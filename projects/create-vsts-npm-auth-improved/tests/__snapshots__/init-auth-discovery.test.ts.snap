@@ -1,0 +1,131 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`does not follow a symbolic-link directory during discovery 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ actual/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+◇  Which packages should be configured?
+│  none
+│
+●  No packages were selected.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`excludes node_modules case-insensitively 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 2 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ DiSt/package.json
+│  ◻ packages/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+◇  Which packages should be configured?
+│  none
+│
+●  No packages were selected.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports that no packages were discovered 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█│  ./█◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 0 package.json files.
+│
+●  No package.json files were found.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports that packages were discovered but none were selected 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+◇  Which packages should be configured?
+│  none
+│
+●  No packages were selected.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`shows deterministic nested discovery while excluding dependency and hidden directories 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 8 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ◻ alpha/package.json
+│  ◻ alpha/nested/package.json
+│  ◻ build/package.json
+│  ◻ coverage/package.json
+│  ◻ dist/package.json
+│  ◻ test-reporters/package.json
+│  ◻ zeta/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+◇  Which packages should be configured?
+│  none
+│
+●  No packages were selected.
+│
+└  No files were changed.
+
+"
+`;

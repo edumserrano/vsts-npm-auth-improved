@@ -1,0 +1,82 @@
+{
+  "name": "vsts-npm-auth-improved",
+  "version": "1.0.0",
+  "author": "Eduardo Serrano",
+  "description": "Authenticate with a private Azure DevOps NPM registry",
+  "engines": {
+    "node": ">=24.18.1"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=24.18.1",
+      "onFail": "error"
+    },
+    "packageManager": {
+      "name": "npm",
+      "version": ">=12.0.2",
+      "onFail": "error"
+    }
+  },
+  "bin": {
+    "vsts-npm-auth-improved": "cjs/main.js"
+  },
+  "scripts": {
+    "check-required-node-version": "node ../scripts/check-required-version.cjs node 24.18.1",
+    "check-required-npm-version": "node ../scripts/check-required-version.cjs npm 12.0.2",
+    "preinstall": "npm run check-required-node-version && npm run check-required-npm-version",
+    "clean:dist": "rimraf ./dist",
+    "clean:tests": "rimraf ./test-reporters",
+    "prebuild": "npm run clean:dist",
+    "build": "npm run build:lib && npm run build:test",
+    "build:lib": "tsc -p ./tsconfig.lib.json",
+    "build:test": "tsc -p ./tests/tsconfig.json",
+    "copy-package-readme": "cp-cli ./README.md dist/vsts-npm-auth-improved/README.md",
+    "copy-package-json": "clear-package-json package.json -o dist/vsts-npm-auth-improved/package.json",
+    "prepack": "npm run build && npm run copy-package-json && npm run copy-package-readme && mkdirp ./dist/vsts-npm-auth-improved-package",
+    "pack": "npm pack ./dist/vsts-npm-auth-improved --pack-destination ./dist/vsts-npm-auth-improved-package && echo Package available at ./dist/vsts-npm-auth-improved-package",
+    "pretest": "npm run clean:tests",
+    "test": "vitest run --coverage",
+    "pretest:watch": "npm run clean:tests && npm run test:setup-test-reporters",
+    "test:watch": "concurrently --raw --kill-others \"npx vitest --coverage\" \"npm run test:show-code-coverage\"",
+    "pretest:ui": "npm run clean:tests && npm run test:setup-test-reporters",
+    "test:ui": "concurrently --raw --kill-others \"npx vitest --ui --coverage\" \"npm run test:show-code-coverage\"",
+    "test:update-snapshots": "vitest run -u",
+    "test:show-html-report": "npx vite preview --outDir test-reporters/html-report --open",
+    "test:show-code-coverage": "browser-sync start --server ./test-reporters --startPath /code-coverage/html-report/index.html --watch --port=41301 --no-ui",
+    "test:setup-test-reporters": "npm run test:create-code-coverage-dir && npm run test:create-code-coverage-index",
+    "test:create-code-coverage-dir": "mkdirp ./test-reporters/code-coverage/html-report",
+    "test:create-code-coverage-index": "cp-cli ./tests/.index-placeholders/index.code-coverage.html ./test-reporters/code-coverage/html-report/index.html"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.7.0",
+    "commander": "^15.0.0",
+    "execa": "^10.0.0",
+    "ini": "^7.0.0",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/ini": "^4.1.1",
+    "@types/node": "^24.13.3",
+    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/expect": "^4.1.10",
+    "@vitest/ui": "^4.1.10",
+    "browser-sync": "^3.0.4",
+    "clean-publish": "^7.1.0",
+    "concurrently": "^10.0.4",
+    "cp-cli": "^2.0.0",
+    "memfs": "^4.64.0",
+    "mkdirp": "^3.0.1",
+    "rimraf": "^6.1.3",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  },
+  "keywords": [
+    "azure-devops",
+    "npm",
+    "registry",
+    "authentication",
+    "azdo",
+    "vsts-npm-auth"
+  ]
+}

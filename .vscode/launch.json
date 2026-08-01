@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Vitest - Current File",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/projects/vsts-npm-auth-improved",
+      "program": "${workspaceFolder}/projects/vsts-npm-auth-improved/node_modules/vitest/vitest.mjs",
+      "args": ["run", "${file}", "--no-coverage"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+    },
+    {
+      "name": "Debug Vitest - All Tests",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/projects/vsts-npm-auth-improved",
+      "program": "${workspaceFolder}/projects/vsts-npm-auth-improved/node_modules/vitest/vitest.mjs",
+      "args": ["run", "--no-coverage"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+    }
+  ]
+}

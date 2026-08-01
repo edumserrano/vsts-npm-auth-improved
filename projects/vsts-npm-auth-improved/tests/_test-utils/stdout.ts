@@ -1,0 +1,46 @@
+import { MockInstance, vi } from "vitest";
+
+/**
+ * Captures writes to stdout and exposes normalized terminal output for complete
+ * scenario snapshots. Normalization removes terminal control formatting and
+ * transport-only blank lines while preserving the CLI's visible content.
+ */
+
+type StdoutWriteFunction = typeof process.stdout.write;
+
+export type StdoutWriteFunctionMock = MockInstance<StdoutWriteFunction> & {
+  readonly normalizedOutput: string;
+};
+
+export function mockStdoutWrite(): StdoutWriteFunctionMock {
+  const mock: MockInstance<StdoutWriteFunction> = vi
+    .spyOn(process.stdout, "write")
+    .mockImplementation(() => true);
+  const augmentedMock = mock as StdoutWriteFunctionMock;
+  Object.defineProperty(augmentedMock, "normalizedOutput", {
+    get() {
+      return normalizeStdout(this);
+    },
+    configurable: true,
+  });
+  return augmentedMock;
+}
+
+function normalizeStdout(stdoutWriteFunctionMock: MockInstance<StdoutWriteFunction>): string {
+  const stringOutputs = stdoutWriteFunctionMock.mock.calls
+    .map(args => args[0])
+    .filter((output): output is string => typeof output === "string");
+  if (stringOutputs.length === 0) {
+    return "";
+  }
+
+  // Remove ANSI escape codes from @clack/prompts output to make snapshots easier to read.
+  // We test our CLI's output and behavior, not the library's internal formatting choices.
+  const ansiRegex = /\x1B\[[^m]*[a-zA-Z]|\x1B\].*?\x07/g; // Matches ESC[ followed by any characters and a letter, or ESC] sequences
+  const normalizedOutput = stringOutputs
+    .map(outputEntry => outputEntry.replace(ansiRegex, "")) // remove ANSI escape codes (color codes, cursor movements, etc.) used by @clack/prompts
+    .flatMap(outputEntry => outputEntry.split("\n")) // a single output entry could contain multiple lines (e.g., "line1\nline2\nline3"). We need to split them first.
+    .filter(outputEntry => outputEntry.trim() !== "")
+    .join("\n");
+  return "\n" + normalizedOutput;
+}

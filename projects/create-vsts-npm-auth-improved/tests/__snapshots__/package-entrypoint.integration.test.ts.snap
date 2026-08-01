@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`runs the no-packages flow through the emitted package entrypoint 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█│  ./█◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 0 package.json files.
+│
+●  No package.json files were found.
+│
+└  No files were changed.
+
+"
+`;

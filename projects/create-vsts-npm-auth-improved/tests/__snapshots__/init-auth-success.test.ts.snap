@@ -1,0 +1,249 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`a second complete CLI run is idempotent for package.json and .npmrc 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  https://prompted.test/
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`a second complete CLI run is idempotent for package.json and .npmrc 2`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (0 changed, 1 unchanged); files: 0 created, 0 updated, 2 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`configures ALL mixed with an individual package through a complete CLI selection 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 3 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ alpha/package.json
+│  ◻ beta/package.json
+│  ◻ gamma/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◼ ALL (Configure every package)│  ◼ beta/package.json◇  Which packages should be configured?
+│  ALL, beta/package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 3 configured (3 changed, 0 unchanged); files: 0 created, 3 updated, 3 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`configures ALL through a complete CLI selection 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 3 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ alpha/package.json
+│  ◻ beta/package.json
+│  ◻ gamma/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◼ ALL (Configure every package)◇  Which packages should be configured?
+│  ALL
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 3 configured (3 changed, 0 unchanged); files: 0 created, 3 updated, 3 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`configures a subset through a complete CLI selection 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 3 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ alpha/package.json
+│  ◻ beta/package.json
+│  ◻ gamma/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ alpha/package.json│  ◼ gamma/package.json◇  Which packages should be configured?
+│  alpha/package.json, gamma/package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 2 configured (2 changed, 0 unchanged); files: 0 created, 2 updated, 2 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`configures multiple individual packages through a complete CLI selection 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 3 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ alpha/package.json
+│  ◻ beta/package.json
+│  ◻ gamma/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ alpha/package.json│  ◼ beta/package.json│  ◼ gamma/package.json◇  Which packages should be configured?
+│  alpha/package.json, beta/package.json, gamma/package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 3 configured (3 changed, 0 unchanged); files: 0 created, 3 updated, 3 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`configures one package through a complete CLI selection 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 3 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ alpha/package.json
+│  ◻ beta/package.json
+│  ◻ gamma/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ beta/package.json◇  Which packages should be configured?
+│  beta/package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`reports mixed created updated and unchanged outcomes in persistence order 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 3 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ alpha/package.json
+│  ◻ beta/package.json
+│  ◻ gamma/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◼ ALL (Configure every package)◇  Which packages should be configured?
+│  ALL
+│
+◆  Registry URL for gamma/package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for gamma/package.json
+│  https://prompted.test/
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 3 configured (2 changed, 1 unchanged); files: 1 created, 2 updated, 3 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;

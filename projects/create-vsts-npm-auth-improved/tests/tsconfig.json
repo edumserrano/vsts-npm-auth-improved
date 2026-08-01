@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../dist/tsc-tests",
+    "rootDir": "..",
+    "paths": {
+      "@create-vsts-npm-auth-improved": ["../src/public-api.ts"],
+      "@test-utils/*": ["./_test-utils/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.d.ts"]
+}

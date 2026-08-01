@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`keeps .npmrc semantically idempotent after normalization 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`keeps .npmrc semantically idempotent after normalization 2`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (0 changed, 1 unchanged); files: 0 created, 0 updated, 2 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;

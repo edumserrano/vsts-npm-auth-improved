@@ -1,0 +1,125 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`configures .npmrc content: 'corrects managed values and preserves…' 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`configures .npmrc content: 'creates a missing project configurati…' 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  https://prompted.test/
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 0 updated, 1 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`configures .npmrc content: 'treats a scoped registry as distinct …' 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  https://prompted.test/
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`configures .npmrc content: 'uses npm\\'s effective final duplicate…' 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;

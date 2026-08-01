@@ -1,0 +1,347 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`accepts a valid HTTPS registry through the real registry prompt 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://r█│  https://re█│  https://reg█│  https://regi█│  https://regis█│  https://regist█│  https://registr█│  https://registry█│  https://registry.█│  https://registry.e█│  https://registry.ex█│  https://registry.exa█│  https://registry.exam█│  https://registry.examp█│  https://registry.exampl█│  https://registry.example█│  https://registry.example.█│  https://registry.example.t█│  https://registry.example.te█│  https://registry.example.tes█│  https://registry.example.test█│  https://registry.example.test/█◇  Registry URL for package.json
+│  https://registry.example.test/
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`accepts a valid custom-scheme registry through the real registry prompt 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  c█│  cu█│  cus█│  cust█│  custo█│  custom█│  custom+█│  custom+n█│  custom+np█│  custom+npm█│  custom+npm:█│  custom+npm:/█│  custom+npm://█│  custom+npm://r█│  custom+npm://re█│  custom+npm://reg█│  custom+npm://regi█│  custom+npm://regis█│  custom+npm://regist█│  custom+npm://registr█│  custom+npm://registry█│  custom+npm://registry.█│  custom+npm://registry.e█│  custom+npm://registry.ex█│  custom+npm://registry.exa█│  custom+npm://registry.exam█│  custom+npm://registry.examp█│  custom+npm://registry.exampl█│  custom+npm://registry.example█│  custom+npm://registry.example.█│  custom+npm://registry.example.t█│  custom+npm://registry.example.te█│  custom+npm://registry.example.tes█│  custom+npm://registry.example.test█│  custom+npm://registry.example.test/█│  custom+npm://registry.example.test/f█│  custom+npm://registry.example.test/fe█│  custom+npm://registry.example.test/fee█│  custom+npm://registry.example.test/feed█◇  Registry URL for package.json
+│  custom+npm://registry.example.test/feed
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`accepts an absolute root through the real directory prompt 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  <test-root>█◇  Where should package.json files be searched for?
+│  <test-root>
+│
+◇  Found 0 package.json files.
+│
+●  No package.json files were found.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reuses an existing global registry without showing a registry prompt 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`shows empty registry feedback before accepting a valid correction 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+▲  Registry URL for package.json
+│  https://registry.example.com/
+└  Enter a registry URL.
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://r█│  https://re█│  https://reg█│  https://regi█│  https://regis█│  https://regist█│  https://registr█│  https://registry█│  https://registry.█│  https://registry.p█│  https://registry.pr█│  https://registry.pro█│  https://registry.prom█│  https://registry.promp█│  https://registry.prompt█│  https://registry.prompte█│  https://registry.prompted█│  https://registry.prompted.█│  https://registry.prompted.t█│  https://registry.prompted.te█│  https://registry.prompted.tes█│  https://registry.prompted.test█│  https://registry.prompted.test/█◇  Registry URL for package.json
+│  https://registry.prompted.test/
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`shows empty-root feedback before accepting a valid correction 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+▲  Where should package.json files be searched for?
+│  ./
+└  Enter a directory path.
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 0 package.json files.
+│
+●  No package.json files were found.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`shows file-root feedback before accepting a valid correction 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  f█│  fi█│  fil█│  file█│  file.█│  file.t█│  file.tx█│  file.txt█▲  Where should package.json files be searched for?
+│  file.txt█
+└  "file.txt" is not a directory.
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 0 package.json files.
+│
+●  No package.json files were found.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`shows invalid root feedback before accepting a valid correction 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  m█│  mi█│  mis█│  miss█│  missi█│  missin█│  missing█│  missing-█│  missing-d█│  missing-di█│  missing-dir█│  missing-dire█│  missing-direc█│  missing-direct█│  missing-directo█│  missing-director█│  missing-directory█▲  Where should package.json files be searched for?
+│  missing-directory█
+└  Directory "missing-directory" does not exist.
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 0 package.json files.
+│
+●  No package.json files were found.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`shows missing-scheme registry feedback before accepting a valid correction 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  r█│  re█│  reg█│  regi█│  regis█│  regist█│  registr█│  registry█│  registry.█│  registry.e█│  registry.ex█│  registry.exa█│  registry.exam█│  registry.examp█│  registry.exampl█│  registry.example█│  registry.example.█│  registry.example.t█│  registry.example.te█│  registry.example.tes█│  registry.example.test█▲  Registry URL for package.json
+│  registry.example.test█
+└  Enter an absolute registry URL including its scheme.
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://r█│  https://re█│  https://reg█│  https://regi█│  https://regis█│  https://regist█│  https://registr█│  https://registry█│  https://registry.█│  https://registry.p█│  https://registry.pr█│  https://registry.pro█│  https://registry.prom█│  https://registry.promp█│  https://registry.prompt█│  https://registry.prompte█│  https://registry.prompted█│  https://registry.prompted.█│  https://registry.prompted.t█│  https://registry.prompted.te█│  https://registry.prompted.tes█│  https://registry.prompted.test█│  https://registry.prompted.test/█◇  Registry URL for package.json
+│  https://registry.prompted.test/
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`shows relative registry feedback before accepting a valid correction 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  /█│  /r█│  /re█│  /rel█│  /rela█│  /relat█│  /relati█│  /relativ█│  /relative█│  /relative/█│  /relative/r█│  /relative/re█│  /relative/reg█│  /relative/regi█│  /relative/regis█│  /relative/regist█│  /relative/registr█│  /relative/registry█▲  Registry URL for package.json
+│  /relative/registry█
+└  Enter an absolute registry URL including its scheme.
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://r█│  https://re█│  https://reg█│  https://regi█│  https://regis█│  https://regist█│  https://registr█│  https://registry█│  https://registry.█│  https://registry.p█│  https://registry.pr█│  https://registry.pro█│  https://registry.prom█│  https://registry.promp█│  https://registry.prompt█│  https://registry.prompte█│  https://registry.prompted█│  https://registry.prompted.█│  https://registry.prompted.t█│  https://registry.prompted.te█│  https://registry.prompted.tes█│  https://registry.prompted.test█│  https://registry.prompted.test/█◇  Registry URL for package.json
+│  https://registry.prompted.test/
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`shows whitespace registry feedback before accepting a valid correction 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│   █│    █│     █▲  Registry URL for package.json
+│     █
+└  Enter a registry URL.
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://r█│  https://re█│  https://reg█│  https://regi█│  https://regis█│  https://regist█│  https://registr█│  https://registry█│  https://registry.█│  https://registry.p█│  https://registry.pr█│  https://registry.pro█│  https://registry.prom█│  https://registry.promp█│  https://registry.prompt█│  https://registry.prompte█│  https://registry.prompted█│  https://registry.prompted.█│  https://registry.prompted.t█│  https://registry.prompted.te█│  https://registry.prompted.tes█│  https://registry.prompted.test█│  https://registry.prompted.test/█◇  Registry URL for package.json
+│  https://registry.prompted.test/
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;

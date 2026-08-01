@@ -1,0 +1,222 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`maps a targeted EACCES root access failure to prompt-safe text 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  b█│  bl█│  blo█│  bloc█│  block█│  blocke█│  blocked█▲  Where should package.json files be searched for?
+│  blocked█
+└  Directory "blocked" is not accessible.
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 0 package.json files.
+│
+●  No package.json files were found.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`maps a targeted EIO root access failure to prompt-safe text 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  b█│  bl█│  blo█│  bloc█│  block█│  blocke█│  blocked█▲  Where should package.json files be searched for?
+│  blocked█
+└  Cannot access directory "blocked".
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 0 package.json files.
+│
+●  No package.json files were found.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`plans every selected package before the first registry prompt 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 2 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ alpha/package.json
+│  ◻ beta/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◼ ALL (Configure every package)◇  Which packages should be configured?
+│  ALL
+│
+■  Could not configure beta/package.json: the file contains invalid JSON: Invalid package.json: JSONParseError: Expected property name or '}' in JSON at position 2 (line 1 column 3) while parsing "{ malformed".
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports a discovery failure before package reads or writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+▲  Could not search <test-root>: directory read failed.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports a non-object JSON value with zero writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+■  Could not configure package.json: the top-level JSON value must be an object.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports a package.json read failure with relative context and zero writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+■  Could not read package.json: permission denied.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports an .npmrc read failure with relative context and zero writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+■  Could not read .npmrc: sharing violation.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports malformed JSON with zero writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+■  Could not configure package.json: the file contains invalid JSON: Invalid package.json: JSONParseError: Expected property name or '}' in JSON at position 2 (line 1 column 3) while parsing "{ malformed".
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`surfaces a targeted write failure through the persistence spinner 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+▲  Could not write package.json: disk is read-only.
+│
+└  Operation failed. Configuration may be partially applied. Review the project files before retrying. Exiting - maybe another time? 👋
+
+"
+`;

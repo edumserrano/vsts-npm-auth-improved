@@ -1,0 +1,162 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`dispatches the default command through the real workflow 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 0 package.json files.
+│
+●  No package.json files were found.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`dispatches the explicit init-auth command through the real workflow 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 0 package.json files.
+│
+●  No package.json files were found.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`renders complete long init-auth help output 1`] = `
+"Usage: create-vsts-npm-auth-improved init-auth [options]
+
+Configure package.json and .npmrc files for registry authentication.
+
+Options:
+  -h, --help  display help for command
+"
+`;
+
+exports[`renders complete long root help output 1`] = `
+"Usage: create-vsts-npm-auth-improved [options] [command]
+
+Configure projects to use vsts-npm-auth-improved.
+
+Options:
+  -v, --version   output the version number
+  -h, --help      display help for command
+
+Commands:
+  init-auth       Configure package.json and .npmrc files for registry
+                  authentication.
+  help [command]  display help for command
+
+Examples:
+  $ create-vsts-npm-auth-improved
+  $ create-vsts-npm-auth-improved init-auth
+
+"
+`;
+
+exports[`renders complete long version output 1`] = `
+"1.0.0
+"
+`;
+
+exports[`renders complete short init-auth help output 1`] = `
+"Usage: create-vsts-npm-auth-improved init-auth [options]
+
+Configure package.json and .npmrc files for registry authentication.
+
+Options:
+  -h, --help  display help for command
+"
+`;
+
+exports[`renders complete short root help output 1`] = `
+"Usage: create-vsts-npm-auth-improved [options] [command]
+
+Configure projects to use vsts-npm-auth-improved.
+
+Options:
+  -v, --version   output the version number
+  -h, --help      display help for command
+
+Commands:
+  init-auth       Configure package.json and .npmrc files for registry
+                  authentication.
+  help [command]  display help for command
+
+Examples:
+  $ create-vsts-npm-auth-improved
+  $ create-vsts-npm-auth-improved init-auth
+
+"
+`;
+
+exports[`renders complete short version output 1`] = `
+"1.0.0
+"
+`;
+
+exports[`reports a known Error from the package adapter boundary 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./
+└
+│  .█◇  Where should package.json files be searched for?
+│  .
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+■  Could not read package.json: filesystem read failed.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports a top-level non-Commander CLI failure 1`] = `""`;
+
+exports[`reports an unexpected Error from the terminal boundary 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+■  unexpected terminal cause
+└  Operation failed. Configuration may be partially applied. Review the project files before retrying. Exiting - maybe another time? 👋
+
+"
+`;
+
+exports[`reports an unexpected non-Error value from the terminal boundary 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+■
+└  Operation failed. Configuration may be partially applied. Review the project files before retrying. Exiting - maybe another time? 👋
+
+"
+`;
+
+exports[`reports an unknown command with the effective Commander exit code 1`] = `""`;
+
+exports[`reports an unknown command with the effective Commander exit code 2`] = `
+"error: too many arguments for 'init-auth'. Expected 0 arguments but got 1: not-a-command.
+"
+`;
