@@ -41,6 +41,11 @@ export type ProcessOutputCaptureOptions = OutputNormalizationOptions & {
   readonly captureStderr?: boolean;
 };
 
+/**
+ * Captures stdout and, when requested, stderr with the same normalization
+ * options so tests can assert complete process output without writing it to the
+ * terminal.
+ */
 export function captureProcessOutput(
   options: ProcessOutputCaptureOptions = {},
 ): ProcessOutputCapture {
@@ -52,18 +57,30 @@ export function captureProcessOutput(
   };
 }
 
+/**
+ * Replaces `process.stdout.write` with a capture that exposes both the write
+ * spy and its lazily normalized output.
+ */
 export function mockStdoutWrite(
   options: OutputNormalizationOptions = {},
 ): OutputChannelCapture {
   return captureOutputChannel(process.stdout, options);
 }
 
+/**
+ * Replaces `process.stderr.write` with a capture that exposes both the write
+ * spy and its lazily normalized output.
+ */
 export function mockStderrWrite(
   options: OutputNormalizationOptions = {},
 ): OutputChannelCapture {
   return captureOutputChannel(process.stderr, options);
 }
 
+/**
+ * Spies on one process stream, suppresses its real writes, and returns a getter
+ * that normalizes all captured chunks on demand using the supplied options.
+ */
 function captureOutputChannel(
   stream: NodeJS.WriteStream,
   options: OutputNormalizationOptions,
@@ -77,6 +94,11 @@ function captureOutputChannel(
   };
 }
 
+/**
+ * Concatenates captured chunks and removes platform-, timing-, terminal-, and
+ * release-specific differences while preserving the CLI content that tests
+ * are intended to verify.
+ */
 function normalizeOutput(
   write: MockInstance<StreamWrite>,
   options: OutputNormalizationOptions,
@@ -112,38 +134,71 @@ function normalizeOutput(
   return normalizePackageVersion(normalized);
 }
 
+/**
+ * Replaces semantic versions shown after either package name or on their own
+ * line so snapshots remain stable across releases.
+ */
 function normalizePackageVersion(output: string): string {
   return output
     .replace(packageVersionAfterName, `$1${packageVersionPlaceholder}`)
     .replace(standalonePackageVersion, packageVersionPlaceholder);
 }
 
+/**
+ * Collapses the redraw frames produced while a complete known temporary root
+ * is typed into one `<test-root>` frame. Requiring the complete root in the
+ * same sequence prevents unrelated absolute input from matching a shared
+ * prefix such as `/` on Linux.
+ */
 function normalizeProgressivelyTypedTemporaryRoots(
   output: string,
   temporaryRoots: readonly string[],
 ): string {
-  const normalizedOutput = output.replace(
-    /│  ([^\n│]+?)█/g,
-    (match, typedValue: string) =>
-      temporaryRoots.some(root =>
-        root.toLowerCase().startsWith(typedValue.toLowerCase()),
-      )
-      ? "│  <test-root>█"
-      : match,
-  );
+  return output.replace(
+    /(?:│  [^\n│]+?█)+/g,
+    typingSequence => {
+      const typedValues = [
+        ...typingSequence.matchAll(/│  ([^\n│]+?)█/g),
+      ].map(([, typedValue]) => typedValue);
+      const completedRoots = temporaryRoots.filter(root =>
+        typedValues.some(
+          typedValue => typedValue.toLowerCase() === root.toLowerCase(),
+        ),
+      );
 
-  return normalizedOutput.replace(
-    /(?:│  <test-root>█)+/g,
-    "│  <test-root>█",
+      if (completedRoots.length === 0) {
+        return typingSequence;
+      }
+
+      return typingSequence
+        .replace(
+          /│  ([^\n│]+?)█/g,
+          (match, typedValue: string) =>
+            completedRoots.some(root =>
+              root.toLowerCase().startsWith(typedValue.toLowerCase()),
+            )
+              ? "│  <test-root>█"
+              : match,
+        )
+        .replace(/(?:│  <test-root>█)+/g, "│  <test-root>█");
+    },
   );
 }
 
+/**
+ * Converts either form accepted by a Node.js stream write into UTF-8 text for
+ * normalization.
+ */
 function toText(chunk: string | Uint8Array): string {
   return typeof chunk === "string"
     ? chunk
     : Buffer.from(chunk).toString();
 }
 
+/**
+ * Removes ANSI control-sequence families and remaining non-printing control
+ * characters while leaving visible terminal text intact.
+ */
 function stripTerminalControlSequences(value: string): string {
   return value
     .replace(/\u001b\][^\u0007]*(?:\u0007|\u001b\\)/g, "")
@@ -152,16 +207,22 @@ function stripTerminalControlSequences(value: string): string {
     .replace(/[\u0000-\u0008\u000b-\u001a\u001c-\u001f\u007f]/g, "");
 }
 
+/**
+ * Removes Clack's timing-dependent in-progress spinner frames. The final
+ * success or error line remains as the deterministic operation result.
+ */
 function stripNondeterministicSpinnerFrames(value: string): string {
-  // Clack's CI renderer writes an in-progress frame only when an operation
-  // crosses its timer interval. The final success/error line is deterministic;
-  // the transient animation frame is terminal transport timing, not CLI output.
   return value.replace(
     /^(?:◒|◐|◓|◑|•|o|O|0) {2}(?:Searching for package\.json files|Writing configuration files)\.\.\.\n?/gm,
     "",
   );
 }
 
+/**
+ * Replaces every occurrence of a string without regard to casing. An explicit
+ * scan avoids regular-expression escaping and preserves the original text
+ * outside each match.
+ */
 function replaceAllCaseInsensitive(
   value: string,
   search: string,

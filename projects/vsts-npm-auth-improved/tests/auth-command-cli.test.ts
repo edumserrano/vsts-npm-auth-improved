@@ -3,7 +3,7 @@ import { AuthCommand, VstsNpmAuthImprovedCli } from "@test-utils/auth-command";
 import { execa } from "execa";
 import { vol } from "memfs";
 import { createInMemoryNpmrcFile } from "@test-utils/npm-configuration-file";
-import { mockStdoutWrite } from "@test-utils/stdout";
+import { mockStderrWrite, mockStdoutWrite } from "@test-utils/stdout";
 import { mockVstsNpmAuth, MockVstsNpmAuthOptions } from "@test-utils/vsts-npm-auth";
 import { Command } from "commander";
 
@@ -809,26 +809,16 @@ test("a global registry amid unrelated npm settings is used", async () => {
 
 test("an unknown Commander command is captured through cliAsync", async () => {
   const stdoutWriteFunctionMock = mockStdoutWrite();
-  const stderrWriteFunctionMock = vi
-    .spyOn(process.stderr, "write")
-    .mockImplementation(() => true);
+  const stderrWriteFunctionMock = mockStderrWrite();
   const execaFunctionMock = vi.mocked(execa);
 
   await VstsNpmAuthImprovedCli.invokeAsync(["unknown-command"]);
-
-  const normalizedStderr = stderrWriteFunctionMock.mock.calls
-    .map(args => args[0])
-    .filter((output): output is string => typeof output === "string")
-    .map(output => output.replace(/\x1B\[[^m]*[a-zA-Z]|\x1B\].*?\x07/g, ""))
-    .flatMap(output => output.split(/\r?\n/))
-    .filter(output => output.trim() !== "")
-    .join("\n");
 
   expect(execaFunctionMock).toHaveBeenCalledTimes(0);
   expect(execaFunctionMock.mock.calls.length).toBe(0);
   expect(process.exitCode).toBe(1);
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
-  expect(normalizedStderr).toMatchSnapshot();
+  expect(stderrWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
 test("a top-level non-Commander CLI failure is handled", async () => {
