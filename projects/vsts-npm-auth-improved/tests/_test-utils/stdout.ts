@@ -25,6 +25,11 @@ export type StdoutWriteFunctionMock = MockInstance<StdoutWriteFunction> & {
   readonly normalizedOutput: string;
 };
 
+/**
+ * Replaces `process.stdout.write` with a Vitest spy that suppresses terminal
+ * output and exposes the captured text through a lazily evaluated,
+ * snapshot-friendly `normalizedOutput` property.
+ */
 export function mockStdoutWrite(): StdoutWriteFunctionMock {
   const mock: MockInstance<StdoutWriteFunction> = vi
     .spyOn(process.stdout, "write")
@@ -39,6 +44,11 @@ export function mockStdoutWrite(): StdoutWriteFunctionMock {
   return augmentedMock;
 }
 
+/**
+ * Collects string writes from the stdout spy, removes Clack's ANSI formatting
+ * and transport-only blank lines, joins the visible lines, and replaces the
+ * package version with a stable placeholder.
+ */
 function normalizeStdout(stdoutWriteFunctionMock: MockInstance<StdoutWriteFunction>): string {
   const stringOutputs = stdoutWriteFunctionMock.mock.calls
     .map(args => args[0])
@@ -58,6 +68,10 @@ function normalizeStdout(stdoutWriteFunctionMock: MockInstance<StdoutWriteFuncti
   return normalizePackageVersion("\n" + normalizedOutput);
 }
 
+/**
+ * Replaces semantic versions shown after the package name or on their own line
+ * so snapshots do not change when the package version changes.
+ */
 function normalizePackageVersion(output: string): string {
   return output
     .replace(packageVersionAfterName, `$1${packageVersionPlaceholder}`)
