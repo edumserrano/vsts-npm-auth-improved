@@ -2,11 +2,24 @@ import { MockInstance, vi } from "vitest";
 
 /**
  * Captures writes to stdout and exposes normalized terminal output for complete
- * scenario snapshots. Normalization removes terminal control formatting and
- * transport-only blank lines while preserving the CLI's visible content.
+ * scenario snapshots. Normalization removes terminal control formatting,
+ * transport-only blank lines, and release-specific package versions while
+ * preserving the CLI's visible content.
  */
 
 type StdoutWriteFunction = typeof process.stdout.write;
+
+const packageVersionPlaceholder = "<PACKAGE_VERSION>";
+const semanticVersionPattern =
+  String.raw`(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)` +
+  String.raw`(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)` +
+  String.raw`(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?` +
+  String.raw`(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
+const packageVersionAfterName = new RegExp(
+  `(vsts-npm-auth-improved )${semanticVersionPattern}(?![0-9A-Za-z.+-])`,
+  "g",
+);
+const standalonePackageVersion = new RegExp(`^${semanticVersionPattern}$`, "gm");
 
 export type StdoutWriteFunctionMock = MockInstance<StdoutWriteFunction> & {
   readonly normalizedOutput: string;
@@ -42,5 +55,11 @@ function normalizeStdout(stdoutWriteFunctionMock: MockInstance<StdoutWriteFuncti
     .flatMap(outputEntry => outputEntry.split("\n")) // a single output entry could contain multiple lines (e.g., "line1\nline2\nline3"). We need to split them first.
     .filter(outputEntry => outputEntry.trim() !== "")
     .join("\n");
-  return "\n" + normalizedOutput;
+  return normalizePackageVersion("\n" + normalizedOutput);
+}
+
+function normalizePackageVersion(output: string): string {
+  return output
+    .replace(packageVersionAfterName, `$1${packageVersionPlaceholder}`)
+    .replace(standalonePackageVersion, packageVersionPlaceholder);
 }

@@ -68,7 +68,7 @@ Examples:
 `;
 
 exports[`renders complete long version output 1`] = `
-"1.0.0-alpha.1
+"<PACKAGE_VERSION>
 "
 `;
 
@@ -104,7 +104,7 @@ Examples:
 `;
 
 exports[`renders complete short version output 1`] = `
-"1.0.0-alpha.1
+"<PACKAGE_VERSION>
 "
 `;
 

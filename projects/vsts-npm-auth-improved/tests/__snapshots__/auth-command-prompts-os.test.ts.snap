@@ -2,7 +2,7 @@
 
 exports[`non-Windows flow skips all auth option prompts 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ▲  Automatic NPM registry authentication is only supported on Windows. No authentication will be performed. Make sure you have manually configured authentication, or npm install will fail.
 │

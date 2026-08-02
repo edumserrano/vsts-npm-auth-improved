@@ -2,10 +2,23 @@ import { Buffer } from "node:buffer";
 import type { MockInstance } from "vitest";
 import { vi } from "vitest";
 
+const packageVersionPlaceholder = "<PACKAGE_VERSION>";
+const semanticVersionPattern =
+  String.raw`(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)` +
+  String.raw`(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)` +
+  String.raw`(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?` +
+  String.raw`(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
+const packageVersionAfterName = new RegExp(
+  `((?:create-)?vsts-npm-auth-improved )${semanticVersionPattern}(?![0-9A-Za-z.+-])`,
+  "g",
+);
+const standalonePackageVersion = new RegExp(`^${semanticVersionPattern}$`, "gm");
+
 /**
  * Captures stdout and optional stderr for complete terminal snapshots. It
  * normalizes only terminal control sequences, timing-dependent spinner frames,
- * test-owned absolute paths, path separators, and newline representation.
+ * test-owned absolute paths, path separators, newline representation, and
+ * release-specific package versions.
  */
 
 type StreamWrite = typeof process.stdout.write;
@@ -96,7 +109,13 @@ function normalizeOutput(
     );
   }
 
-  return normalized;
+  return normalizePackageVersion(normalized);
+}
+
+function normalizePackageVersion(output: string): string {
+  return output
+    .replace(packageVersionAfterName, `$1${packageVersionPlaceholder}`)
+    .replace(standalonePackageVersion, packageVersionPlaceholder);
 }
 
 function normalizeProgressivelyTypedTemporaryRoots(
