@@ -2,6 +2,7 @@
   "name": "vsts-npm-auth-improved",
   "version": "1.0.0",
   "author": "Eduardo Serrano",
+  "license": "MIT",
   "description": "Authenticate with a private Azure DevOps NPM registry",
   "engines": {
     "node": ">=24.18.1"
