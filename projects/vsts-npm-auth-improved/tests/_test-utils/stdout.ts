@@ -1,13 +1,15 @@
-import { MockInstance, vi } from "vitest";
+import { Buffer } from "node:buffer";
+import type { MockInstance } from "vitest";
+import { vi } from "vitest";
 
 /**
- * Captures writes to stdout and exposes normalized terminal output for complete
- * scenario snapshots. Normalization removes terminal control formatting,
- * transport-only blank lines, and release-specific package versions while
- * preserving the CLI's visible content.
+ * Captures writes to process output streams and exposes normalized terminal
+ * output for complete scenario snapshots. Normalization removes terminal
+ * control formatting, transport-only blank lines, and release-specific package
+ * versions while preserving the CLI's visible content.
  */
 
-type StdoutWriteFunction = typeof process.stdout.write;
+type StreamWriteFunction = typeof process.stdout.write;
 
 const packageVersionPlaceholder = "<PACKAGE_VERSION>";
 const semanticVersionPattern =
@@ -21,7 +23,7 @@ const packageVersionAfterName = new RegExp(
 );
 const standalonePackageVersion = new RegExp(`^${semanticVersionPattern}$`, "gm");
 
-export type StdoutWriteFunctionMock = MockInstance<StdoutWriteFunction> & {
+export type OutputWriteFunctionMock = MockInstance<StreamWriteFunction> & {
   readonly normalizedOutput: string;
 };
 
@@ -30,14 +32,34 @@ export type StdoutWriteFunctionMock = MockInstance<StdoutWriteFunction> & {
  * output and exposes the captured text through a lazily evaluated,
  * snapshot-friendly `normalizedOutput` property.
  */
-export function mockStdoutWrite(): StdoutWriteFunctionMock {
-  const mock: MockInstance<StdoutWriteFunction> = vi
-    .spyOn(process.stdout, "write")
+export function mockStdoutWrite(): OutputWriteFunctionMock {
+  return mockStreamWrite(process.stdout, "\n");
+}
+
+/**
+ * Replaces `process.stderr.write` with a Vitest spy that suppresses terminal
+ * output and exposes the captured text through a lazily evaluated,
+ * snapshot-friendly `normalizedOutput` property.
+ */
+export function mockStderrWrite(): OutputWriteFunctionMock {
+  return mockStreamWrite(process.stderr);
+}
+
+/**
+ * Creates a normalized write spy for either process output stream. The optional
+ * prefix preserves the historical leading newline used by stdout snapshots.
+ */
+function mockStreamWrite(
+  stream: NodeJS.WriteStream,
+  normalizedOutputPrefix = "",
+): OutputWriteFunctionMock {
+  const mock: MockInstance<StreamWriteFunction> = vi
+    .spyOn(stream, "write")
     .mockImplementation(() => true);
-  const augmentedMock = mock as StdoutWriteFunctionMock;
+  const augmentedMock = mock as OutputWriteFunctionMock;
   Object.defineProperty(augmentedMock, "normalizedOutput", {
     get() {
-      return normalizeStdout(this);
+      return normalizeOutput(this, normalizedOutputPrefix);
     },
     configurable: true,
   });
@@ -45,27 +67,53 @@ export function mockStdoutWrite(): StdoutWriteFunctionMock {
 }
 
 /**
- * Collects string writes from the stdout spy, removes Clack's ANSI formatting
- * and transport-only blank lines, joins the visible lines, and replaces the
- * package version with a stable placeholder.
+ * Collects text and byte writes from an output spy, normalizes newlines, removes
+ * terminal control sequences and transport-only blank lines, joins the visible
+ * lines, and replaces the package version with a stable placeholder.
  */
-function normalizeStdout(stdoutWriteFunctionMock: MockInstance<StdoutWriteFunction>): string {
-  const stringOutputs = stdoutWriteFunctionMock.mock.calls
-    .map(args => args[0])
-    .filter((output): output is string => typeof output === "string");
-  if (stringOutputs.length === 0) {
+function normalizeOutput(
+  outputWriteFunctionMock: MockInstance<StreamWriteFunction>,
+  prefix: string,
+): string {
+  const outputs = outputWriteFunctionMock.mock.calls.map(([chunk]) =>
+    toText(chunk),
+  );
+  if (outputs.length === 0) {
     return "";
   }
 
-  // Remove ANSI escape codes from @clack/prompts output to make snapshots easier to read.
-  // We test our CLI's output and behavior, not the library's internal formatting choices.
-  const ansiRegex = /\x1B\[[^m]*[a-zA-Z]|\x1B\].*?\x07/g; // Matches ESC[ followed by any characters and a letter, or ESC] sequences
-  const normalizedOutput = stringOutputs
-    .map(outputEntry => outputEntry.replace(ansiRegex, "")) // remove ANSI escape codes (color codes, cursor movements, etc.) used by @clack/prompts
-    .flatMap(outputEntry => outputEntry.split("\n")) // a single output entry could contain multiple lines (e.g., "line1\nline2\nline3"). We need to split them first.
+  const normalizedOutput = outputs
+    .map(outputEntry =>
+      stripTerminalControlSequences(
+        outputEntry.replace(/\r\n?|\u2028|\u2029/g, "\n"),
+      ),
+    )
+    .flatMap(outputEntry => outputEntry.split("\n"))
     .filter(outputEntry => outputEntry.trim() !== "")
     .join("\n");
-  return normalizePackageVersion("\n" + normalizedOutput);
+  return normalizePackageVersion(prefix + normalizedOutput);
+}
+
+/**
+ * Converts either form accepted by a Node.js stream write into UTF-8 text for
+ * normalization.
+ */
+function toText(chunk: string | Uint8Array): string {
+  return typeof chunk === "string"
+    ? chunk
+    : Buffer.from(chunk).toString();
+}
+
+/**
+ * Removes ANSI control-sequence families and remaining non-printing control
+ * characters while leaving visible terminal text and line feeds intact.
+ */
+function stripTerminalControlSequences(value: string): string {
+  return value
+    .replace(/\u001b\][^\u0007]*(?:\u0007|\u001b\\)/g, "")
+    .replace(/\u001b\[[0-?]*[ -/]*[@-~]/g, "")
+    .replace(/\u001b[()][0-2A-Z0-9]/g, "")
+    .replace(/[\u0000-\u0008\u000b-\u001a\u001c-\u001f\u007f]/g, "");
 }
 
 /**
