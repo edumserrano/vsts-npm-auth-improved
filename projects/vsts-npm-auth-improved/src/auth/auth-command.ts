@@ -1,4 +1,5 @@
 import { Command } from "commander";
+import { isCI } from "ci-info";
 import {
   isVstsNpmAuthSuccessful,
   runVstsNpmAuthAsync,
@@ -36,6 +37,15 @@ async function handleAuthCommandAsync(options: AuthCommandOptions, _: Command): 
 
   try {
     prompts.intro(`📦🔑 Welcome to ${packageName} ${packageVersion} 📦🔑`);
+    if (isCI) {
+      prompts.log.warn(
+        `Automatic NPM registry authentication is not supported in CI environments. No authentication will be performed. Make sure you have configured authentication in your CI environment, or npm install will fail.`,
+      );
+      prompts.outro("Automatic authentication skipped.");
+      process.exitCode = 0;
+      return;
+    }
+
     if (process.platform !== "win32") {
       prompts.log.warn(
         `Automatic NPM registry authentication is only supported on Windows. No authentication will be performed. Make sure you have manually configured authentication, or npm install will fail.`,

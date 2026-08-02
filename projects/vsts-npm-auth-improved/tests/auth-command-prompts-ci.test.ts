@@ -5,19 +5,19 @@ import { mockStdoutWrite } from "@test-utils/stdout";
 import { mockVstsNpmAuth } from "@test-utils/vsts-npm-auth";
 
 /**
- * The tests below verify platform-specific auth command behavior outside Windows when options are
- * provided via user prompts.
+ * The tests below verify CI-specific auth command behavior when options would normally be provided
+ * via user prompts.
  */
 
 vi.mock("execa");
-vi.mock("ci-info", () => ({ isCI: false }));
+vi.mock("ci-info", () => ({ isCI: true }));
 vi.mock("node:fs", async () => {
   const { fs } = await import("memfs");
   return fs;
 });
 
 beforeEach(() => {
-  vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
+  vi.spyOn(process, "platform", "get").mockReturnValue("win32");
 });
 
 afterEach(() => {
@@ -28,16 +28,16 @@ afterEach(() => {
 });
 
 /**
- * Tests the non-Windows flow when every auth option would normally be provided via prompts.
+ * Tests the CI flow when every auth option would normally be provided via prompts.
  * Verifies that:
  * - NPM configuration path, token scope, and forced-acquisition prompts are all skipped
- * - The manual-authentication warning is displayed without a registry URL
+ * - The CI authentication warning is displayed
  * - vsts-npm-auth is not called and the process exit code is 0
  *
  * CLI command:
  * - vsts-npm-auth-improved auth
  */
-test("non-Windows flow skips all auth option prompts", async () => {
+test("CI flow skips all auth option prompts", async () => {
   const stdoutWriteFunctionMock = mockStdoutWrite();
   const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
 
@@ -51,7 +51,7 @@ test("non-Windows flow skips all auth option prompts", async () => {
   expect(vstsNpmAuthMock.callCount).toBe(0);
   expect(process.exitCode).toBe(0);
   expect(stdoutWriteFunctionMock.normalizedOutput).toContain(
-    "Make sure you have manually configured authentication, or npm install will fail.",
+    "Make sure you have configured authentication in your CI environment, or npm install will fail.",
   );
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });

@@ -13,6 +13,7 @@ import { PromptsInteraction } from "@test-utils/prompts";
  */
 
 vi.mock("execa");
+vi.mock("ci-info", () => ({ isCI: false }));
 vi.mock("node:fs", async () => {
   const { fs } = await import("memfs");
   return fs;

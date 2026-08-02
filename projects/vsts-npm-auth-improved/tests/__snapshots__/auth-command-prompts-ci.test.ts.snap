@@ -1,0 +1,10 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CI flow skips all auth option prompts 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+│
+▲  Automatic NPM registry authentication is not supported in CI environments. No authentication will be performed. Make sure you have configured authentication in your CI environment, or npm install will fail.
+│
+└  Automatic authentication skipped."
+`;

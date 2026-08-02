@@ -55,6 +55,13 @@ When an option is omitted during automatic Windows authentication, the CLI promp
 
 ## Platform behavior
 
+### CI environments
+
+Immediately after the welcome message, the command detects CI environments before checking the
+operating system and skips automatic authentication. It does not resolve the `.npmrc` path, prompt
+for authentication options, or invoke `vsts-npm-auth`. The command warns that authentication must
+be configured in the CI environment and exits successfully so the npm script can continue.
+
 ### Windows
 
 The command reads the registry from the selected `.npmrc`, invokes `vsts-npm-auth`, and writes the

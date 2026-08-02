@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CI detection takes precedence over the non-Windows platform check 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+│
+▲  Automatic NPM registry authentication is not supported in CI environments. No authentication will be performed. Make sure you have configured authentication in your CI environment, or npm install will fail.
+│
+└  Automatic authentication skipped."
+`;
+
+exports[`automatic authentication is skipped in CI 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+│
+▲  Automatic NPM registry authentication is not supported in CI environments. No authentication will be performed. Make sure you have configured authentication in your CI environment, or npm install will fail.
+│
+└  Automatic authentication skipped."
+`;
