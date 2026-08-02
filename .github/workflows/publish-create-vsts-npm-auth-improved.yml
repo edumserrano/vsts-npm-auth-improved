@@ -107,14 +107,12 @@ jobs:
         run: |
           tag_exists=false
           npm_exists=false
+          tag_commit=""
 
           if git show-ref --verify --quiet "refs/tags/$GIT_TAG"; then
             tag_exists=true
             tag_commit="$(git rev-list -n 1 "$GIT_TAG")"
-            if [[ "$tag_commit" != "$GITHUB_SHA" ]]; then
-              echo "::error::Git tag $GIT_TAG already points to $tag_commit."
-              exit 1
-            fi
+            echo "tag_commit=$tag_commit" >> "$GITHUB_OUTPUT"
           fi
 
           npm_error="$(mktemp)"
@@ -127,8 +125,8 @@ jobs:
           fi
 
           if [[ "$npm_exists" == true && "$tag_exists" == true ]]; then
-            echo "mode=complete" >> "$GITHUB_OUTPUT"
-            echo "$PACKAGE@$VERSION is already published and tagged at this commit."
+            echo "mode=verify-existing" >> "$GITHUB_OUTPUT"
+            echo "$PACKAGE@$VERSION is already published and tagged; provenance will verify the tag commit."
           elif [[ "$npm_exists" == true ]]; then
             echo "mode=recover" >> "$GITHUB_OUTPUT"
             echo "$PACKAGE@$VERSION already exists; provenance must match this workflow and commit before the missing tag can be recovered."
@@ -271,17 +269,18 @@ jobs:
         run: npm publish "$TARBALL" --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
 
       - name: Verify npm release and provenance
-        if: steps.preflight.outputs.mode != 'complete'
+        id: verification
         env:
           PACKAGE: ${{ steps.metadata.outputs.package }}
           VERSION: ${{ steps.metadata.outputs.version }}
           DIST_TAG: ${{ steps.metadata.outputs.dist_tag }}
+          MODE: ${{ steps.preflight.outputs.mode }}
           WORKFLOW_PATH: .github/workflows/publish-create-vsts-npm-auth-improved.yml
         run: |
           verified=false
           for attempt in {1..12}; do
-            exact="$(npm view "$PACKAGE@$VERSION" version --json --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '"[:space:]')" || true
-            tagged="$(npm view "$PACKAGE@$DIST_TAG" version --json --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '"[:space:]')" || true
+            exact="$(npm view "$PACKAGE@$VERSION" version --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '[:space:]')" || true
+            tagged="$(npm view "$PACKAGE@$DIST_TAG" version --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '[:space:]')" || true
             attestation_url="$(npm view "$PACKAGE@$VERSION" dist.attestations.url --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '\r\n')" || true
 
             if [[ "$exact" == "$VERSION" && "$tagged" == "$VERSION" && -n "$attestation_url" ]]; then
@@ -313,36 +312,95 @@ jobs:
           const workflow = statement.predicate?.buildDefinition?.externalParameters?.workflow;
           const dependencies = statement.predicate?.buildDefinition?.resolvedDependencies ?? [];
           const subject = statement.subject?.[0]?.name;
+          const repository = "https://github.com/" + process.env.GITHUB_REPOSITORY;
 
-          if (workflow?.repository !== "https://github.com/" + process.env.GITHUB_REPOSITORY) {
+          if (workflow?.repository !== repository) {
             throw new Error("Provenance repository does not match this repository.");
+          }
+          if (workflow?.ref !== "refs/heads/main") {
+            throw new Error("Provenance does not identify the main branch.");
           }
           if (workflow?.path !== process.env.WORKFLOW_PATH) {
             throw new Error("Provenance workflow path does not match " + process.env.WORKFLOW_PATH);
           }
-          if (!dependencies.some((item) => item.digest?.gitCommit === process.env.GITHUB_SHA)) {
-            throw new Error("Provenance does not identify the release commit.");
-          }
           if (subject !== "pkg:npm/" + process.env.PACKAGE + "@" + process.env.VERSION) {
             throw new Error("Provenance subject does not match the npm release.");
+          }
+
+          const source = dependencies.find(
+            (item) =>
+              item.uri === "git+" + repository + "@" + workflow.ref &&
+              /^[0-9a-f]{40}$/.test(item.digest?.gitCommit ?? ""),
+          );
+          if (!source) {
+            throw new Error("Provenance does not identify a valid source commit.");
+          }
+
+          const releaseCommit = source.digest.gitCommit;
+          if (process.env.MODE === "publish" && releaseCommit !== process.env.GITHUB_SHA) {
+            throw new Error("New publication provenance does not identify the workflow commit.");
+          }
+          if (!["publish", "recover", "verify-existing"].includes(process.env.MODE)) {
+            throw new Error("Unexpected release mode: " + process.env.MODE);
+          }
+
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, "release_commit=" + releaseCommit + "\n");
+          NODE
+
+      - name: Validate provenance release commit
+        env:
+          PACKAGE: ${{ steps.metadata.outputs.package }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+          RELEASE_COMMIT: ${{ steps.verification.outputs.release_commit }}
+        run: |
+          if ! git cat-file -e "$RELEASE_COMMIT^{commit}"; then
+            echo "::error::Provenance commit $RELEASE_COMMIT is not present in this repository."
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$RELEASE_COMMIT" origin/main; then
+            echo "::error::Provenance commit $RELEASE_COMMIT is not reachable from main."
+            exit 1
+          fi
+
+          release_manifest="$RUNNER_TEMP/create-vsts-npm-auth-improved-release-package.json"
+          git show "$RELEASE_COMMIT:projects/create-vsts-npm-auth-improved/package.json" > "$release_manifest"
+          RELEASE_MANIFEST="$release_manifest" node <<'NODE'
+          const fs = require("node:fs");
+          const manifest = JSON.parse(fs.readFileSync(process.env.RELEASE_MANIFEST, "utf8"));
+          if (manifest.name !== process.env.PACKAGE || manifest.version !== process.env.VERSION) {
+            throw new Error("Provenance commit package metadata does not match the npm release.");
           }
           NODE
 
       - name: Create and push release tag
-        if: steps.preflight.outputs.mode != 'complete'
+        if: steps.preflight.outputs.mode == 'publish' || steps.preflight.outputs.mode == 'recover'
         env:
           GIT_TAG: ${{ steps.metadata.outputs.git_tag }}
           PACKAGE: ${{ steps.metadata.outputs.package }}
           VERSION: ${{ steps.metadata.outputs.version }}
+          RELEASE_COMMIT: ${{ steps.verification.outputs.release_commit }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag --annotate "$GIT_TAG" "$GITHUB_SHA" --message "Release $PACKAGE@$VERSION"
+          git tag --annotate "$GIT_TAG" "$RELEASE_COMMIT" --message "Release $PACKAGE@$VERSION"
           git push origin "refs/tags/$GIT_TAG"
 
+      - name: Verify existing release tag
+        if: steps.preflight.outputs.mode == 'verify-existing'
+        env:
+          GIT_TAG: ${{ steps.metadata.outputs.git_tag }}
+          TAG_COMMIT: ${{ steps.preflight.outputs.tag_commit }}
+          RELEASE_COMMIT: ${{ steps.verification.outputs.release_commit }}
+        run: |
+          if [[ "$TAG_COMMIT" != "$RELEASE_COMMIT" ]]; then
+            echo "::error::Git tag $GIT_TAG points to $TAG_COMMIT, but provenance identifies $RELEASE_COMMIT."
+            exit 1
+          fi
+          echo "$GIT_TAG already points to the provenance release commit; nothing to do."
+
       - name: Report existing release
-        if: steps.preflight.outputs.mode == 'complete'
+        if: steps.preflight.outputs.mode == 'verify-existing'
         env:
           PACKAGE: ${{ steps.metadata.outputs.package }}
           VERSION: ${{ steps.metadata.outputs.version }}
-        run: echo "$PACKAGE@$VERSION is already published and tagged at this commit; nothing to do."
+        run: echo "$PACKAGE@$VERSION is already published with a provenance-verified tag; nothing to do."
