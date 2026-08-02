@@ -122,19 +122,34 @@ function normalizeProgressivelyTypedTemporaryRoots(
   output: string,
   temporaryRoots: readonly string[],
 ): string {
-  const normalizedOutput = output.replace(
-    /│  ([^\n│]+?)█/g,
-    (match, typedValue: string) =>
-      temporaryRoots.some(root =>
-        root.toLowerCase().startsWith(typedValue.toLowerCase()),
-      )
-      ? "│  <test-root>█"
-      : match,
-  );
+  return output.replace(
+    /(?:│  [^\n│]+?█)+/g,
+    typingSequence => {
+      const typedValues = [
+        ...typingSequence.matchAll(/│  ([^\n│]+?)█/g),
+      ].map(([, typedValue]) => typedValue);
+      const completedRoots = temporaryRoots.filter(root =>
+        typedValues.some(
+          typedValue => typedValue.toLowerCase() === root.toLowerCase(),
+        ),
+      );
 
-  return normalizedOutput.replace(
-    /(?:│  <test-root>█)+/g,
-    "│  <test-root>█",
+      if (completedRoots.length === 0) {
+        return typingSequence;
+      }
+
+      return typingSequence
+        .replace(
+          /│  ([^\n│]+?)█/g,
+          (match, typedValue: string) =>
+            completedRoots.some(root =>
+              root.toLowerCase().startsWith(typedValue.toLowerCase()),
+            )
+              ? "│  <test-root>█"
+              : match,
+        )
+        .replace(/(?:│  <test-root>█)+/g, "│  <test-root>█");
+    },
   );
 }
 
