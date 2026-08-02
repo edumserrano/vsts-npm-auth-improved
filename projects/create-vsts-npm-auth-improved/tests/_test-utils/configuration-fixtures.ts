@@ -14,7 +14,7 @@ const EXPECTED_REQUIRED_SCRIPTS = {
   "install-packages": "npm i",
 } as const;
 
-const EXPECTED_VSTS_NPM_AUTH_IMPROVED_VERSION = "^1.0.0";
+const EXPECTED_VSTS_NPM_AUTH_IMPROVED_VERSION = "^1.0.0-alpha.0";
 
 export const EXPECTED_MANAGED_NPM_CONFIG = {
   "package-lock": "true",

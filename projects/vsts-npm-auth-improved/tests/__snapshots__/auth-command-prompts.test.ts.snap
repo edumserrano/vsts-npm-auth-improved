@@ -2,7 +2,7 @@
 
 exports[`Packaging (Read & Write) can be selected from the prompt 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -78,12 +78,12 @@ exports[`Packaging (Read & Write) can be selected from the prompt 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
 `;
 
 exports[`all prompts successful 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -155,12 +155,12 @@ exports[`all prompts successful 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
 `;
 
 exports[`complete non-default prompt flow selects read-write scope and forced acquisition 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -241,12 +241,12 @@ exports[`complete non-default prompt flow selects read-write scope and forced ac
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
 `;
 
 exports[`configuration without a registry can be corrected before successful completion 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -339,12 +339,12 @@ exports[`configuration without a registry can be corrected before successful com
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
 `;
 
 exports[`default command 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -416,12 +416,12 @@ exports[`default command 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
 `;
 
 exports[`force token acquisition select prompt cancelled 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -488,7 +488,7 @@ exports[`force token acquisition select prompt cancelled 1`] = `
 
 exports[`forced acquisition can be selected from the prompt 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -565,12 +565,12 @@ exports[`forced acquisition can be selected from the prompt 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
 `;
 
 exports[`invalid configuration path can be corrected before successful completion 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -689,12 +689,12 @@ exports[`invalid configuration path can be corrected before successful completio
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
 `;
 
 exports[`npm configuration path - default value 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -715,7 +715,7 @@ exports[`npm configuration path - default value 1`] = `
 
 exports[`npm configuration path - prompt validation - file does not exist 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -772,7 +772,7 @@ exports[`npm configuration path - prompt validation - file does not exist 1`] = 
 
 exports[`npm configuration path - prompt validation - no registry found ('empty registry value') 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -826,7 +826,7 @@ exports[`npm configuration path - prompt validation - no registry found ('empty 
 
 exports[`npm configuration path - prompt validation - no registry found ('no registry key') 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -880,7 +880,7 @@ exports[`npm configuration path - prompt validation - no registry found ('no reg
 
 exports[`npm configuration path prompt cancelled 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc
@@ -893,7 +893,7 @@ exports[`npm configuration path prompt cancelled 1`] = `
 
 exports[`token scope select prompt cancelled 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
 │
 ◆  Where is the NPM configuration file?
 │  ./.npmrc

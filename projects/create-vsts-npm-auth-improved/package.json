@@ -1,6 +1,6 @@
 {
   "name": "create-vsts-npm-auth-improved",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.0",
   "author": "Eduardo Serrano",
   "license": "MIT",
   "description": "Configure projects to use vsts-npm-auth-improved",
@@ -33,8 +33,9 @@
     "build:lib": "tsc -p ./tsconfig.lib.json",
     "build:test": "tsc -p ./tests/tsconfig.json",
     "copy-package-readme": "cp-cli ./README.md dist/create-vsts-npm-auth-improved/README.md",
+    "copy-package-license": "cp-cli ../../LICENSE dist/create-vsts-npm-auth-improved/LICENSE",
     "copy-package-json": "clear-package-json package.json -o dist/create-vsts-npm-auth-improved/package.json",
-    "prepack": "npm run build && npm run copy-package-json && npm run copy-package-readme && mkdirp ./dist/create-vsts-npm-auth-improved-package",
+    "prepack": "npm run build && npm run copy-package-json && npm run copy-package-readme && npm run copy-package-license && mkdirp ./dist/create-vsts-npm-auth-improved-package",
     "pack": "npm pack ./dist/create-vsts-npm-auth-improved --pack-destination ./dist/create-vsts-npm-auth-improved-package && echo Package available at ./dist/create-vsts-npm-auth-improved-package",
     "pretest": "npm run clean:tests",
     "test": "vitest run --coverage",
@@ -77,5 +78,14 @@
     "registry",
     "authentication",
     "vsts-npm-auth-improved"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edumserrano/vsts-npm-auth-improved.git",
+    "directory": "projects/create-vsts-npm-auth-improved"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 }

@@ -21,7 +21,7 @@ test.each([
     expected: {
       name: "new-fields",
       scripts: managedScripts,
-      devDependencies: { "vsts-npm-auth-improved": "^1.0.0" },
+      devDependencies: { "vsts-npm-auth-improved": "^1.0.0-alpha.0" },
     },
     initial: { name: "new-fields" },
     label: "adds managed fields",
@@ -34,7 +34,7 @@ test.each([
       custom: { nested: true },
       devDependencies: {
         existing: "2",
-        "vsts-npm-auth-improved": "^1.0.0",
+        "vsts-npm-auth-improved": "^1.0.0-alpha.0",
       },
     },
     initial: {
@@ -59,7 +59,7 @@ test.each([
     expected: {
       name: "invalid-containers",
       scripts: managedScripts,
-      devDependencies: { "vsts-npm-auth-improved": "^1.0.0" },
+      devDependencies: { "vsts-npm-auth-improved": "^1.0.0-alpha.0" },
     },
     initial: {
       name: "invalid-containers",
@@ -110,7 +110,7 @@ test("passes all dependency sections through npm sorting and reconciliation", as
     dependencies: { alpha: "3", zebra: "1" },
     devDependencies: {
       alphaDev: "5",
-      "vsts-npm-auth-improved": "^1.0.0",
+      "vsts-npm-auth-improved": "^1.0.0-alpha.0",
       zebraDev: "4",
     },
     optionalDependencies: { alphaOptional: "7", sharedOptional: "6" },

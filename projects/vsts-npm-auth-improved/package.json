@@ -1,6 +1,6 @@
 {
   "name": "vsts-npm-auth-improved",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.0",
   "author": "Eduardo Serrano",
   "license": "MIT",
   "description": "Authenticate with a private Azure DevOps NPM registry",
@@ -33,8 +33,9 @@
     "build:lib": "tsc -p ./tsconfig.lib.json",
     "build:test": "tsc -p ./tests/tsconfig.json",
     "copy-package-readme": "cp-cli ./README.md dist/vsts-npm-auth-improved/README.md",
+    "copy-package-license": "cp-cli ../../LICENSE dist/vsts-npm-auth-improved/LICENSE",
     "copy-package-json": "clear-package-json package.json -o dist/vsts-npm-auth-improved/package.json",
-    "prepack": "npm run build && npm run copy-package-json && npm run copy-package-readme && mkdirp ./dist/vsts-npm-auth-improved-package",
+    "prepack": "npm run build && npm run copy-package-json && npm run copy-package-readme && npm run copy-package-license && mkdirp ./dist/vsts-npm-auth-improved-package",
     "pack": "npm pack ./dist/vsts-npm-auth-improved --pack-destination ./dist/vsts-npm-auth-improved-package && echo Package available at ./dist/vsts-npm-auth-improved-package",
     "pretest": "npm run clean:tests",
     "test": "vitest run --coverage",
@@ -80,5 +81,14 @@
     "authentication",
     "azdo",
     "vsts-npm-auth"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edumserrano/vsts-npm-auth-improved.git",
+    "directory": "projects/vsts-npm-auth-improved"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 }

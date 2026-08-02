@@ -87,7 +87,7 @@ test("loads the package directory and sends the complete safe update through npm
       dependencies: { zebra: "1", alpha: "2" },
       devDependencies: {
         typescript: "7",
-        "vsts-npm-auth-improved": "^1.0.0",
+        "vsts-npm-auth-improved": "^1.0.0-alpha.0",
       },
       optionalDependencies: { optional: "3" },
       peerDependencies: { peer: "4" },
@@ -117,7 +117,7 @@ test("replaces unsupported script and development dependency containers", async 
     {
       scripts: managedScripts,
       devDependencies: {
-        "vsts-npm-auth-improved": "^1.0.0",
+        "vsts-npm-auth-improved": "^1.0.0-alpha.0",
       },
     },
   ]);
@@ -139,7 +139,7 @@ test("discards invalid entries from managed containers before calling npm", asyn
       scripts: { ...managedScripts, test: "vitest" },
       devDependencies: {
         typescript: "7",
-        "vsts-npm-auth-improved": "^1.0.0",
+        "vsts-npm-auth-improved": "^1.0.0-alpha.0",
       },
     },
   ]);
@@ -149,7 +149,7 @@ test("reports semantic idempotency without updating or saving", async () => {
   fakePackageJson = new FakePackageJson({
     scripts: { ...managedScripts, test: "vitest" },
     devDependencies: {
-      "vsts-npm-auth-improved": "^1.0.0",
+      "vsts-npm-auth-improved": "^1.0.0-alpha.0",
       typescript: "7",
     },
   });
