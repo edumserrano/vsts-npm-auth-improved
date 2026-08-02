@@ -1,6 +1,6 @@
 import path from "node:path";
 
-const VSTS_NPM_AUTH_IMPROVED_VERSION = "^1.0.0-alpha.0";
+const VSTS_NPM_AUTH_IMPROVED_VERSION = "^1.0.0-alpha.1";
 
 const REQUIRED_SCRIPTS = {
   "registry-auth": "vsts-npm-auth-improved -c ./.npmrc --read",

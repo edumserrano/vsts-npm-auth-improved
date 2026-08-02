@@ -43,7 +43,7 @@ test.each([
     {
       name: "example",
       scripts: managedScripts,
-      devDependencies: { "vsts-npm-auth-improved": "^1.0.0-alpha.0" },
+      devDependencies: { "vsts-npm-auth-improved": "^1.0.0-alpha.1" },
     },
   ],
   [
@@ -52,7 +52,7 @@ test.each([
     {
       name: "example",
       scripts: managedScripts,
-      devDependencies: { "vsts-npm-auth-improved": "^1.0.0-alpha.0" },
+      devDependencies: { "vsts-npm-auth-improved": "^1.0.0-alpha.1" },
     },
   ],
   [
@@ -80,7 +80,7 @@ test.each([
       scripts: { ...managedScripts, test: "vitest", lint: "eslint ." },
       dependencies: { lodash: "^4.17.21" },
       custom: { nested: true },
-      devDependencies: { "vsts-npm-auth-improved": "^1.0.0-alpha.0" },
+      devDependencies: { "vsts-npm-auth-improved": "^1.0.0-alpha.1" },
     },
   ],
 ] as const)(

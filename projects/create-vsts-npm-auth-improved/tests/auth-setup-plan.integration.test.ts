@@ -153,7 +153,7 @@ test("a complete plan reports paths and counts before adapter persistence", asyn
   });
   expect(JSON.parse(await project.readFileAsync("package.json"))).toMatchObject({
     name: "complete",
-    devDependencies: { "vsts-npm-auth-improved": "^1.0.0-alpha.0" },
+    devDependencies: { "vsts-npm-auth-improved": "^1.0.0-alpha.1" },
   });
   expect(await project.readFileAsync(".npmrc")).toContain(
     "registry=https://project.example/",

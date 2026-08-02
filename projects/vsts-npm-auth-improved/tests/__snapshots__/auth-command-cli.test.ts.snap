@@ -2,7 +2,7 @@
 
 exports[`a global registry amid unrelated npm settings is used 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/global/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -14,12 +14,12 @@ exports[`a global registry amid unrelated npm settings is used 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`a scoped registry without a global registry is rejected 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ▲  No registry entry found in the NPM configuration file
 │
@@ -31,7 +31,7 @@ exports[`a top-level non-Commander CLI failure is handled 1`] = `""`;
 
 exports[`an initial forced authentication failure does not retry 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: yes)
 │
@@ -47,7 +47,7 @@ exports[`an initial forced authentication failure does not retry 1`] = `
 
 exports[`an unexpected Error reports its Error cause 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -61,7 +61,7 @@ exports[`an unexpected Error reports its Error cause 1`] = `
 
 exports[`an unexpected non-Error rejection is handled 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -105,17 +105,17 @@ Options:
 
 exports[`auth command version (useOptionAlias: false) 1`] = `
 "
-1.0.0-alpha.0"
+1.0.0-alpha.1"
 `;
 
 exports[`auth command version (useOptionAlias: true) 1`] = `
 "
-1.0.0-alpha.0"
+1.0.0-alpha.1"
 `;
 
 exports[`auth failures cases (vsts-npm-auth returns 'config-file-not-found') 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -131,7 +131,7 @@ exports[`auth failures cases (vsts-npm-auth returns 'config-file-not-found') 1`]
 
 exports[`auth failures cases (vsts-npm-auth returns 'credentials-not-required') 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -147,7 +147,7 @@ exports[`auth failures cases (vsts-npm-auth returns 'credentials-not-required') 
 
 exports[`auth failures cases (vsts-npm-auth returns 'no-registry-entry-found') 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -163,7 +163,7 @@ exports[`auth failures cases (vsts-npm-auth returns 'no-registry-entry-found') 1
 
 exports[`auth failures cases (vsts-npm-auth returns 'unknown') 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -179,7 +179,7 @@ exports[`auth failures cases (vsts-npm-auth returns 'unknown') 1`] = `
 
 exports[`auth success cases (vsts-npm-auth returns 'already-have-credentials') 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -191,12 +191,12 @@ exports[`auth success cases (vsts-npm-auth returns 'already-have-credentials') 1
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`auth success cases (vsts-npm-auth returns 'credentials-obtained') 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -208,12 +208,12 @@ exports[`auth success cases (vsts-npm-auth returns 'credentials-obtained') 1`] =
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`combined read and force options are passed to vsts-npm-auth 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read), force: yes)
 │
@@ -225,12 +225,12 @@ exports[`combined read and force options are passed to vsts-npm-auth 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`multiple unknown vsts-npm-auth output lines are displayed in order 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -250,7 +250,7 @@ exports[`multiple unknown vsts-npm-auth output lines are displayed in order 1`] 
 
 exports[`npm configuration file not found 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ▲  NPM configuration file not found. Is the filepath correct?
 │
@@ -260,7 +260,7 @@ exports[`npm configuration file not found 1`] = `
 
 exports[`npm configuration file without a registry defined 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ▲  No registry entry found in the NPM configuration file
 │
@@ -270,7 +270,7 @@ exports[`npm configuration file without a registry defined 1`] = `
 
 exports[`npm configuration path (useConfigPathAlias: false) 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -282,12 +282,12 @@ exports[`npm configuration path (useConfigPathAlias: false) 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`npm configuration path (useConfigPathAlias: true) 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -299,12 +299,12 @@ exports[`npm configuration path (useConfigPathAlias: true) 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`retries once but still fails 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -320,7 +320,7 @@ exports[`retries once but still fails 1`] = `
 
 exports[`retries once with force token acquisition when vsts-npm-auth returns could-not-get-auth-token 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -332,12 +332,12 @@ exports[`retries once with force token acquisition when vsts-npm-auth returns co
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`retry with force token acquisition keeps arguments 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read), force: no)
 │
@@ -349,12 +349,12 @@ exports[`retry with force token acquisition keeps arguments 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`token acquisition (force: false) 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -366,12 +366,12 @@ exports[`token acquisition (force: false) 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`token acquisition (force: true) 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: yes)
 │
@@ -383,12 +383,12 @@ exports[`token acquisition (force: true) 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`token scope (read: false) 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
@@ -400,12 +400,12 @@ exports[`token scope (read: false) 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`token scope (read: true) 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read), force: no)
 │
@@ -417,12 +417,12 @@ exports[`token scope (read: true) 1`] = `
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │
-└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑"
+└  📦🔑 Thanks for using vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑"
 `;
 
 exports[`unexpected errors are handled 1`] = `
 "
-┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.0 📦🔑
+┌  📦🔑 Welcome to vsts-npm-auth-improved 1.0.0-alpha.1 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
