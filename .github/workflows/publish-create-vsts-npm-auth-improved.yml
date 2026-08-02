@@ -148,15 +148,15 @@ jobs:
             "utf8",
           );
           const match = source.match(
-            /const VSTS_NPM_AUTH_IMPROVED_VERSION = "([^"]+)";/,
+            /const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "([^"]+)";/,
           );
           if (!match) throw new Error("Could not read the generated core dependency range.");
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, "range=" + match[1] + "\n");
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, "spec=" + match[1] + "\n");
           NODE
 
-          core_range="$(node -e 'const fs=require("node:fs");const s=fs.readFileSync("src/init-auth/package-files/npm-package-json-file.ts","utf8");process.stdout.write(s.match(/const VSTS_NPM_AUTH_IMPROVED_VERSION = "([^"]+)";/)[1])')"
-          if ! npm view "vsts-npm-auth-improved@$core_range" version --json --registry=https://registry.npmjs.org/ > /dev/null; then
-            echo "::error::No published vsts-npm-auth-improved version satisfies $core_range."
+          core_spec="$(node -e 'const fs=require("node:fs");const s=fs.readFileSync("src/init-auth/package-files/npm-package-json-file.ts","utf8");process.stdout.write(s.match(/const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "([^"]+)";/)[1])')"
+          if ! npm view "vsts-npm-auth-improved@$core_spec" version --json --registry=https://registry.npmjs.org/ > /dev/null; then
+            echo "::error::No published vsts-npm-auth-improved version resolves from $core_spec."
             exit 1
           fi
 
@@ -196,7 +196,7 @@ jobs:
         env:
           PACKAGE: ${{ steps.metadata.outputs.package }}
           VERSION: ${{ steps.metadata.outputs.version }}
-          CORE_RANGE: ${{ steps.core-dependency.outputs.range }}
+          CORE_SPEC: ${{ steps.core-dependency.outputs.spec }}
           TARBALL: ${{ steps.tarball.outputs.path }}
         run: |
           entries="$RUNNER_TEMP/create-vsts-npm-auth-improved-entries.txt"
@@ -243,8 +243,8 @@ jobs:
 
           compiled="$RUNNER_TEMP/create-vsts-npm-auth-improved-core-dependency.js"
           tar -xOzf "$TARBALL" package/cjs/init-auth/package-files/npm-package-json-file.js > "$compiled"
-          if ! grep -Fq -- "$CORE_RANGE" "$compiled"; then
-            echo "::error::Packed CLI does not contain the verified core dependency range $CORE_RANGE."
+          if ! grep -Fq -- "$CORE_SPEC" "$compiled"; then
+            echo "::error::Packed CLI does not contain the verified core dependency spec $CORE_SPEC."
             exit 1
           fi
 

@@ -1,6 +1,6 @@
 import path from "node:path";
 
-const VSTS_NPM_AUTH_IMPROVED_VERSION = "^1.0.0-alpha.1";
+const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "alpha";
 
 const REQUIRED_SCRIPTS = {
   "registry-auth": "vsts-npm-auth-improved -c ./.npmrc --read",
@@ -118,7 +118,7 @@ export async function loadNpmPackageJsonFileWithDependencies(
   const scripts = buildScripts(content["scripts"]);
   const devDependencies = {
     ...readStringMap(content["devDependencies"]),
-    "vsts-npm-auth-improved": VSTS_NPM_AUTH_IMPROVED_VERSION,
+    "vsts-npm-auth-improved": VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC,
   };
   const disposition = hasRequiredSemanticState(
     content,

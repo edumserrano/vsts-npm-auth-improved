@@ -98,7 +98,7 @@ The CLI adds or replaces this exact development dependency:
 ```json
 {
   "devDependencies": {
-    "vsts-npm-auth-improved": "^1.0.0-alpha.1"
+    "vsts-npm-auth-improved": "alpha"
   }
 }
 ```
@@ -136,10 +136,13 @@ rewritten, so their existing bytes remain unchanged.
 
 ## Version policy
 
-The `vsts-npm-auth-improved` range is part of this create package's generated
-contract. Changing the managed range from `^1.0.0-alpha.1` requires a new release
-of `create-vsts-npm-auth-improved`; do not silently change the range in an existing
-release.
+During the prerelease phase, the CLI writes the npm `alpha` dist-tag for
+`vsts-npm-auth-improved` instead of a fixed version range. Generated projects
+therefore resolve the version that npm assigns to `alpha` when dependencies are
+installed. Publishing another core alpha does not require a corresponding source
+or documentation update in `create-vsts-npm-auth-improved`. When the stable
+release is ready, change this managed spec to `latest` and publish a new create
+package version.
 
 ## Local development
 
@@ -172,13 +175,13 @@ npm run pack
 The package is written to:
 
 ```text
-dist/create-vsts-npm-auth-improved-package/create-vsts-npm-auth-improved-1.0.0-alpha.1.tgz
+dist/create-vsts-npm-auth-improved-package/create-vsts-npm-auth-improved-<version>.tgz
 ```
 
 Smoke-test that tarball with npm's package runner (PowerShell example):
 
 ```powershell
-$tarball = (Resolve-Path .\dist\create-vsts-npm-auth-improved-package\create-vsts-npm-auth-improved-1.0.0-alpha.1.tgz).Path
+$tarball = (Resolve-Path .\dist\create-vsts-npm-auth-improved-package\create-vsts-npm-auth-improved-*.tgz).Path
 npx --yes --package="$tarball" create-vsts-npm-auth-improved --help
 npx --yes --package="$tarball" create-vsts-npm-auth-improved --version
 ```
