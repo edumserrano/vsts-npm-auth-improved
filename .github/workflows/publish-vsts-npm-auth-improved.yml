@@ -1,0 +1,317 @@
+name: Publish vsts-npm-auth-improved
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: npm-publish-vsts-npm-auth-improved
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish vsts-npm-auth-improved
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    defaults:
+      run:
+        shell: bash
+        working-directory: projects/vsts-npm-auth-improved
+
+    steps:
+      - name: Check out the release commit
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Require a main branch release
+        working-directory: .
+        run: |
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "::error::Releases must be dispatched from main, not $GITHUB_REF."
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.18.1
+          registry-url: https://registry.npmjs.org/
+          package-manager-cache: false
+
+      - name: Set up npm
+        run: npm install --global npm@12.0.2
+
+      - name: Read and validate release metadata
+        id: metadata
+        env:
+          EXPECTED_PACKAGE: vsts-npm-auth-improved
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const lockfile = JSON.parse(fs.readFileSync("package-lock.json", "utf8"));
+          const identifier = "(?:0|[1-9]\\d*|\\d*[A-Za-z-][0-9A-Za-z-]*)";
+          const semver = new RegExp(
+            "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)" +
+              "(?:-(" + identifier + "(?:\\." + identifier + ")*))?" +
+              "(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
+          );
+          const match = semver.exec(manifest.version);
+
+          if (manifest.name !== process.env.EXPECTED_PACKAGE) {
+            throw new Error("Unexpected package name: " + manifest.name);
+          }
+          if (!match) {
+            throw new Error("Package version is not valid SemVer: " + manifest.version);
+          }
+          if (
+            lockfile.name !== manifest.name ||
+            lockfile.version !== manifest.version ||
+            lockfile.packages?.[""]?.name !== manifest.name ||
+            lockfile.packages?.[""]?.version !== manifest.version
+          ) {
+            throw new Error("package.json and package-lock.json name/version metadata do not agree.");
+          }
+
+          let distTag = "latest";
+          if (match[4]) {
+            const prerelease = match[4].split(".")[0];
+            if (!["alpha", "beta", "rc"].includes(prerelease)) {
+              throw new Error("Unsupported prerelease channel: " + prerelease);
+            }
+            distTag = prerelease;
+          }
+
+          const gitTag = manifest.name + "@" + manifest.version;
+          fs.appendFileSync(
+            process.env.GITHUB_OUTPUT,
+            [
+              "package=" + manifest.name,
+              "version=" + manifest.version,
+              "dist_tag=" + distTag,
+              "git_tag=" + gitTag,
+            ].join("\n") + "\n",
+          );
+          NODE
+
+      - name: Check for release conflicts
+        id: preflight
+        env:
+          PACKAGE: ${{ steps.metadata.outputs.package }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+          GIT_TAG: ${{ steps.metadata.outputs.git_tag }}
+        run: |
+          tag_exists=false
+          npm_exists=false
+
+          if git show-ref --verify --quiet "refs/tags/$GIT_TAG"; then
+            tag_exists=true
+            tag_commit="$(git rev-list -n 1 "$GIT_TAG")"
+            if [[ "$tag_commit" != "$GITHUB_SHA" ]]; then
+              echo "::error::Git tag $GIT_TAG already points to $tag_commit."
+              exit 1
+            fi
+          fi
+
+          npm_error="$(mktemp)"
+          if npm view "$PACKAGE@$VERSION" version --json --registry=https://registry.npmjs.org/ > /dev/null 2>"$npm_error"; then
+            npm_exists=true
+          elif ! grep -qE 'E404|404 Not Found' "$npm_error"; then
+            cat "$npm_error" >&2
+            echo "::error::Could not determine whether $PACKAGE@$VERSION exists."
+            exit 1
+          fi
+
+          if [[ "$npm_exists" == true && "$tag_exists" == true ]]; then
+            echo "mode=complete" >> "$GITHUB_OUTPUT"
+            echo "$PACKAGE@$VERSION is already published and tagged at this commit."
+          elif [[ "$npm_exists" == true ]]; then
+            echo "mode=recover" >> "$GITHUB_OUTPUT"
+            echo "$PACKAGE@$VERSION already exists; provenance must match this workflow and commit before the missing tag can be recovered."
+          elif [[ "$tag_exists" == true ]]; then
+            echo "::error::Git tag $GIT_TAG exists but the npm version does not."
+            exit 1
+          else
+            echo "mode=publish" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        if: steps.preflight.outputs.mode == 'publish'
+        run: npm ci
+
+      - name: Run tests
+        if: steps.preflight.outputs.mode == 'publish'
+        run: npm test
+
+      - name: Build and pack
+        if: steps.preflight.outputs.mode == 'publish'
+        run: npm run pack
+
+      - name: Locate release tarball
+        if: steps.preflight.outputs.mode == 'publish'
+        id: tarball
+        env:
+          PACKAGE: ${{ steps.metadata.outputs.package }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+        run: |
+          package_dir="$GITHUB_WORKSPACE/projects/vsts-npm-auth-improved/dist/vsts-npm-auth-improved-package"
+          expected="$package_dir/$PACKAGE-$VERSION.tgz"
+          mapfile -t tarballs < <(find "$package_dir" -maxdepth 1 -type f -name '*.tgz')
+
+          if [[ "${#tarballs[@]}" -ne 1 || "${tarballs[0]}" != "$expected" ]]; then
+            printf 'Expected exactly %s; found:\n' "$expected" >&2
+            printf '  %s\n' "${tarballs[@]:-<none>}" >&2
+            exit 1
+          fi
+
+          echo "path=$expected" >> "$GITHUB_OUTPUT"
+
+      - name: Inspect release tarball
+        if: steps.preflight.outputs.mode == 'publish'
+        env:
+          PACKAGE: ${{ steps.metadata.outputs.package }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+          TARBALL: ${{ steps.tarball.outputs.path }}
+        run: |
+          entries="$RUNNER_TEMP/vsts-npm-auth-improved-entries.txt"
+          manifest="$RUNNER_TEMP/vsts-npm-auth-improved-package.json"
+          tar -tzf "$TARBALL" > "$entries"
+
+          for required in package/LICENSE package/README.md package/package.json package/cjs/main.js; do
+            grep -Fxq "$required" "$entries" || {
+              echo "::error::Release tarball is missing $required."
+              exit 1
+            }
+          done
+
+          if grep -Eq '(^|/)(tests?|test-reporters|coverage|node_modules)(/|$)|(^|/)\.npmrc$' "$entries"; then
+            echo "::error::Release tarball contains development files or npm credentials."
+            grep -E '(^|/)(tests?|test-reporters|coverage|node_modules)(/|$)|(^|/)\.npmrc$' "$entries"
+            exit 1
+          fi
+
+          tar -xOzf "$TARBALL" package/package.json > "$manifest"
+          MANIFEST="$manifest" node <<'NODE'
+          const fs = require("node:fs");
+          const manifest = JSON.parse(fs.readFileSync(process.env.MANIFEST, "utf8"));
+          const expectedRepository = "git+https://github.com/edumserrano/vsts-npm-auth-improved.git";
+
+          const checks = [
+            [manifest.name === process.env.PACKAGE, "package name"],
+            [manifest.version === process.env.VERSION, "package version"],
+            [manifest.license === "MIT", "MIT license"],
+            [manifest.bin?.[process.env.PACKAGE] === "cjs/main.js", "CLI binary"],
+            [manifest.repository?.url === expectedRepository, "repository URL"],
+            [manifest.repository?.directory === "projects/vsts-npm-auth-improved", "repository directory"],
+            [manifest.publishConfig?.access === "public", "public access"],
+            [manifest.publishConfig?.registry === "https://registry.npmjs.org/", "public registry"],
+            [Object.keys(manifest.dependencies ?? {}).length > 0, "runtime dependencies"],
+            [manifest.devDependencies === undefined, "no development dependencies"],
+            [manifest.scripts === undefined, "no development scripts"],
+          ];
+
+          for (const [valid, description] of checks) {
+            if (!valid) throw new Error("Generated manifest failed check: " + description);
+          }
+          NODE
+
+      - name: Smoke-test release tarball
+        if: steps.preflight.outputs.mode == 'publish'
+        env:
+          VERSION: ${{ steps.metadata.outputs.version }}
+          TARBALL: ${{ steps.tarball.outputs.path }}
+        run: |
+          actual_version="$(npx --yes --package "$TARBALL" vsts-npm-auth-improved --version | tr -d '\r' | xargs)"
+          [[ "$actual_version" == "$VERSION" ]] || {
+            echo "::error::CLI reported $actual_version instead of $VERSION."
+            exit 1
+          }
+          npx --yes --package "$TARBALL" vsts-npm-auth-improved --help > /dev/null
+
+      - name: Publish to npm
+        if: steps.preflight.outputs.mode == 'publish'
+        env:
+          DIST_TAG: ${{ steps.metadata.outputs.dist_tag }}
+          TARBALL: ${{ steps.tarball.outputs.path }}
+        run: npm publish "$TARBALL" --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
+
+      - name: Verify npm release and provenance
+        if: steps.preflight.outputs.mode != 'complete'
+        env:
+          PACKAGE: ${{ steps.metadata.outputs.package }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+          DIST_TAG: ${{ steps.metadata.outputs.dist_tag }}
+          WORKFLOW_PATH: .github/workflows/publish-vsts-npm-auth-improved.yml
+        run: |
+          verified=false
+          for attempt in {1..12}; do
+            exact="$(npm view "$PACKAGE@$VERSION" version --json --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '"[:space:]')" || true
+            tagged="$(npm view "$PACKAGE@$DIST_TAG" version --json --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '"[:space:]')" || true
+            attestation_url="$(npm view "$PACKAGE@$VERSION" dist.attestations.url --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '\r\n')" || true
+
+            if [[ "$exact" == "$VERSION" && "$tagged" == "$VERSION" && -n "$attestation_url" ]]; then
+              curl --fail --silent --show-error "$attestation_url" --output "$RUNNER_TEMP/npm-attestations.json"
+              verified=true
+              break
+            fi
+
+            echo "Registry metadata is not complete yet (attempt $attempt/12)."
+            sleep 10
+          done
+
+          if [[ "$verified" != true ]]; then
+            echo "::error::Could not verify the npm version, dist-tag, and provenance."
+            exit 1
+          fi
+
+          ATTESTATIONS="$RUNNER_TEMP/npm-attestations.json" node <<'NODE'
+          const fs = require("node:fs");
+          const response = JSON.parse(fs.readFileSync(process.env.ATTESTATIONS, "utf8"));
+          const attestation = response.attestations?.find(
+            (item) => item.predicateType === "https://slsa.dev/provenance/v1",
+          );
+          if (!attestation) throw new Error("SLSA provenance attestation is missing.");
+
+          const statement = JSON.parse(
+            Buffer.from(attestation.bundle.dsseEnvelope.payload, "base64").toString("utf8"),
+          );
+          const workflow = statement.predicate?.buildDefinition?.externalParameters?.workflow;
+          const dependencies = statement.predicate?.buildDefinition?.resolvedDependencies ?? [];
+          const subject = statement.subject?.[0]?.name;
+
+          if (workflow?.repository !== "https://github.com/" + process.env.GITHUB_REPOSITORY) {
+            throw new Error("Provenance repository does not match this repository.");
+          }
+          if (workflow?.path !== process.env.WORKFLOW_PATH) {
+            throw new Error("Provenance workflow path does not match " + process.env.WORKFLOW_PATH);
+          }
+          if (!dependencies.some((item) => item.digest?.gitCommit === process.env.GITHUB_SHA)) {
+            throw new Error("Provenance does not identify the release commit.");
+          }
+          if (subject !== "pkg:npm/" + process.env.PACKAGE + "@" + process.env.VERSION) {
+            throw new Error("Provenance subject does not match the npm release.");
+          }
+          NODE
+
+      - name: Create and push release tag
+        if: steps.preflight.outputs.mode != 'complete'
+        env:
+          GIT_TAG: ${{ steps.metadata.outputs.git_tag }}
+          PACKAGE: ${{ steps.metadata.outputs.package }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag --annotate "$GIT_TAG" "$GITHUB_SHA" --message "Release $PACKAGE@$VERSION"
+          git push origin "refs/tags/$GIT_TAG"
+
+      - name: Report existing release
+        if: steps.preflight.outputs.mode == 'complete'
+        env:
+          PACKAGE: ${{ steps.metadata.outputs.package }}
+          VERSION: ${{ steps.metadata.outputs.version }}
+        run: echo "$PACKAGE@$VERSION is already published and tagged at this commit; nothing to do."
