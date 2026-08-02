@@ -10,6 +10,7 @@ const root = path.resolve(__dirname, "../../..");
 const repository = "example/vsts-npm-auth-improved";
 const sha = "b".repeat(40);
 const parentSha = "a".repeat(40);
+const releaseAppSlug = "vsts-npm-auth-release-bot";
 const packageNames = ["vsts-npm-auth-improved", "create-vsts-npm-auth-improved"];
 const workflows = packageNames.map(packageName => ({
   packageName,
@@ -52,7 +53,7 @@ function inputFor(packageName = packageNames[0]) {
     sha,
     parentSha,
     repository,
-    appSlug: "trusted-release-app",
+    appSlug: releaseAppSlug,
     pullRequests: [
       {
         number: 17,
@@ -60,7 +61,7 @@ function inputFor(packageName = packageNames[0]) {
         body,
         merged_at: "2026-08-02T12:00:00Z",
         merge_commit_sha: sha,
-        user: { login: "trusted-release-app[bot]" },
+        user: { login: `${releaseAppSlug}[bot]` },
         base: { ref: "main" },
         head: { ref: branch, repo: { full_name: repository } },
         labels: [{ name: "release-preparation" }, { name: `release-package:${packageName}` }],
@@ -254,12 +255,17 @@ test("audit metadata must corroborate Git, workflow run, source lineage, and bra
 test("exact App slug is required for release candidates", () => {
   expectRejected(input => {
     input.appSlug = "";
-  }, /RELEASE_APP_SLUG/);
+  }, /release App slug is required/);
 });
 
 test("publisher workflows scope privilege and preserve recovery behavior", () => {
   for (const workflow of workflows) {
     const source = fs.readFileSync(path.join(root, workflow.file), "utf8");
+    assert.equal(
+      (source.match(new RegExp(`RELEASE_APP_SLUG: ${releaseAppSlug}`, "g")) ?? []).length,
+      1,
+    );
+    assert.doesNotMatch(source, /vars\.RELEASE_APP_SLUG/);
     assert.match(source, /^on:\n  push:\n    branches:\n      - main$/m);
     assert.match(source, /^permissions:\n  contents: read$/m);
     assert.match(source, /^  identify-release:\n/m);

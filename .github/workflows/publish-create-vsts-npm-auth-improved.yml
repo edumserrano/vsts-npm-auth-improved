@@ -62,7 +62,7 @@ jobs:
         env:
           EXPECTED_PACKAGE: create-vsts-npm-auth-improved
           PR_JSON: ${{ runner.temp }}/associated-pull-requests.json
-          RELEASE_APP_SLUG: ${{ vars.RELEASE_APP_SLUG }}
+          RELEASE_APP_SLUG: vsts-npm-auth-release-bot
         run: node projects/scripts/identify-release.cjs
 
   publish:

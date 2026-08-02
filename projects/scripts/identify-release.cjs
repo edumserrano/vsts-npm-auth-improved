@@ -134,7 +134,7 @@ function identifyRelease(input) {
       "AMBIGUOUS_ASSOCIATED_PRS",
     );
   }
-  if (!input.appSlug) fail("repository variable RELEASE_APP_SLUG is required", "MISSING_APP_SLUG");
+  if (!input.appSlug) fail("release App slug is required", "MISSING_APP_SLUG");
   if (!/^[A-Za-z0-9][A-Za-z0-9-]*$/.test(input.appSlug))
     fail("RELEASE_APP_SLUG is invalid", "INVALID_APP_SLUG");
 
