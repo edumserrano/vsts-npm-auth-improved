@@ -1,4 +1,4 @@
-import { test, expect, afterEach, vi } from "vitest";
+import { test, expect, afterEach, beforeEach, vi } from "vitest";
 import { AuthCommand, VstsNpmAuthImprovedCli } from "@test-utils/auth-command";
 import { execa } from "execa";
 import { vol } from "memfs";
@@ -15,6 +15,10 @@ vi.mock("execa");
 vi.mock("node:fs", async () => {
   const { fs } = await import("memfs");
   return fs;
+});
+
+beforeEach(() => {
+  vi.spyOn(process, "platform", "get").mockReturnValue("win32");
 });
 
 afterEach(() => {

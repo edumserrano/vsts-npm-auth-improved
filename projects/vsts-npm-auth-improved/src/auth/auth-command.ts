@@ -36,6 +36,15 @@ async function handleAuthCommandAsync(options: AuthCommandOptions, _: Command): 
 
   try {
     prompts.intro(`📦🔑 Welcome to ${packageName} ${packageVersion} 📦🔑`);
+    if (process.platform !== "win32") {
+      prompts.log.warn(
+        `Automatic NPM registry authentication is only supported on Windows. No authentication will be performed. Make sure you have manually configured authentication, or npm install will fail.`,
+      );
+      prompts.outro("Automatic authentication skipped.");
+      process.exitCode = 0;
+      return;
+    }
+
     const authOptionsResult = await getAuthOptionsAsync(options);
     if (authOptionsResult.promptCancelled) {
       prompts.cancel(PromptMessages.Cancel);

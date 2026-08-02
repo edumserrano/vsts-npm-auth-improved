@@ -18,6 +18,10 @@ vi.mock("node:fs", async () => {
   return fs;
 });
 
+beforeEach(() => {
+  vi.spyOn(process, "platform", "get").mockReturnValue("win32");
+});
+
 afterEach(() => {
   vi.resetAllMocks(); // clears history on module mocks like execa
   vi.restoreAllMocks(); // restores original implementations of spied functions
