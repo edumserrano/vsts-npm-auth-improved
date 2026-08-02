@@ -3,6 +3,17 @@ name: Build and test create-vsts-npm-auth-improved
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      prepare_release:
+        description: Prepare a new package version
+        required: true
+        type: boolean
+        default: false
+      version:
+        description: SemVer version, or "auto"; ignored unless preparation is enabled
+        required: true
+        type: string
+        default: auto
 
 permissions:
   contents: read
@@ -39,3 +50,63 @@ jobs:
 
       - name: Test
         run: npm test
+
+  prepare-release:
+    name: Prepare release create-vsts-npm-auth-improved
+    if: github.event_name == 'workflow_dispatch' && inputs.prepare_release == true
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    permissions:
+      contents: read
+    environment: release-preparation
+    concurrency:
+      group: release-preparation-create-vsts-npm-auth-improved
+      cancel-in-progress: false
+
+    steps:
+      - name: Require a dispatch from main
+        env:
+          DISPATCH_REF: ${{ github.ref }}
+        run: |
+          if [[ "$DISPATCH_REF" != "refs/heads/main" ]]; then
+            echo "Release preparation must be dispatched from main (refs/heads/main); got $DISPATCH_REF." >&2
+            exit 1
+          fi
+
+      - name: Create release App token
+        id: release-app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-issues: write
+          permission-pull-requests: write
+
+      - name: Check out main for release preparation
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+          token: ${{ steps.release-app-token.outputs.token }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.18.1
+          package-manager-cache: false
+
+      - name: Set up npm
+        run: npm install --global npm@12.0.2
+
+      - name: Prepare, open, and wait for the release PR
+        env:
+          APP_SLUG: ${{ steps.release-app-token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.release-app-token.outputs.token }}
+          PACKAGE_NAME: create-vsts-npm-auth-improved
+          PREPARE_RELEASE: ${{ inputs.prepare_release }}
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: bash projects/scripts/prepare-release.sh
