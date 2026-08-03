@@ -13,20 +13,22 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash
+        shell: pwsh
         working-directory: projects/vsts-npm-auth-improved
+    env:
+      NODE_VERSION: 24.18.1
+      NPM_VERSION: 12.0.2
     steps:
       - name: Check out the event commit
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.sha }}
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24.18.1
-          package-manager-cache: false
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: projects/vsts-npm-auth-improved/package-lock.json
       - name: Set up npm
-        run: npm install --global npm@12.0.2
+        run: npm install --global "npm@$env:NPM_VERSION"
       - name: Install dependencies
         run: npm ci
       - name: Build

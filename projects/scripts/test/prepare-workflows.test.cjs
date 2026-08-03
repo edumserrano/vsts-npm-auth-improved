@@ -231,8 +231,28 @@ test("stable checks stay read-only and retain their required identities", () => 
     const source = read(workflow.buildFile);
     const buildJob = jobSection(source, "build-and-test");
     assert.match(source, /^permissions:\n  contents: read$/m);
+    assert.doesNotMatch(source, /^env:/m);
     assert.match(buildJob, new RegExp(`name: ${workflow.checkName.replaceAll("-", "\\-")}`));
-    assert.match(buildJob, /ref: \$\{\{ github\.sha \}\}/);
+    assert.match(
+      buildJob,
+      /env:\n      NODE_VERSION: 24\.18\.1\n      NPM_VERSION: 12\.0\.2/,
+    );
+    assert.match(
+      buildJob,
+      new RegExp(
+        `defaults:\\n      run:\\n        shell: pwsh\\n        working-directory: projects/${workflow.packageName}`,
+      ),
+    );
+    assert.match(buildJob, /uses: actions\/checkout@v6/);
+    assert.doesNotMatch(buildJob, /\n\s+ref:/);
+    assert.match(buildJob, /node-version: \$\{\{ env\.NODE_VERSION \}\}/);
+    assert.match(buildJob, /cache: npm/);
+    assert.match(
+      buildJob,
+      new RegExp(`cache-dependency-path: projects/${workflow.packageName}/package-lock\\.json`),
+    );
+    assert.doesNotMatch(buildJob, /package-manager-cache:/);
+    assert.match(buildJob, /npm install --global "npm@\$env:NPM_VERSION"/);
     assert.match(buildJob, /run: npm ci/);
     assert.match(buildJob, /run: npm run build/);
     assert.match(buildJob, /run: npm test/);
