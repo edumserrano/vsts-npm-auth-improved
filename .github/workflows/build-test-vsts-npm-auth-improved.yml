@@ -42,20 +42,14 @@ jobs:
           npm config list -l
           Write-Output "::endgroup::"
       - name: Install dependencies
-        id: install
         run: npm ci
       - name: Build
-        id: build
         run: npm run build
       - name: Test
-        id: test
         run: npm test
       - name: Add job summary
         if: ${{ always() }}
         working-directory: ${{ github.workspace }}
         env:
           CACHE_HIT: ${{ steps.setup-node.outputs.cache-hit }}
-          INSTALL_OUTCOME: ${{ steps.install.outcome }}
-          BUILD_OUTCOME: ${{ steps.build.outcome }}
-          TEST_OUTCOME: ${{ steps.test.outcome }}
-        run: ./.github/scripts/write-build-test-summary.ps1 -ProjectDirectory "projects/vsts-npm-auth-improved" -CacheHit $env:CACHE_HIT -InstallOutcome $env:INSTALL_OUTCOME -BuildOutcome $env:BUILD_OUTCOME -TestOutcome $env:TEST_OUTCOME
+        run: ./.github/scripts/write-build-test-summary.ps1 -ProjectDirectory "projects/vsts-npm-auth-improved" -CacheHit $env:CACHE_HIT

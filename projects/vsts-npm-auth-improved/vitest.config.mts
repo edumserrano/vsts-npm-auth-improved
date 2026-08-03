@@ -24,6 +24,7 @@ export default defineConfig({
         ["html", { subdir: "html-report" }],
         ["lcovonly", { file: "lcov-report.info" }],
         ["cobertura", { file: "cobertura-report.xml" }],
+        ["json-summary", { file: "coverage-summary.json" }],
       ],
       reportsDirectory: "./test-reporters/code-coverage",
       include: ["src/**/*.ts"],
