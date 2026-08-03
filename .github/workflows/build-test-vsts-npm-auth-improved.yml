@@ -15,7 +15,6 @@ jobs:
       run:
         shell: bash
         working-directory: projects/vsts-npm-auth-improved
-
     steps:
       - name: Check out the event commit
         uses: actions/checkout@v6
