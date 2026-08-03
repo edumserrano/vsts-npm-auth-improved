@@ -1,21 +1,82 @@
 name: Publish create-vsts-npm-auth-improved
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
-  contents: write
-  id-token: write
-
-concurrency:
-  group: npm-publish-create-vsts-npm-auth-improved
-  cancel-in-progress: false
+  contents: read
 
 jobs:
+  identify-release:
+    name: Identify trusted create-vsts-npm-auth-improved release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      trusted_release: ${{ steps.identify.outputs.trusted_release }}
+      selected_package: ${{ steps.identify.outputs.selected_package }}
+      release_commit: ${{ steps.identify.outputs.release_commit }}
+      old_version: ${{ steps.identify.outputs.old_version }}
+      new_version: ${{ steps.identify.outputs.new_version }}
+      pull_request_number: ${{ steps.identify.outputs.pull_request_number }}
+
+    steps:
+      - name: Check out the pushed commit for identification
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Require the pushed commit on origin/main
+        run: |
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "::error::Release identification requires refs/heads/main; got $GITHUB_REF."
+            exit 1
+          fi
+          if [[ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ]]; then
+            echo "::error::Identification checkout does not equal GITHUB_SHA."
+            exit 1
+          fi
+          git fetch --no-tags --force origin refs/heads/main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
+            echo "::error::GITHUB_SHA is not reachable from origin/main."
+            exit 1
+          fi
+
+      - name: Read pull requests associated with the pushed commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_JSON: ${{ runner.temp }}/associated-pull-requests.json
+        run: |
+          gh api --paginate --slurp \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls?per_page=100" \
+            | jq -e '[.[] | .[]]' > "$PR_JSON"
+
+      - name: Identify a trusted package release
+        id: identify
+        env:
+          EXPECTED_PACKAGE: create-vsts-npm-auth-improved
+          PR_JSON: ${{ runner.temp }}/associated-pull-requests.json
+          RELEASE_APP_SLUG: vsts-npm-auth-release-bot
+        run: node projects/scripts/identify-release.cjs
+
   publish:
     name: Publish create-vsts-npm-auth-improved
+    needs: identify-release
+    if: needs.identify-release.outputs.trusted_release == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     environment: npm-publish
+    concurrency:
+      group: npm-publish-create-vsts-npm-auth-improved
+      cancel-in-progress: false
     defaults:
       run:
         shell: bash
@@ -25,13 +86,28 @@ jobs:
       - name: Check out the release commit
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Require a main branch release
+      - name: Preserve the authorized immutable release commit
         working-directory: .
+        env:
+          AUTHORIZED_COMMIT: ${{ needs.identify-release.outputs.release_commit }}
         run: |
           if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
-            echo "::error::Releases must be dispatched from main, not $GITHUB_REF."
+            echo "::error::Releases must run from main, not $GITHUB_REF."
+            exit 1
+          fi
+          checked_out_commit="$(git rev-parse HEAD)"
+          if [[ "$checked_out_commit" != "$GITHUB_SHA" || "$AUTHORIZED_COMMIT" != "$GITHUB_SHA" ]]; then
+            echo "::error::Checked-out, authorized, and event release commits must all equal GITHUB_SHA."
+            exit 1
+          fi
+          git fetch --force origin refs/heads/main:refs/remotes/origin/main
+          git fetch --force --tags origin
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
+            echo "::error::The immutable release commit is not reachable from origin/main."
             exit 1
           fi
 
@@ -337,8 +413,8 @@ jobs:
           }
 
           const releaseCommit = source.digest.gitCommit;
-          if (process.env.MODE === "publish" && releaseCommit !== process.env.GITHUB_SHA) {
-            throw new Error("New publication provenance does not identify the workflow commit.");
+          if (releaseCommit !== process.env.GITHUB_SHA) {
+            throw new Error("npm provenance does not identify the exact pushed release commit.");
           }
           if (!["publish", "recover", "verify-existing"].includes(process.env.MODE)) {
             throw new Error("Unexpected release mode: " + process.env.MODE);
