@@ -37,12 +37,10 @@ require_value GITHUB_REPOSITORY
 require_value GITHUB_RUN_ID
 require_value GITHUB_SERVER_URL
 require_value PACKAGE_NAME
-require_value PREPARE_RELEASE
 require_value REQUESTED_VERSION
 require_value RUNNER_TEMP
 
 [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]] || fail "preparation is allowed only for workflow_dispatch"
-[[ "$PREPARE_RELEASE" == "true" ]] || fail "preparation was not explicitly enabled"
 [[ "$GITHUB_REF" == "refs/heads/main" ]] || fail "preparation must be dispatched from refs/heads/main"
 
 case "$PACKAGE_NAME" in

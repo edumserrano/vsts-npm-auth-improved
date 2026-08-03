@@ -1,8 +1,8 @@
 # Release runbook
 
 This repository releases `vsts-npm-auth-improved` and `create-vsts-npm-auth-improved`
-independently. A maintainer chooses a version by manually starting a package build workflow from
-`main`; the workflow then prepares a pull request, waits for its checks and squash merge, and lets
+independently. A maintainer chooses a version by manually starting a package preparation workflow
+from `main`; that workflow prepares a pull request, waits for its checks and squash merge, and lets
 the matching push-triggered publisher publish to npm and create the Git tag.
 
 Do not publish with a local `npm publish`, create a release tag manually, or bypass the preparation
@@ -13,12 +13,12 @@ commit.
 
 In GitHub Actions, open the workflow for the package being released:
 
-| Package                         | Preparation workflow                           |
-| ------------------------------- | ---------------------------------------------- |
-| `vsts-npm-auth-improved`        | `Build and test vsts-npm-auth-improved`        |
-| `create-vsts-npm-auth-improved` | `Build and test create-vsts-npm-auth-improved` |
+| Package                         | Preparation workflow                            |
+| ------------------------------- | ----------------------------------------------- |
+| `vsts-npm-auth-improved`        | `Prepare release vsts-npm-auth-improved`        |
+| `create-vsts-npm-auth-improved` | `Prepare release create-vsts-npm-auth-improved` |
 
-Run the workflow from branch `main`, set `prepare_release` to `true`, and set `version` as follows:
+Run the workflow from branch `main` and set `version` as follows:
 
 - Use `auto` for the normal release. A stable version gets a patch increment. A prerelease keeps its
   channel and increments its number: for example, `1.0.0-alpha.2` becomes `1.0.0-alpha.3`.
@@ -32,18 +32,19 @@ to stable therefore requires an explicit version.
 The equivalent GitHub CLI commands are:
 
 ```shell
-gh workflow run build-test-prepare-vsts-npm-auth-improved.yml --ref main -f prepare_release=true -f version=auto
-gh workflow run build-test-prepare-create-vsts-npm-auth-improved.yml --ref main -f prepare_release=true -f version=auto
+gh workflow run prepare-release-vsts-npm-auth-improved.yml --ref main -f version=auto
+gh workflow run prepare-release-create-vsts-npm-auth-improved.yml --ref main -f version=auto
 ```
 
-Replace `auto` with the explicit version when promoting or selecting a version. A run with
-`prepare_release=false` only builds and tests; it does not mint the release App token or mutate the
-repository or npm.
+Replace `auto` with the explicit version when promoting or selecting a version. The separate build
+and test workflows can still be dispatched manually without inputs and never mint the release App
+token or mutate the repository or npm.
 
 ## Follow the automatic release
 
-The initial `build-and-test` job must pass before preparation receives the GitHub App credential.
-The generated pull request can be recognized by all of these markers:
+The preparation workflow updates version-derived snapshots, builds, and tests the bumped package
+before it creates the pull request. The generated pull request can be recognized by all of these
+markers:
 
 - author `vsts-npm-auth-release-bot[bot]`;
 - title `[release-prep] <package>@<version>`;
@@ -184,7 +185,8 @@ For planned rotation:
 2. Replace `RELEASE_APP_PRIVATE_KEY` in the `release-preparation` environment with the complete new
    PEM value.
 3. Validate it during the next controlled release preparation. There is no checked-in
-   non-publishing credential-check workflow, and `prepare_release=false` does not read the key.
+   non-publishing credential-check workflow; the separate build and test workflows do not read the
+   key.
 4. After the new key successfully creates the correctly App-authored preparation pull request,
    delete the old key in the App settings.
 
