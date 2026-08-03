@@ -70,7 +70,6 @@ function inputFor(packageName = packageNames[0]) {
     changedPaths: [
       `projects/${packageName}/package.json`,
       `projects/${packageName}/package-lock.json`,
-      `projects/${packageName}/tests/__snapshots__/version.test.ts.snap`,
     ],
     packageStates: Object.fromEntries(
       packageNames.map(name => [

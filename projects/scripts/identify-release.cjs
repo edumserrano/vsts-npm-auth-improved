@@ -4,14 +4,11 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
-const {
-  ReleaseToolError,
-  compareVersions,
-  parseVersion,
-  validateChangedPaths,
-} = require("./release-tool.cjs");
 
 const PACKAGES = ["vsts-npm-auth-improved", "create-vsts-npm-auth-improved"];
+const SUPPORTED_PRERELEASE_CHANNELS = new Set(["alpha", "beta", "rc"]);
+const SEMVER_PATTERN =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
 
 class IdentifyReleaseError extends Error {
   constructor(message, code) {
@@ -23,6 +20,55 @@ class IdentifyReleaseError extends Error {
 
 function fail(message, code = "UNTRUSTED_RELEASE") {
   throw new IdentifyReleaseError(message, code);
+}
+
+function parseVersion(value, label = "version") {
+  if (typeof value !== "string") fail(`${label} must be a SemVer string`, "INVALID_SEMVER");
+  const match = SEMVER_PATTERN.exec(value);
+  if (!match) fail(`${label} is not valid SemVer: ${value}`, "INVALID_SEMVER");
+  const prerelease = match[4] ? match[4].split(".") : [];
+  if (prerelease.length > 0) {
+    const [channel, number, ...rest] = prerelease;
+    if (!SUPPORTED_PRERELEASE_CHANNELS.has(channel)) {
+      fail(`${label} uses unsupported prerelease identifier: ${channel}`, "UNSUPPORTED_PRERELEASE");
+    }
+    if (rest.length > 0 || number === undefined || !/^(0|[1-9]\d*)$/.test(number)) {
+      fail(`${label} prerelease must have the form alpha.N, beta.N, or rc.N`, "INVALID_PRERELEASE");
+    }
+  }
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+    patch: Number(match[3]),
+    prerelease,
+  };
+}
+
+function compareVersions(leftValue, rightValue) {
+  const left = typeof leftValue === "string" ? parseVersion(leftValue) : leftValue;
+  const right = typeof rightValue === "string" ? parseVersion(rightValue) : rightValue;
+  for (const field of ["major", "minor", "patch"]) {
+    if (left[field] !== right[field]) return left[field] > right[field] ? 1 : -1;
+  }
+  if (left.prerelease.length === 0 && right.prerelease.length === 0) return 0;
+  if (left.prerelease.length === 0) return 1;
+  if (right.prerelease.length === 0) return -1;
+  const channelComparison = left.prerelease[0].localeCompare(right.prerelease[0]);
+  if (channelComparison !== 0) return channelComparison > 0 ? 1 : -1;
+  const leftNumber = Number(left.prerelease[1]);
+  const rightNumber = Number(right.prerelease[1]);
+  return leftNumber === rightNumber ? 0 : leftNumber > rightNumber ? 1 : -1;
+}
+
+function validateChangedPaths(packageName, changedPaths) {
+  const prefix = `projects/${packageName}/`;
+  const allowedPaths = new Set([`${prefix}package.json`, `${prefix}package-lock.json`]);
+  const unexpectedPaths = [...new Set(changedPaths.map(value => value.replaceAll("\\", "/")))]
+    .filter(changedPath => !allowedPaths.has(changedPath))
+    .sort();
+  if (unexpectedPaths.length > 0) {
+    fail(`preparation changed unexpected paths: ${unexpectedPaths.join(", ")}`, "UNEXPECTED_CHANGED_PATHS");
+  }
 }
 
 function releaseSignal(pr) {
@@ -79,12 +125,7 @@ function deriveTransition(packageStates, changedPaths) {
       "INVALID_VERSION_TRANSITION",
     );
   }
-  try {
-    validateChangedPaths(`projects/${transition.packageName}`, changedPaths);
-  } catch (error) {
-    if (error instanceof ReleaseToolError) fail(error.message, error.code);
-    throw error;
-  }
+  validateChangedPaths(transition.packageName, changedPaths);
   for (const required of ["package.json", "package-lock.json"]) {
     const expected = `projects/${transition.packageName}/${required}`;
     if (!changedPaths.includes(expected)) {
@@ -309,10 +350,7 @@ if (require.main === module) {
   try {
     cli();
   } catch (error) {
-    const code =
-      error instanceof IdentifyReleaseError || error instanceof ReleaseToolError
-        ? error.code
-        : "UNEXPECTED_ERROR";
+    const code = error instanceof IdentifyReleaseError ? error.code : "UNEXPECTED_ERROR";
     process.stderr.write(`${JSON.stringify({ error: code, message: error.message })}\n`);
     process.exitCode = 1;
   }
