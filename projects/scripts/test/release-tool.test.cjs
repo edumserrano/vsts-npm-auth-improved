@@ -40,13 +40,15 @@ test("rejects explicit versions that do not increase", () => {
 });
 
 test("rejects unsupported prerelease identifiers", () => {
-  assert.throws(() => resolveVersion("1.0.0", "1.1.0-preview.1"), { code: "UNSUPPORTED_PRERELEASE" });
+  assert.throws(() => resolveVersion("1.0.0", "1.1.0-preview.1"), {
+    code: "UNSUPPORTED_PRERELEASE",
+  });
   assert.throws(() => resolveVersion("1.0.0-dev.1", "auto"), { code: "UNSUPPORTED_PRERELEASE" });
   assert.throws(() => parseVersion("1.0.0-alpha"), { code: "INVALID_PRERELEASE" });
 });
 
 function runnerWith({ npmStatus = 1, npmError = "E404", gitStatus = 1 } = {}) {
-  return (command) =>
+  return command =>
     command === "npm"
       ? { status: npmStatus, stdout: "", stderr: npmError }
       : { status: gitStatus, stdout: "", stderr: "" };
@@ -62,10 +64,9 @@ test("rejects an already-published npm version without mutating the registry", (
       ? { status: 0, stdout: '"1.0.1"', stderr: "" }
       : { status: 1, stdout: "", stderr: "" };
   };
-  assert.throws(
-    () => checkReleaseConflicts(metadata, "1.0.1", ".", runner),
-    { code: "NPM_VERSION_EXISTS" },
-  );
+  assert.throws(() => checkReleaseConflicts(metadata, "1.0.1", ".", runner), {
+    code: "NPM_VERSION_EXISTS",
+  });
   assert.deepEqual(commands, [
     ["npm", "view", "example-package@1.0.1", "version", "--json"],
     ["git", "show-ref", "--verify", "--quiet", "refs/tags/example-package@1.0.1"],
@@ -109,11 +110,16 @@ test("rejects unexpected changed paths, including deleted or renamed source path
   );
 });
 
-test("CLI emits JSON and GitHub Actions outputs", (context) => {
+test("CLI emits JSON and GitHub Actions outputs", context => {
   const temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "release-tool-test-"));
   context.after(() => fs.rmSync(temporaryDirectory, { recursive: true, force: true }));
   const outputPath = path.join(temporaryDirectory, "github-output.txt");
-  const packageDirectory = path.resolve(__dirname, "../../vsts-npm-auth-improved");
+  const packageDirectory = path.join(temporaryDirectory, "package");
+  fs.mkdirSync(packageDirectory);
+  fs.writeFileSync(
+    path.join(packageDirectory, "package.json"),
+    `${JSON.stringify({ name: "vsts-npm-auth-improved", version: "1.0.0-alpha.1" }, null, 2)}\n`,
+  );
   const cliPath = path.resolve(__dirname, "../release-tool-cli.cjs");
   const result = spawnSync(
     process.execPath,
