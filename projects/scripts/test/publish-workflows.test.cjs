@@ -260,7 +260,7 @@ test("exact App slug is required for release candidates", () => {
 
 test("publisher workflows scope privilege and preserve recovery behavior", () => {
   for (const workflow of workflows) {
-    const source = fs.readFileSync(path.join(root, workflow.file), "utf8");
+    const source = fs.readFileSync(path.join(root, workflow.file), "utf8").replaceAll("\r\n", "\n");
     assert.equal(
       (source.match(new RegExp(`RELEASE_APP_SLUG: ${releaseAppSlug}`, "g")) ?? []).length,
       1,

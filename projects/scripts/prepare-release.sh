@@ -16,6 +16,19 @@ require_value() {
   [[ -n "${!name:-}" ]] || fail "required environment value $name is missing"
 }
 
+require_repository_label() {
+  local label="$1"
+  local encoded_label
+  if ! encoded_label="$(jq -rn --arg value "$label" '$value | @uri')"; then
+    fail "could not URL-encode required repository label '$label'"
+  fi
+  [[ -n "$encoded_label" ]] || fail "URL encoding produced an empty value for required repository label '$label'"
+
+  if ! gh api --method GET "repos/$GITHUB_REPOSITORY/labels/$encoded_label" --silent; then
+    fail "required repository label '$label' is missing or its exact GitHub API lookup failed"
+  fi
+}
+
 require_value APP_SLUG
 require_value GH_TOKEN
 require_value GITHUB_EVENT_NAME
@@ -69,9 +82,7 @@ SOURCE_COMMIT="$(git rev-parse HEAD)"
 readonly SOURCE_COMMIT
 
 for label in release-preparation "$PACKAGE_LABEL"; do
-  if ! gh label view "$label" --repo "$GITHUB_REPOSITORY" >/dev/null; then
-    fail "required repository label '$label' is missing; a repository administrator must create it"
-  fi
+  require_repository_label "$label"
 done
 
 # REST pagination avoids silently missing a marked PR in a repository with more
