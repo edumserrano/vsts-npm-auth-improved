@@ -16,8 +16,7 @@
     "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml",
     ".prettierrc": ".prettierrc, .prettierignore"
   },
-  "typescript.preferences.importModuleSpecifier": "relative",
-  "javascript.preferences.importModuleSpecifier": "relative",
+  "js/ts.preferences.importModuleSpecifier": "relative",
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
