@@ -69,3 +69,6 @@ npm test
 ```
 
 The repository currently requires Node.js 24.18.1 or later and npm 12.0.2 or later.
+
+Maintainers should follow the [release runbook](RELEASE_RUNBOOK.md) to prepare, publish, verify,
+or recover a package release.
