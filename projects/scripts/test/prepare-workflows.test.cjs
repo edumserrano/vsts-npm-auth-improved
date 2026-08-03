@@ -2,6 +2,7 @@
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const test = require("node:test");
@@ -21,7 +22,7 @@ const workflows = [
 ];
 
 function read(relativePath) {
-  return fs.readFileSync(path.join(root, relativePath), "utf8");
+  return fs.readFileSync(path.join(root, relativePath), "utf8").replaceAll("\r\n", "\n");
 }
 
 function jobSection(workflow, jobName) {
@@ -54,6 +55,88 @@ function runGuard({ eventName, prepareRelease, ref, packageName = "vsts-npm-auth
       RUNNER_TEMP: process.env.TEMP ?? process.env.TMP ?? root,
     },
   });
+}
+
+function bashPath(file) {
+  const normalized = file.replaceAll("\\", "/");
+  if (process.platform !== "win32") return normalized;
+  return normalized.replace(/^([A-Za-z]):/, (_, drive) => `/${drive.toLowerCase()}`);
+}
+
+function runLabelLookup(packageName, failedLookup = "") {
+  const temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "prepare-label-test-"));
+  const mockEnvironment = path.join(temporaryDirectory, "mock-environment.sh");
+  const lookupLog = path.join(temporaryDirectory, "label-lookups.txt");
+
+  fs.writeFileSync(
+    mockEnvironment,
+    `git() {
+if [[ "$1" == "rev-parse" && "$2" == "--show-toplevel" ]]; then
+  printf '%s\\n' "$MOCK_REPOSITORY_ROOT"
+elif [[ "$1" == "rev-parse" ]]; then
+  printf '%s\\n' '0123456789abcdef0123456789abcdef01234567'
+fi
+return 0
+}
+jq() {
+while (($#)); do
+  if [[ "$1" == "--arg" && "$2" == "value" ]]; then
+    value="$3"
+    break
+  fi
+  shift
+done
+[[ -n "\${value:-}" ]] || return 2
+printf '%s\\n' "\${value//:/%3A}"
+}
+gh() {
+if [[ "$1" == "auth" && "$2" == "setup-git" ]]; then
+  return 0
+fi
+if [[ "$1" == "api" && "$2" == "--method" && "$3" == "GET" && "$5" == "--silent" ]]; then
+  printf '%s\\n' "$4" >> "$MOCK_LABEL_LOOKUP_LOG"
+  if [[ "$4" == "$MOCK_FAILED_LABEL_LOOKUP" ]]; then
+    printf '%s\\n' 'simulated label API failure' >&2
+    return 1
+  fi
+  return 0
+fi
+printf '%s\\n' 'STOP_AFTER_LABEL_LOOKUPS' >&2
+return 42
+}
+`,
+  );
+
+  const windowsGitBash = "C:\\Program Files\\Git\\bin\\bash.exe";
+  const bash =
+    process.platform === "win32" && fs.existsSync(windowsGitBash) ? windowsGitBash : "bash";
+  const result = spawnSync(bash, [path.join(root, "projects/scripts/prepare-release.sh")], {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      APP_SLUG: "test-release-app",
+      BASH_ENV: bashPath(mockEnvironment),
+      GH_TOKEN: "test-token-not-a-secret",
+      GITHUB_EVENT_NAME: "workflow_dispatch",
+      GITHUB_REF: "refs/heads/main",
+      GITHUB_REPOSITORY: "example/repository",
+      GITHUB_RUN_ID: "123",
+      GITHUB_SERVER_URL: "https://github.example",
+      MOCK_LABEL_LOOKUP_LOG: bashPath(lookupLog),
+      MOCK_FAILED_LABEL_LOOKUP: failedLookup,
+      MOCK_REPOSITORY_ROOT: bashPath(root),
+      PACKAGE_NAME: packageName,
+      PREPARE_RELEASE: "true",
+      REQUESTED_VERSION: "auto",
+      RUNNER_TEMP: temporaryDirectory,
+    },
+  });
+  const lookups = fs.existsSync(lookupLog)
+    ? fs.readFileSync(lookupLog, "utf8").trim().split(/\r?\n/)
+    : [];
+  fs.rmSync(temporaryDirectory, { recursive: true, force: true });
+  return { result, lookups };
 }
 
 test("preparation inputs are explicit and default fail-closed", () => {
@@ -128,6 +211,38 @@ test("the lifecycle script independently rejects untrusted and disabled invocati
   });
   assert.equal(wrongPackage.status, 1);
   assert.match(wrongPackage.stderr, /unsupported package/);
+});
+
+test("required labels use supported exact URL-encoded GitHub REST lookups", () => {
+  const script = read("projects/scripts/prepare-release.sh");
+  assert.doesNotMatch(script, /\bgh label view\b/);
+  assert.match(script, /jq -rn --arg value "\$label" '\$value \| @uri'/);
+  assert.match(
+    script,
+    /gh api --method GET "repos\/\$GITHUB_REPOSITORY\/labels\/\$encoded_label" --silent/,
+  );
+
+  for (const packageName of ["vsts-npm-auth-improved", "create-vsts-npm-auth-improved"]) {
+    const { result, lookups } = runLabelLookup(packageName);
+    assert.equal(result.status, 42, result.stderr);
+    assert.match(result.stderr, /STOP_AFTER_LABEL_LOOKUPS/);
+    assert.deepEqual(lookups, [
+      "repos/example/repository/labels/release-preparation",
+      `repos/example/repository/labels/release-package%3A${packageName}`,
+    ]);
+  }
+
+  const failed = runLabelLookup(
+    "vsts-npm-auth-improved",
+    "repos/example/repository/labels/release-preparation",
+  );
+  assert.equal(failed.result.status, 1);
+  assert.match(failed.result.stderr, /simulated label API failure/);
+  assert.match(
+    failed.result.stderr,
+    /required repository label 'release-preparation' is missing or its exact GitHub API lookup failed/,
+  );
+  assert.deepEqual(failed.lookups, ["repos/example/repository/labels/release-preparation"]);
 });
 
 test("stable checks stay read-only and retain their required identities", () => {
