@@ -9,58 +9,263 @@ on:
         type: string
         default: auto
 
-permissions:
-  contents: read
+defaults:
+  run:
+    shell: pwsh
+
+env:
+  NODE_VERSION: 24.18.1
+  NPM_VERSION: 12.0.2
+
+concurrency:
+  group: release-preparation-create-vsts-npm-auth-improved
+  cancel-in-progress: false
+  queue: max # https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency#example-queueing-multiple-pending-runs
 
 jobs:
-  prepare-release:
-    name: Prepare release create-vsts-npm-auth-improved
+  validate-release-request:
+    name: Validate release request create-vsts-npm-auth-improved
     runs-on: ubuntu-latest
-    timeout-minutes: 50
     permissions:
       contents: read
-    environment: release-preparation
-    concurrency:
-      group: release-preparation-create-vsts-npm-auth-improved
-      cancel-in-progress: false
-
+      pull-requests: read
     steps:
       - name: Require a dispatch from main
         env:
           DISPATCH_REF: ${{ github.ref }}
         run: |
-          if [[ "$DISPATCH_REF" != "refs/heads/main" ]]; then
-            echo "Release preparation must be dispatched from main (refs/heads/main); got $DISPATCH_REF." >&2
+          if ($env:DISPATCH_REF -ne "refs/heads/main") {
+            $message = "Release preparation must be dispatched from main (refs/heads/main); got $env:DISPATCH_REF."
+            Write-Output "::error::$message"
             exit 1
-          fi
-      - name: Create release App token
+          }
+      - name: Check for an existing release PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          Set-StrictMode -Version Latest
+          $PSNativeCommandUseErrorActionPreference = $true
+          $packageName = "create-vsts-npm-auth-improved"
+          $packageLabel = "release-package:$packageName"
+          $matchingPullRequests = @(
+            gh pr list `
+              --repo $env:GITHUB_REPOSITORY `
+              --state open `
+              --base main `
+              --label release-preparation `
+              --label $packageLabel `
+              --limit 1 `
+              --json number,url | ConvertFrom-Json
+          )
+          if ($matchingPullRequests.Count -gt 0) {
+            $matchingPullRequests | ForEach-Object {
+              Write-Output "::error::Open preparation PR #$($_.number): $($_.url)"
+            }
+            exit 1
+          }
+          Write-Output "No open release PR was found for package $packageName."
+
+  build-and-test:
+    name: Build and test create-vsts-npm-auth-improved
+    needs: validate-release-request
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: projects/create-vsts-npm-auth-improved
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+      - name: Set up Node.js
+        id: setup-node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: projects/create-vsts-npm-auth-improved/package-lock.json
+      - name: Set up npm
+        run: npm install --global "npm@$env:NPM_VERSION"
+      - name: Show npm configuration
+        run: |
+          Write-Output "::group::npm config list"
+          npm config list
+          Write-Output "::endgroup::"
+          Write-Output "::group::npm config list -l - show all defaults"
+          npm config list -l
+          Write-Output "::endgroup::"
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Test
+        run: npm test
+      - name: Add job summary
+        if: ${{ always() }}
+        working-directory: ${{ github.workspace }}
+        env:
+          CACHE_HIT: ${{ steps.setup-node.outputs.cache-hit }}
+        run: ./.github/scripts/write-build-test-summary.ps1 -ProjectDirectory "projects/create-vsts-npm-auth-improved" -CacheHit $env:CACHE_HIT
+
+  prepare-release:
+    name: Prepare release create-vsts-npm-auth-improved
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      PACKAGE_NAME: create-vsts-npm-auth-improved
+      PACKAGE_DIRECTORY: projects/create-vsts-npm-auth-improved
+    environment: vsts-npm-auth-release-bot
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Set up npm
+        run: npm install --global "npm@$env:NPM_VERSION"
+      - name: Create vsts-npm-auth-release-bot app token
         id: release-app-token
         uses: actions/create-github-app-token@v3
         with:
           client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          private-key: ${{ secrets.VSTS_NPM_AUTH_RELEASE_BOT_PRIVATE_KEY }}
           permission-contents: write
           permission-issues: write
           permission-pull-requests: write
-      - name: Check out main for release preparation
-        uses: actions/checkout@v6
-        with:
-          ref: main
-          fetch-depth: 0
-          fetch-tags: true
-          persist-credentials: false
-          token: ${{ steps.release-app-token.outputs.token }}
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24.18.1
-          package-manager-cache: false
-      - name: Set up npm
-        run: npm install --global npm@12.0.2
-      - name: Prepare, open, and wait for the release PR
+      - name: Configure Git CLI for vsts-npm-auth-release-bot app authentication
+        working-directory: ${{ runner.temp }}
         env:
-          APP_SLUG: ${{ steps.release-app-token.outputs.app-slug }}
           GH_TOKEN: ${{ steps.release-app-token.outputs.token }}
-          PACKAGE_NAME: create-vsts-npm-auth-improved
+        run: |
+          # As recommended in https://github.com/actions/create-github-app-token#configure-git-cli-for-an-apps-bot-user
+          $PSNativeCommandUseErrorActionPreference = $true
+          $botLogin = "${{ steps.release-app-token.outputs.app-slug }}[bot]"
+          $botId = gh api "/users/$botLogin" --jq ".id"
+          git config --global user.name $botLogin
+          git config --global user.email "$botId+$botLogin@users.noreply.github.com"
+          gh auth setup-git
+      - name: Update package version and calculate release tag
+        id: update-package-version
+        working-directory: projects/create-vsts-npm-auth-improved
+        env:
           REQUESTED_VERSION: ${{ inputs.version }}
-        run: bash projects/scripts/prepare-release.sh
+        run: |
+          $oldVersion = [string](Get-Content package.json -Raw | ConvertFrom-Json).version
+          $versionSpec = $env:REQUESTED_VERSION
+          if ($versionSpec -eq "auto") {
+            $versionSpec = if ($oldVersion.Split("+")[0].Contains("-")) { "prerelease" } else { "patch" }
+          }
+
+          $npmOutput = @(npm version $versionSpec --no-git-tag-version --ignore-scripts 2>&1)
+          if ($LASTEXITCODE -ne 0) {
+            $npmMessage = (($npmOutput -join " ") -replace '\s+', ' ').Trim()
+            Write-Output "::error::Could not update package version using '$versionSpec'. $npmMessage"
+            exit 1
+          }
+
+          $newVersion = [string](Get-Content package.json -Raw | ConvertFrom-Json).version
+          $releaseTag = "$env:PACKAGE_NAME@$newVersion"
+          "old_version=$oldVersion" >> $env:GITHUB_OUTPUT
+          "new_version=$newVersion" >> $env:GITHUB_OUTPUT
+          "tag=$releaseTag" >> $env:GITHUB_OUTPUT
+          Write-Output "Updated package version from $oldVersion to $newVersion and calculated release tag $releaseTag."
+      - name: Verify npm version is available
+        env:
+          RELEASE_TAG: ${{ steps.update-package-version.outputs.tag }}
+        run: |
+          Set-StrictMode -Version Latest
+          $PSNativeCommandUseErrorActionPreference = $false
+          $npmOutput = @(npm view $env:RELEASE_TAG version --json 2>&1)
+          $npmStatus = $LASTEXITCODE
+          if ($npmStatus -eq 0) {
+            Write-Output "::error::npm version already exists: $env:RELEASE_TAG"
+            exit 1
+          }
+
+          $npmMessage = (($npmOutput -join " ") -replace '\s+', ' ').Trim()
+          if ($npmMessage -notmatch '\bE404\b|\b404\b|is not in this registry') {
+            Write-Output "::error::Could not verify npm version availability for $env:RELEASE_TAG. $npmMessage"
+            exit 1
+          }
+          Write-Output "npm version is available: $env:RELEASE_TAG"
+      - name: Verify Git tag is available
+        env:
+          RELEASE_TAG: ${{ steps.update-package-version.outputs.tag }}
+        run: |
+          Set-StrictMode -Version Latest
+          $PSNativeCommandUseErrorActionPreference = $false
+          git show-ref --verify --quiet "refs/tags/$env:RELEASE_TAG"
+          $tagStatus = $LASTEXITCODE
+          if ($tagStatus -eq 0) {
+            Write-Output "::error::Git tag already exists: $env:RELEASE_TAG"
+            exit 1
+          }
+
+          if ($tagStatus -ne 1) {
+            Write-Output "::error::Could not verify Git tag availability: $env:RELEASE_TAG"
+            exit 1
+          }
+
+          Write-Output "Git tag is available: $env:RELEASE_TAG"
+      - name: Create and push release preparation commit
+        id: release-preparation
+        env:
+          GH_TOKEN: ${{ steps.release-app-token.outputs.token }}
+          NEW_VERSION: ${{ steps.update-package-version.outputs.new_version }}
+        run: |
+          Set-StrictMode -Version Latest
+          $PSNativeCommandUseErrorActionPreference = $true
+          $preparationBranch = "release-prep/$env:PACKAGE_NAME/$env:NEW_VERSION/$env:GITHUB_RUN_ID"
+          $remoteBranch = git ls-remote --heads origin "refs/heads/$preparationBranch"
+          if (-not [string]::IsNullOrWhiteSpace(($remoteBranch -join ""))) {
+            $message = "Preparation branch already exists: $preparationBranch"
+            Write-Output "::error::$message"
+            exit 1
+          }
+
+          git switch --create $preparationBranch
+          git add -- "$env:PACKAGE_DIRECTORY/package.json" "$env:PACKAGE_DIRECTORY/package-lock.json"
+          git commit -m "chore(release): prepare $env:PACKAGE_NAME@$env:NEW_VERSION"
+          git push --set-upstream origin $preparationBranch
+          "branch=$preparationBranch" >> $env:GITHUB_OUTPUT
+      - name: Create release preparation PR
+        env:
+          GH_TOKEN: ${{ steps.release-app-token.outputs.token }}
+          OLD_VERSION: ${{ steps.update-package-version.outputs.old_version }}
+          NEW_VERSION: ${{ steps.update-package-version.outputs.new_version }}
+          SOURCE_COMMIT: ${{ github.sha }}
+          PREPARATION_BRANCH: ${{ steps.release-preparation.outputs.branch }}
+        run: |
+          Set-StrictMode -Version Latest
+          $PSNativeCommandUseErrorActionPreference = $true
+          $bodyPath = Join-Path $env:RUNNER_TEMP "release-preparation-$env:GITHUB_RUN_ID.md"
+          @"
+          Automated release preparation.
+
+          - Package: ``$env:PACKAGE_NAME``
+          - Old version: ``$env:OLD_VERSION``
+          - New version: ``$env:NEW_VERSION``
+          - Source commit: ``$env:SOURCE_COMMIT``
+          - Workflow run: $env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID
+          - Preparation branch: ``$env:PREPARATION_BRANCH``
+          "@ | Set-Content -Path $bodyPath -Encoding utf8
+
+          $title = "[release-prep] $env:PACKAGE_NAME@$env:NEW_VERSION"
+          $prUrl = gh pr create --repo $env:GITHUB_REPOSITORY --base main --head $env:PREPARATION_BRANCH --title $title --body-file $bodyPath
+          $pullRequest = gh pr view $prUrl --repo $env:GITHUB_REPOSITORY --json number | ConvertFrom-Json
+          if ([string]$pullRequest.number -notmatch "^[0-9]+$") {
+            $message = "Created preparation PR could not be identified unambiguously."
+            Write-Output "::error::$message"
+            exit 1
+          }
+
+          gh pr edit $prUrl --repo $env:GITHUB_REPOSITORY --add-label release-preparation --add-label "release-package:$env:PACKAGE_NAME"
+          gh pr merge $prUrl --repo $env:GITHUB_REPOSITORY --auto --squash
+          Write-Output "Created release preparation PR #$($pullRequest.number): $prUrl"
