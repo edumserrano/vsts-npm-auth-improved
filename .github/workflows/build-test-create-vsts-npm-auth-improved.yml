@@ -7,13 +7,12 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   build-and-test:
     name: Build and test create-vsts-npm-auth-improved
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         shell: pwsh
@@ -22,7 +21,7 @@ jobs:
       NODE_VERSION: 24.18.1
       NPM_VERSION: 12.0.2
     steps:
-      - name: Check out the event commit
+      - name: Check out repo
         uses: actions/checkout@v6
       - name: Set up Node.js
         id: setup-node
