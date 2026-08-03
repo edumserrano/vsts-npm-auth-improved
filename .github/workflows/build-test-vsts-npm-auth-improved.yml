@@ -1,6 +1,9 @@
 name: Build and test vsts-npm-auth-improved
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 

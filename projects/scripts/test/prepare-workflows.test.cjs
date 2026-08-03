@@ -143,7 +143,10 @@ test("build workflows are parameterless and preparation accepts only a version",
   for (const workflow of workflows) {
     const buildSource = read(workflow.buildFile);
     const prepareSource = read(workflow.prepareFile);
-    assert.match(buildSource, /^on:\n  pull_request:\n  workflow_dispatch:$/m);
+    assert.match(
+      buildSource,
+      /^on:\n  pull_request:\n  push:\n    branches:\n      - main\n  workflow_dispatch:$/m,
+    );
     assert.doesNotMatch(buildSource, /^    inputs:|^      prepare_release:|^      version:/m);
     assert.match(prepareSource, /^on:\n  workflow_dispatch:\n    inputs:$/m);
     assert.match(
@@ -294,7 +297,7 @@ test("preparation lifecycle is bounded, package-scoped, and contains no publishi
   assert.doesNotMatch(script, /npm publish|git tag|git push[^\n]*--tags/);
 
   for (const workflow of workflows) {
-    assert.doesNotMatch(read(workflow.buildFile), /npm publish|workflow_run|push:/);
+    assert.doesNotMatch(read(workflow.buildFile), /npm publish|workflow_run/);
     assert.doesNotMatch(read(workflow.prepareFile), /npm publish|workflow_run|push:/);
   }
 });
