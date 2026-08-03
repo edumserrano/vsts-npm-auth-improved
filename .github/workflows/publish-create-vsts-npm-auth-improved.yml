@@ -29,7 +29,6 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
-
       - name: Require the pushed commit on origin/main
         run: |
           if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
@@ -45,7 +44,6 @@ jobs:
             echo "::error::GITHUB_SHA is not reachable from origin/main."
             exit 1
           fi
-
       - name: Read pull requests associated with the pushed commit
         env:
           GH_TOKEN: ${{ github.token }}
@@ -56,7 +54,6 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls?per_page=100" \
             | jq -e '[.[] | .[]]' > "$PR_JSON"
-
       - name: Identify a trusted package release
         id: identify
         env:
@@ -89,7 +86,6 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
           fetch-tags: true
-
       - name: Preserve the authorized immutable release commit
         working-directory: .
         env:
@@ -110,17 +106,14 @@ jobs:
             echo "::error::The immutable release commit is not reachable from origin/main."
             exit 1
           fi
-
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24.18.1
           registry-url: https://registry.npmjs.org/
           package-manager-cache: false
-
       - name: Set up npm
         run: npm install --global npm@12.0.2
-
       - name: Read and validate release metadata
         id: metadata
         env:
@@ -173,7 +166,6 @@ jobs:
             ].join("\n") + "\n",
           );
           NODE
-
       - name: Check for release conflicts
         id: preflight
         env:
@@ -212,7 +204,6 @@ jobs:
           else
             echo "mode=publish" >> "$GITHUB_OUTPUT"
           fi
-
       - name: Verify the generated core dependency
         if: steps.preflight.outputs.mode == 'publish'
         id: core-dependency
@@ -235,19 +226,15 @@ jobs:
             echo "::error::No published vsts-npm-auth-improved version resolves from $core_spec."
             exit 1
           fi
-
       - name: Install dependencies
         if: steps.preflight.outputs.mode == 'publish'
         run: npm ci
-
       - name: Run tests
         if: steps.preflight.outputs.mode == 'publish'
         run: npm test
-
       - name: Build and pack
         if: steps.preflight.outputs.mode == 'publish'
         run: npm run pack
-
       - name: Locate release tarball
         if: steps.preflight.outputs.mode == 'publish'
         id: tarball
@@ -266,7 +253,6 @@ jobs:
           fi
 
           echo "path=$expected" >> "$GITHUB_OUTPUT"
-
       - name: Inspect release tarball
         if: steps.preflight.outputs.mode == 'publish'
         env:
@@ -323,7 +309,6 @@ jobs:
             echo "::error::Packed CLI does not contain the verified core dependency spec $CORE_SPEC."
             exit 1
           fi
-
       - name: Smoke-test release tarball
         if: steps.preflight.outputs.mode == 'publish'
         env:
@@ -336,14 +321,12 @@ jobs:
             exit 1
           }
           npx --yes --package "$TARBALL" create-vsts-npm-auth-improved --help > /dev/null
-
       - name: Publish to npm
         if: steps.preflight.outputs.mode == 'publish'
         env:
           DIST_TAG: ${{ steps.metadata.outputs.dist_tag }}
           TARBALL: ${{ steps.tarball.outputs.path }}
         run: npm publish "$TARBALL" --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
-
       - name: Verify npm release and provenance
         id: verification
         env:
@@ -422,7 +405,6 @@ jobs:
 
           fs.appendFileSync(process.env.GITHUB_OUTPUT, "release_commit=" + releaseCommit + "\n");
           NODE
-
       - name: Validate provenance release commit
         env:
           PACKAGE: ${{ steps.metadata.outputs.package }}
@@ -447,7 +429,6 @@ jobs:
             throw new Error("Provenance commit package metadata does not match the npm release.");
           }
           NODE
-
       - name: Create and push release tag
         if: steps.preflight.outputs.mode == 'publish' || steps.preflight.outputs.mode == 'recover'
         env:
@@ -460,7 +441,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag --annotate "$GIT_TAG" "$RELEASE_COMMIT" --message "Release $PACKAGE@$VERSION"
           git push origin "refs/tags/$GIT_TAG"
-
       - name: Verify existing release tag
         if: steps.preflight.outputs.mode == 'verify-existing'
         env:
@@ -473,7 +453,6 @@ jobs:
             exit 1
           fi
           echo "$GIT_TAG already points to the provenance release commit; nothing to do."
-
       - name: Report existing release
         if: steps.preflight.outputs.mode == 'verify-existing'
         env:
