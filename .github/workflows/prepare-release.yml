@@ -178,6 +178,7 @@ jobs:
           }
 
           Write-Output "npm version is available: $env:RELEASE_TAG"
+          exit 0
       - name: Verify Git tag is available
         id: verify-git-tag
         env:
@@ -197,6 +198,7 @@ jobs:
             exit 1
           }
           Write-Output "Git tag is available: $env:RELEASE_TAG"
+          exit 0
       - name: Create and push release preparation commit
         id: release-preparation
         env:
