@@ -1,6 +1,6 @@
 {
   "name": "vsts-npm-auth-improved",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "author": "Eduardo Serrano",
   "license": "MIT",
   "description": "Authenticate with a private Azure DevOps NPM registry",
