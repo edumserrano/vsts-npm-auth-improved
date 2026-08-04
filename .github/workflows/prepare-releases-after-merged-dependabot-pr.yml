@@ -1,0 +1,194 @@
+name: Prepare releases after merged Dependabot PR
+run-name: Prepare releases after merged Dependabot PR at ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  identify-affected-package:
+    name: Identify affected package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      package-name: ${{ steps.dependabot-release-info.outputs.package_name }}
+      pull-request-number: ${{ steps.dependabot-release-info.outputs.pull_request_number }}
+      pull-request-url: ${{ steps.dependabot-release-info.outputs.pull_request_url }}
+    steps:
+      - name: Get affected package from merged Dependabot PR
+        id: dependabot-release-info
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          "package_name=" >> $env:GITHUB_OUTPUT
+
+          if ($env:GITHUB_REF -ne "refs/heads/main") {
+            Write-Output "::error::Dependabot release identification requires refs/heads/main; got $env:GITHUB_REF."
+            exit 1
+          }
+
+          $pullRequests = @(
+            gh api `
+              -H "Accept: application/vnd.github+json" `
+              -H "X-GitHub-Api-Version: 2022-11-28" `
+              "repos/$env:GITHUB_REPOSITORY/commits/$env:GITHUB_SHA/pulls?per_page=100" |
+              ConvertFrom-Json
+          )
+          $dependabotPullRequests = @(
+            $pullRequests | Where-Object {
+              [string]$_.base.ref -eq "main" -and
+                -not [string]::IsNullOrWhiteSpace([string]$_.merged_at) -and
+                [string]$_.merge_commit_sha -eq $env:GITHUB_SHA -and
+                [string]$_.user.login -eq "dependabot[bot]"
+            }
+          )
+
+          if ($dependabotPullRequests.Count -eq 0) {
+            Write-Output "The pushed commit is not the merge commit of a Dependabot PR."
+            exit 0
+          }
+
+          if ($dependabotPullRequests.Count -ne 1) {
+            Write-Output "::error::The pushed commit is associated with more than one merged Dependabot PR."
+            exit 1
+          }
+
+          $pullRequest = $dependabotPullRequests[0]
+          $pullRequestNumber = [string]$pullRequest.number
+          if ($pullRequestNumber -notmatch '^[1-9]\d*$') {
+            Write-Output "::error::The associated Dependabot PR number is invalid."
+            exit 1
+          }
+
+          $changedPaths = @(
+            gh api `
+              --paginate `
+              -H "Accept: application/vnd.github+json" `
+              -H "X-GitHub-Api-Version: 2022-11-28" `
+              "repos/$env:GITHUB_REPOSITORY/pulls/$pullRequestNumber/files?per_page=100" `
+              --jq '.[].filename'
+          )
+          $packageMappings = @{
+            "dependabot-package:vsts-npm-auth-improved" = [ordered]@{
+              Name = "vsts-npm-auth-improved"
+              Directory = "projects/vsts-npm-auth-improved/"
+            }
+            "dependabot-package:create-vsts-npm-auth-improved" = [ordered]@{
+              Name = "create-vsts-npm-auth-improved"
+              Directory = "projects/create-vsts-npm-auth-improved/"
+            }
+          }
+
+          $labels = @($pullRequest.labels | ForEach-Object { [string]$_.name })
+          $packageLabels = @($labels | Where-Object { $_.StartsWith("dependabot-package:", [StringComparison]::Ordinal) })
+          $changedPackages = @(
+            $packageMappings.Values | Where-Object {
+              $packageDirectory = [string]$_.Directory
+              @($changedPaths | Where-Object { $_.StartsWith($packageDirectory, [StringComparison]::Ordinal) }).Count -gt 0
+            }
+          )
+
+          if ($packageLabels.Count -eq 0) {
+            if ($changedPackages.Count -gt 0) {
+              Write-Output "::error::The merged Dependabot PR changes a configured npm package but has no dependabot-package label."
+              exit 1
+            }
+            Write-Output "The merged Dependabot PR does not update a configured npm package."
+            exit 0
+          }
+          if ($packageLabels.Count -ne 1) {
+            Write-Output "::error::The merged Dependabot PR must have exactly one dependabot-package label; found $($packageLabels -join ', ')."
+            exit 1
+          }
+
+          $packageLabel = $packageLabels[0]
+          if (-not $packageMappings.ContainsKey($packageLabel)) {
+            Write-Output "::error::Unsupported Dependabot package label: $packageLabel"
+            exit 1
+          }
+
+          $package = $packageMappings[$packageLabel]
+          $packageName = [string]$package.Name
+          if ($changedPackages.Count -ne 1 -or [string]$changedPackages[0].Name -ne $packageName) {
+            Write-Output "::error::Changed npm package paths do not agree with Dependabot package label $packageLabel."
+            exit 1
+          }
+
+          $pullRequestUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/pull/$pullRequestNumber"
+          "package_name=$packageName" >> $env:GITHUB_OUTPUT
+          "pull_request_number=$pullRequestNumber" >> $env:GITHUB_OUTPUT
+          "pull_request_url=$pullRequestUrl" >> $env:GITHUB_OUTPUT
+
+          Write-Output "Dependabot PR: $pullRequestUrl"
+          Write-Output "Affected package: $packageName"
+
+  dispatch-release-preparation:
+    name: Dispatch prepare release workflow
+    needs: identify-affected-package
+    if: needs.identify-affected-package.outputs.package-name != ''
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Dispatch prepare release workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_NAME: ${{ needs.identify-affected-package.outputs.package-name }}
+          DEPENDABOT_PR_NUMBER: ${{ needs.identify-affected-package.outputs.pull-request-number }}
+          DEPENDABOT_PR_URL: ${{ needs.identify-affected-package.outputs.pull-request-url }}
+        run: |
+          Set-StrictMode -Version Latest
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          gh workflow run prepare-release.yml `
+            --repo $env:GITHUB_REPOSITORY `
+            --ref main `
+            -f package=$env:PACKAGE_NAME `
+            -f version=auto
+
+          Write-Output "Dispatched release preparation for $env:PACKAGE_NAME after merging Dependabot PR #$env:DEPENDABOT_PR_NUMBER ($env:DEPENDABOT_PR_URL)."
+
+  release-preparation-summary:
+    name: Add release preparation summary
+    needs:
+      - identify-affected-package
+      - dispatch-release-preparation
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out summary script
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Add release preparation summary
+        env:
+          SOURCE_COMMIT: ${{ github.sha }}
+          PACKAGE_NAME: ${{ needs.identify-affected-package.outputs.package-name }}
+          DEPENDABOT_PR_NUMBER: ${{ needs.identify-affected-package.outputs.pull-request-number }}
+          DEPENDABOT_PR_URL: ${{ needs.identify-affected-package.outputs.pull-request-url }}
+          IDENTIFICATION_JOB_OUTCOME: ${{ needs.identify-affected-package.result }}
+          DISPATCH_JOB_OUTCOME: ${{ needs.dispatch-release-preparation.result }}
+        run: |
+          $summaryParameters = @{
+            SourceCommit = $env:SOURCE_COMMIT
+            PackageName = $env:PACKAGE_NAME
+            PullRequestNumber = $env:DEPENDABOT_PR_NUMBER
+            PullRequestUrl = $env:DEPENDABOT_PR_URL
+            IdentificationJobOutcome = $env:IDENTIFICATION_JOB_OUTCOME
+            DispatchJobOutcome = $env:DISPATCH_JOB_OUTCOME
+          }
+          ./.github/scripts/write-prepare-releases-after-merged-dependabot-pr-summary.ps1 @summaryParameters

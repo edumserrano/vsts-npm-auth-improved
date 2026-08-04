@@ -1,0 +1,36 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /projects/vsts-npm-auth-improved
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/London
+    labels:
+      - dependencies
+      - npm
+      - dependabot-package:vsts-npm-auth-improved
+    groups:
+      vsts-npm-auth-improved-updates:
+        applies-to: version-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: /projects/create-vsts-npm-auth-improved
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/London
+    labels:
+      - dependencies
+      - npm
+      - dependabot-package:create-vsts-npm-auth-improved
+    groups:
+      create-vsts-npm-auth-improved-updates:
+        applies-to: version-updates
+        patterns:
+          - "*"
