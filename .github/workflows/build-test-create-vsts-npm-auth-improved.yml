@@ -7,8 +7,6 @@ on:
     paths:
       - projects/create-vsts-npm-auth-improved/**
   pull_request:
-    paths:
-      - projects/create-vsts-npm-auth-improved/**
   workflow_dispatch:
 
 jobs:

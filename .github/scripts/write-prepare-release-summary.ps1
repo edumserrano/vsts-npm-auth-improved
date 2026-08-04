@@ -80,7 +80,7 @@ $summary.Add("")
 if ($PullRequestOutcome -eq "success") {
   $pullRequestLabel = if ([string]::IsNullOrWhiteSpace($PullRequestNumber)) { "Open PR" } else { "#$PullRequestNumber" }
   $summary.Add("- **PR:** [$pullRequestLabel]($PullRequestUrl) — ``$PullRequestTitle``")
-  $summary.Add("- **Merge:** ✅ Automatic squash merge enabled")
+  $summary.Add("- **Merge:** Automatic squash merge enabled")
 } elseif ($PullRequestOutcome -eq "failure") {
   if (-not [string]::IsNullOrWhiteSpace($PullRequestUrl)) {
     $pullRequestLabel = if ([string]::IsNullOrWhiteSpace($PullRequestNumber)) { "Open PR" } else { "#$PullRequestNumber" }
