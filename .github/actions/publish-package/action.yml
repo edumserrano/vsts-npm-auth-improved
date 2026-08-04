@@ -202,6 +202,7 @@ runs:
         }
 
         Write-Output "Git tag $env:GIT_TAG is available."
+        exit 0
     - name: Publish to npm
       id: publish-npm
       shell: pwsh
