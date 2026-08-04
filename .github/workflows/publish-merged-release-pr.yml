@@ -9,7 +9,10 @@ defaults:
   run:
     shell: pwsh
 
-permissions: {}
+concurrency:
+  group: release-publishing
+  cancel-in-progress: false
+  queue: max # https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency#example-queueing-multiple-pending-runs
 
 jobs:
   identify-release:
@@ -198,6 +201,9 @@ jobs:
       - identify-release
     if: needs.identify-release.outputs.is-release == 'true'
     outputs:
+      version: ${{ steps.publish-package.outputs.version }}
+      git-tag: ${{ steps.publish-package.outputs.git-tag }}
+      release-artifact-name: ${{ steps.publish-package.outputs.release-artifact-name }}
       dist-tag: ${{ steps.publish-package.outputs.dist-tag }}
       installed-node-version: ${{ steps.publish-package.outputs.installed-node-version }}
       installed-npm-version: ${{ steps.publish-package.outputs.installed-npm-version }}
@@ -209,10 +215,6 @@ jobs:
       contents: write
       id-token: write
     environment: npm-publish
-    concurrency:
-      group: npm-publish-${{ needs.identify-release.outputs.package-name }}
-      cancel-in-progress: false
-      queue: max
     steps:
       - name: Check out release commit
         uses: actions/checkout@v6
@@ -229,11 +231,150 @@ jobs:
           node-version: 24.18.1
           npm-version: 12.0.2
 
+  github-release:
+    name: Create GitHub Release ${{ needs.publish.outputs.git-tag }}
+    needs:
+      - identify-release
+      - publish
+    if: needs.publish.result == 'success'
+    outputs:
+      url: ${{ steps.create-github-release.outputs.release_url }}
+      previous-tag: ${{ steps.create-github-release.outputs.previous_tag }}
+      is-prerelease: ${{ steps.create-github-release.outputs.is_prerelease }}
+      sha256: ${{ steps.create-github-release.outputs.sha256 }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Check out release commit and package tags
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.identify-release.outputs.source-sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Download GitHub Release assets
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ needs.publish.outputs.release-artifact-name }}
+          path: ${{ runner.temp }}/github-release-assets
+      - name: Create GitHub Release
+        id: create-github-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_NAME: ${{ needs.identify-release.outputs.package-name }}
+          VERSION: ${{ needs.publish.outputs.version }}
+          RELEASE_TAG: ${{ needs.publish.outputs.git-tag }}
+          SOURCE_SHA: ${{ needs.identify-release.outputs.source-sha }}
+          PR_NUMBER: ${{ needs.identify-release.outputs.pull-request-number }}
+          PR_URL: ${{ needs.identify-release.outputs.pull-request-url }}
+          DIST_TAG: ${{ needs.publish.outputs.dist-tag }}
+          ASSETS_DIRECTORY: ${{ runner.temp }}/github-release-assets
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          $expectedReleaseTag = "$env:PACKAGE_NAME@$env:VERSION"
+          if ($env:RELEASE_TAG -cne $expectedReleaseTag) {
+            throw "Release tag '$env:RELEASE_TAG' does not match package version '$expectedReleaseTag'."
+          }
+
+          if ($env:SOURCE_SHA -notmatch '^[0-9a-f]{40}$') {
+            throw "Source commit '$env:SOURCE_SHA' is not a full Git commit SHA."
+          }
+
+          if (-not (Test-Path -LiteralPath $env:ASSETS_DIRECTORY -PathType Container)) {
+            throw "GitHub Release assets directory does not exist: $env:ASSETS_DIRECTORY"
+          }
+
+          $taggedCommit = ((git rev-list -n 1 $env:RELEASE_TAG) -join "").Trim()
+          if ($taggedCommit -ne $env:SOURCE_SHA) {
+            throw "Release tag '$env:RELEASE_TAG' resolves to '$taggedCommit' instead of '$env:SOURCE_SHA'."
+          }
+
+          $tarballName = "$env:PACKAGE_NAME-$env:VERSION.tgz"
+          $tarballs = @(
+            Get-ChildItem -LiteralPath $env:ASSETS_DIRECTORY -Recurse -File |
+              Where-Object { $_.Name -ceq $tarballName }
+          )
+          if ($tarballs.Count -ne 1) {
+            throw "Expected exactly one '$tarballName' asset; found $($tarballs.Count)."
+          }
+
+          $tarball = $tarballs[0]
+          $checksumPath = "$($tarball.FullName).sha256"
+          if (-not (Test-Path -LiteralPath $checksumPath -PathType Leaf)) {
+            throw "Expected checksum asset was not found: $checksumPath"
+          }
+
+          $checksumContent = (Get-Content -LiteralPath $checksumPath -Raw).Trim()
+          $expectedChecksumPattern = "^(?<hash>[0-9a-f]{64})  $([Regex]::Escape($tarball.Name))$"
+          $checksumMatch = [Regex]::Match($checksumContent, $expectedChecksumPattern)
+          if (-not $checksumMatch.Success) {
+            throw "Checksum asset has an unexpected format: $checksumPath"
+          }
+
+          $actualChecksum = (Get-FileHash -LiteralPath $tarball.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actualChecksum -cne $checksumMatch.Groups["hash"].Value) {
+            throw "SHA-256 verification failed for $($tarball.FullName)."
+          }
+
+          $previousTags = @(
+            git tag --list "$env:PACKAGE_NAME@*" --merged "$env:SOURCE_SHA^" --sort=-version:refname
+          )
+          $previousTag = if ($previousTags.Count -gt 0) { [string]$previousTags[0] } else { "" }
+          $isPrerelease = $env:VERSION.Split("+", 2)[0].Contains("-")
+
+          $npmPackageUrl = "https://www.npmjs.com/package/$([Uri]::EscapeDataString($env:PACKAGE_NAME))/v/$([Uri]::EscapeDataString($env:VERSION))"
+          $sourceCommitUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/commit/$env:SOURCE_SHA"
+          $workflowRunUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+          $notesPath = Join-Path $env:RUNNER_TEMP "github-release-$env:GITHUB_RUN_ID.md"
+          @"
+          ## Package
+
+          - npm: [``$env:PACKAGE_NAME@$env:VERSION``]($npmPackageUrl)
+          - Install: ``npm install $env:PACKAGE_NAME@$env:VERSION``
+          - npm dist-tag: ``$env:DIST_TAG``
+          - Preparation PR: [#$env:PR_NUMBER]($env:PR_URL)
+          - Source commit: [``$($env:SOURCE_SHA.Substring(0, 7))``]($sourceCommitUrl)
+          - Workflow run: $workflowRunUrl
+          "@ | Set-Content -LiteralPath $notesPath -Encoding utf8
+
+          $releaseArguments = @(
+            "release", "create", $env:RELEASE_TAG,
+            $tarball.FullName, $checksumPath,
+            "--repo", $env:GITHUB_REPOSITORY,
+            "--verify-tag",
+            "--title", $env:RELEASE_TAG,
+            "--notes-file", $notesPath,
+            "--latest=false"
+          )
+          if (-not [string]::IsNullOrWhiteSpace($previousTag)) {
+            $releaseArguments += @("--generate-notes", "--notes-start-tag", $previousTag)
+          }
+          if ($isPrerelease) {
+            $releaseArguments += "--prerelease"
+          }
+
+          gh @releaseArguments
+          $releaseUrl = ((gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --json url --jq .url) -join "").Trim()
+          if ([string]::IsNullOrWhiteSpace($releaseUrl)) {
+            throw "GitHub Release '$env:RELEASE_TAG' was created but its URL could not be determined."
+          }
+
+          "release_url=$releaseUrl" >> $env:GITHUB_OUTPUT
+          "previous_tag=$previousTag" >> $env:GITHUB_OUTPUT
+          "is_prerelease=$($isPrerelease.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+          "sha256=$actualChecksum" >> $env:GITHUB_OUTPUT
+          Write-Output "Created GitHub Release: $releaseUrl"
+
   release-summary:
     name: Add release summary
     needs:
       - identify-release
       - publish
+      - github-release
     if: ${{ always() && needs.identify-release.result == 'success' && needs.identify-release.outputs.is-release == 'true' }}
     runs-on: ubuntu-latest
     permissions:
@@ -257,6 +398,8 @@ jobs:
           NPM_PUBLISH_OUTCOME: ${{ needs.publish.outputs.npm-publish-outcome }}
           GIT_TAG_OUTCOME: ${{ needs.publish.outputs.git-tag-outcome }}
           PUBLISH_JOB_OUTCOME: ${{ needs.publish.result }}
+          GITHUB_RELEASE_JOB_OUTCOME: ${{ needs.github-release.result }}
+          GITHUB_RELEASE_URL: ${{ needs.github-release.outputs.url }}
           SOURCE_SHA: ${{ needs.identify-release.outputs.source-sha }}
         run: |
           $summaryParameters = @{
@@ -273,5 +416,7 @@ jobs:
             NpmPublishOutcome = $env:NPM_PUBLISH_OUTCOME
             GitTagOutcome = $env:GIT_TAG_OUTCOME
             PublishJobOutcome = $env:PUBLISH_JOB_OUTCOME
+            GitHubReleaseJobOutcome = $env:GITHUB_RELEASE_JOB_OUTCOME
+            GitHubReleaseUrl = $env:GITHUB_RELEASE_URL
           }
           ./.github/scripts/write-publish-merged-release-pr-summary.ps1 @summaryParameters

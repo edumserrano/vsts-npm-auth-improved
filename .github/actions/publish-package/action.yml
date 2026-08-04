@@ -16,6 +16,15 @@ inputs:
     required: true
 
 outputs:
+  version:
+    description: Published npm package version
+    value: ${{ steps.release.outputs.version }}
+  git-tag:
+    description: Package-specific Git release tag
+    value: ${{ steps.release.outputs.git_tag }}
+  release-artifact-name:
+    description: Workflow artifact containing the GitHub Release assets
+    value: ${{ steps.release.outputs.release_artifact_name }}
   dist-tag:
     description: npm distribution tag used for the release
     value: ${{ steps.publish-results.outputs.dist_tag }}
@@ -77,9 +86,11 @@ runs:
         "version=$version" >> $env:GITHUB_OUTPUT
         "dist_tag=$distTag" >> $env:GITHUB_OUTPUT
         "git_tag=$env:PACKAGE_NAME@$version" >> $env:GITHUB_OUTPUT
+        "release_artifact_name=github-release-$env:PACKAGE_NAME-$version" >> $env:GITHUB_OUTPUT
         Write-Output "version=$version"
         Write-Output "dist_tag=$distTag"
         Write-Output "git_tag=$env:PACKAGE_NAME@$version"
+        Write-Output "release_artifact_name=github-release-$env:PACKAGE_NAME-$version"
     - name: Install dependencies
       shell: pwsh
       working-directory: projects/${{ inputs.package-name }}
@@ -105,7 +116,12 @@ runs:
           exit 1
         }
 
+        $checksum = "$tarball.sha256"
+        $tarballHash = (Get-FileHash -Path $tarball -Algorithm SHA256).Hash.ToLowerInvariant()
+        "$tarballHash  $(Split-Path -Path $tarball -Leaf)" | Set-Content -Path $checksum -Encoding ascii
+
         "tarball=$tarball" >> $env:GITHUB_OUTPUT
+        "checksum=$checksum" >> $env:GITHUB_OUTPUT
     - name: Inspect release tarball
       shell: pwsh
       working-directory: projects/${{ inputs.package-name }}
@@ -179,6 +195,16 @@ runs:
           Write-Output "::error::Release tarball help smoke test failed."
           exit 1
         }
+    - name: Upload GitHub Release assets
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ steps.release.outputs.release_artifact_name }}
+        path: |
+          ${{ steps.package.outputs.tarball }}
+          ${{ steps.package.outputs.checksum }}
+        if-no-files-found: error
+        # The downstream GitHub Release job consumes this artifact during the same workflow run.
+        retention-days: 1
     - name: Confirm release tag does not exist
       shell: pwsh
       working-directory: projects/${{ inputs.package-name }}

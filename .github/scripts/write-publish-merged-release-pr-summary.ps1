@@ -16,7 +16,10 @@ param(
   [string] $NpmPublishOutcome,
   [string] $GitTagOutcome,
   [Parameter(Mandatory)]
-  [string] $PublishJobOutcome
+  [string] $PublishJobOutcome,
+  [Parameter(Mandatory)]
+  [string] $GitHubReleaseJobOutcome,
+  [string] $GitHubReleaseUrl
 )
 
 Set-StrictMode -Version Latest
@@ -102,5 +105,20 @@ $tagResult = switch ($GitTagOutcome) {
   default { "⏭️ Not created" }
 }
 $summary.Add("- **Git tag:** $tagResult")
+
+$githubReleaseResult = switch ($GitHubReleaseJobOutcome) {
+  "success" {
+    if (-not [string]::IsNullOrWhiteSpace($GitHubReleaseUrl)) {
+      "✅ Published [GitHub Release]($GitHubReleaseUrl)"
+    }
+    else {
+      "✅ Published"
+    }
+  }
+  "failure" { "❌ Release creation failed" }
+  "cancelled" { "🚫 Release creation cancelled" }
+  default { "⏭️ Not created" }
+}
+$summary.Add("- **GitHub Release:** $githubReleaseResult")
 
 $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
