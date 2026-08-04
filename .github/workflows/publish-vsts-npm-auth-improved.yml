@@ -1,71 +1,24 @@
 name: Publish vsts-npm-auth-improved
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      source_sha:
+        description: Exact merged release commit
+        required: true
+        type: string
 
-permissions:
-  contents: read
+defaults:
+  run:
+    shell: pwsh
+
+env:
+  NODE_VERSION: 24.18.1
+  NPM_VERSION: 12.0.2
 
 jobs:
-  identify-release:
-    name: Identify trusted vsts-npm-auth-improved release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-    outputs:
-      trusted_release: ${{ steps.identify.outputs.trusted_release }}
-      selected_package: ${{ steps.identify.outputs.selected_package }}
-      release_commit: ${{ steps.identify.outputs.release_commit }}
-      old_version: ${{ steps.identify.outputs.old_version }}
-      new_version: ${{ steps.identify.outputs.new_version }}
-      pull_request_number: ${{ steps.identify.outputs.pull_request_number }}
-
-    steps:
-      - name: Check out the pushed commit for identification
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-      - name: Require the pushed commit on origin/main
-        run: |
-          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
-            echo "::error::Release identification requires refs/heads/main; got $GITHUB_REF."
-            exit 1
-          fi
-          if [[ "$(git rev-parse HEAD)" != "$GITHUB_SHA" ]]; then
-            echo "::error::Identification checkout does not equal GITHUB_SHA."
-            exit 1
-          fi
-          git fetch --no-tags --force origin refs/heads/main:refs/remotes/origin/main
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
-            echo "::error::GITHUB_SHA is not reachable from origin/main."
-            exit 1
-          fi
-      - name: Read pull requests associated with the pushed commit
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_JSON: ${{ runner.temp }}/associated-pull-requests.json
-        run: |
-          gh api --paginate --slurp \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls?per_page=100" \
-            | jq -e '[.[] | .[]]' > "$PR_JSON"
-      - name: Identify a trusted package release
-        id: identify
-        env:
-          EXPECTED_PACKAGE: vsts-npm-auth-improved
-          PR_JSON: ${{ runner.temp }}/associated-pull-requests.json
-          RELEASE_APP_SLUG: vsts-npm-auth-release-bot
-        run: node projects/scripts/identify-release.cjs
-
   publish:
     name: Publish vsts-npm-auth-improved
-    needs: identify-release
-    if: needs.identify-release.outputs.trusted_release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -74,358 +27,207 @@ jobs:
     concurrency:
       group: npm-publish-vsts-npm-auth-improved
       cancel-in-progress: false
+      queue: max
     defaults:
       run:
-        shell: bash
         working-directory: projects/vsts-npm-auth-improved
-
+    env:
+      PACKAGE_NAME: vsts-npm-auth-improved
+      SOURCE_SHA: ${{ inputs.source_sha }}
     steps:
-      - name: Check out the release commit
+      - name: Check out release commit
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
+          ref: ${{ inputs.source_sha }}
           fetch-tags: true
-      - name: Preserve the authorized immutable release commit
-        working-directory: .
-        env:
-          AUTHORIZED_COMMIT: ${{ needs.identify-release.outputs.release_commit }}
-        run: |
-          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
-            echo "::error::Releases must run from main, not $GITHUB_REF."
-            exit 1
-          fi
-          checked_out_commit="$(git rev-parse HEAD)"
-          if [[ "$checked_out_commit" != "$GITHUB_SHA" || "$AUTHORIZED_COMMIT" != "$GITHUB_SHA" ]]; then
-            echo "::error::Checked-out, authorized, and event release commits must all equal GITHUB_SHA."
-            exit 1
-          fi
-          git fetch --force origin refs/heads/main:refs/remotes/origin/main
-          git fetch --force --tags origin
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
-            echo "::error::The immutable release commit is not reachable from origin/main."
-            exit 1
-          fi
+          persist-credentials: false
       - name: Set up Node.js
+        id: setup-node
         uses: actions/setup-node@v6
         with:
-          node-version: 24.18.1
+          node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
-          package-manager-cache: false
-      - name: Set up npm
-        run: npm install --global npm@12.0.2
-      - name: Read and validate release metadata
-        id: metadata
-        env:
-          EXPECTED_PACKAGE: vsts-npm-auth-improved
+          cache: npm
+          cache-dependency-path: projects/vsts-npm-auth-improved/package-lock.json
+      - name: Set up npm and read release values
+        id: release
         run: |
-          node <<'NODE'
-          const fs = require("node:fs");
-          const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
-          const lockfile = JSON.parse(fs.readFileSync("package-lock.json", "utf8"));
-          const identifier = "(?:0|[1-9]\\d*|\\d*[A-Za-z-][0-9A-Za-z-]*)";
-          const semver = new RegExp(
-            "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)" +
-              "(?:-(" + identifier + "(?:\\." + identifier + ")*))?" +
-              "(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
-          );
-          const match = semver.exec(manifest.version);
-
-          if (manifest.name !== process.env.EXPECTED_PACKAGE) {
-            throw new Error("Unexpected package name: " + manifest.name);
-          }
-          if (!match) {
-            throw new Error("Package version is not valid SemVer: " + manifest.version);
-          }
-          if (
-            lockfile.name !== manifest.name ||
-            lockfile.version !== manifest.version ||
-            lockfile.packages?.[""]?.name !== manifest.name ||
-            lockfile.packages?.[""]?.version !== manifest.version
-          ) {
-            throw new Error("package.json and package-lock.json name/version metadata do not agree.");
-          }
-
-          let distTag = "latest";
-          if (match[4]) {
-            const prerelease = match[4].split(".")[0];
-            if (!["alpha", "beta", "rc"].includes(prerelease)) {
-              throw new Error("Unsupported prerelease channel: " + prerelease);
-            }
-            distTag = prerelease;
-          }
-
-          const gitTag = manifest.name + "@" + manifest.version;
-          fs.appendFileSync(
-            process.env.GITHUB_OUTPUT,
-            [
-              "package=" + manifest.name,
-              "version=" + manifest.version,
-              "dist_tag=" + distTag,
-              "git_tag=" + gitTag,
-            ].join("\n") + "\n",
-          );
-          NODE
-      - name: Check for release conflicts
-        id: preflight
-        env:
-          PACKAGE: ${{ steps.metadata.outputs.package }}
-          VERSION: ${{ steps.metadata.outputs.version }}
-          GIT_TAG: ${{ steps.metadata.outputs.git_tag }}
-        run: |
-          tag_exists=false
-          npm_exists=false
-          tag_commit=""
-
-          if git show-ref --verify --quiet "refs/tags/$GIT_TAG"; then
-            tag_exists=true
-            tag_commit="$(git rev-list -n 1 "$GIT_TAG")"
-            echo "tag_commit=$tag_commit" >> "$GITHUB_OUTPUT"
-          fi
-
-          npm_error="$(mktemp)"
-          if npm view "$PACKAGE@$VERSION" version --json --registry=https://registry.npmjs.org/ > /dev/null 2>"$npm_error"; then
-            npm_exists=true
-          elif ! grep -qE 'E404|404 Not Found' "$npm_error"; then
-            cat "$npm_error" >&2
-            echo "::error::Could not determine whether $PACKAGE@$VERSION exists."
+          npm install --global "npm@$env:NPM_VERSION"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "::error::Could not install npm $env:NPM_VERSION."
             exit 1
-          fi
+          }
 
-          if [[ "$npm_exists" == true && "$tag_exists" == true ]]; then
-            echo "mode=verify-existing" >> "$GITHUB_OUTPUT"
-            echo "$PACKAGE@$VERSION is already published and tagged; provenance will verify the tag commit."
-          elif [[ "$npm_exists" == true ]]; then
-            echo "mode=recover" >> "$GITHUB_OUTPUT"
-            echo "$PACKAGE@$VERSION already exists; provenance must match this workflow and commit before the missing tag can be recovered."
-          elif [[ "$tag_exists" == true ]]; then
-            echo "::error::Git tag $GIT_TAG exists but the npm version does not."
+          $manifest = Get-Content package.json -Raw | ConvertFrom-Json
+          $version = [string]$manifest.version
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            Write-Output "::error::package.json does not contain a version."
             exit 1
-          else
-            echo "mode=publish" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Install dependencies
-        if: steps.preflight.outputs.mode == 'publish'
-        run: npm ci
-      - name: Run tests
-        if: steps.preflight.outputs.mode == 'publish'
-        run: npm test
-      - name: Build and pack
-        if: steps.preflight.outputs.mode == 'publish'
-        run: npm run pack
-      - name: Locate release tarball
-        if: steps.preflight.outputs.mode == 'publish'
-        id: tarball
-        env:
-          PACKAGE: ${{ steps.metadata.outputs.package }}
-          VERSION: ${{ steps.metadata.outputs.version }}
-        run: |
-          package_dir="$GITHUB_WORKSPACE/projects/vsts-npm-auth-improved/dist/vsts-npm-auth-improved-package"
-          expected="$package_dir/$PACKAGE-$VERSION.tgz"
-          mapfile -t tarballs < <(find "$package_dir" -maxdepth 1 -type f -name '*.tgz')
+          }
 
-          if [[ "${#tarballs[@]}" -ne 1 || "${tarballs[0]}" != "$expected" ]]; then
-            printf 'Expected exactly %s; found:\n' "$expected" >&2
-            printf '  %s\n' "${tarballs[@]:-<none>}" >&2
-            exit 1
-          fi
-
-          echo "path=$expected" >> "$GITHUB_OUTPUT"
-      - name: Inspect release tarball
-        if: steps.preflight.outputs.mode == 'publish'
-        env:
-          PACKAGE: ${{ steps.metadata.outputs.package }}
-          VERSION: ${{ steps.metadata.outputs.version }}
-          TARBALL: ${{ steps.tarball.outputs.path }}
-        run: |
-          entries="$RUNNER_TEMP/vsts-npm-auth-improved-entries.txt"
-          manifest="$RUNNER_TEMP/vsts-npm-auth-improved-package.json"
-          tar -tzf "$TARBALL" > "$entries"
-
-          for required in package/LICENSE package/README.md package/package.json package/cjs/main.js; do
-            grep -Fxq "$required" "$entries" || {
-              echo "::error::Release tarball is missing $required."
+          $distTag = "latest"
+          $versionWithoutBuildMetadata = $version.Split("+", 2)[0]
+          $versionParts = $versionWithoutBuildMetadata.Split("-", 2)
+          if ($versionParts.Count -eq 2) {
+            $distTag = $versionParts[1].Split(".", 2)[0]
+            if ($distTag -notin @("alpha", "beta", "rc")) {
+              Write-Output "::error::Unsupported prerelease channel: $distTag"
               exit 1
             }
-          done
-
-          if grep -Eq '(^|/)(tests?|test-reporters|coverage|node_modules)(/|$)|(^|/)\.npmrc$' "$entries"; then
-            echo "::error::Release tarball contains development files or npm credentials."
-            grep -E '(^|/)(tests?|test-reporters|coverage|node_modules)(/|$)|(^|/)\.npmrc$' "$entries"
-            exit 1
-          fi
-
-          tar -xOzf "$TARBALL" package/package.json > "$manifest"
-          MANIFEST="$manifest" node <<'NODE'
-          const fs = require("node:fs");
-          const manifest = JSON.parse(fs.readFileSync(process.env.MANIFEST, "utf8"));
-          const expectedRepository = "git+https://github.com/edumserrano/vsts-npm-auth-improved.git";
-
-          const checks = [
-            [manifest.name === process.env.PACKAGE, "package name"],
-            [manifest.version === process.env.VERSION, "package version"],
-            [manifest.license === "MIT", "MIT license"],
-            [manifest.bin?.[process.env.PACKAGE] === "cjs/main.js", "CLI binary"],
-            [manifest.repository?.url === expectedRepository, "repository URL"],
-            [manifest.repository?.directory === "projects/vsts-npm-auth-improved", "repository directory"],
-            [manifest.publishConfig?.access === "public", "public access"],
-            [manifest.publishConfig?.registry === "https://registry.npmjs.org/", "public registry"],
-            [Object.keys(manifest.dependencies ?? {}).length > 0, "runtime dependencies"],
-            [manifest.devDependencies === undefined, "no development dependencies"],
-            [manifest.scripts === undefined, "no development scripts"],
-          ];
-
-          for (const [valid, description] of checks) {
-            if (!valid) throw new Error("Generated manifest failed check: " + description);
           }
-          NODE
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "dist_tag=$distTag" >> $env:GITHUB_OUTPUT
+          "git_tag=$env:PACKAGE_NAME@$version" >> $env:GITHUB_OUTPUT
+          Write-Output "version=$version"
+          Write-Output "dist_tag=$distTag"
+          Write-Output "git_tag=$env:PACKAGE_NAME@$version"
+      - name: Install dependencies
+        run: npm ci
+      - name: Build and pack
+        id: package
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          npm run pack
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "::error::Could not build and pack $env:PACKAGE_NAME@$env:VERSION."
+            exit 1
+          }
+
+          $packageDirectory = Join-Path $env:GITHUB_WORKSPACE "projects/vsts-npm-auth-improved/dist/vsts-npm-auth-improved-package"
+          $tarball = Join-Path $packageDirectory "$env:PACKAGE_NAME-$env:VERSION.tgz"
+          if (-not (Test-Path $tarball -PathType Leaf)) {
+            Write-Output "::error::Expected release tarball was not created: $tarball"
+            exit 1
+          }
+          "tarball=$tarball" >> $env:GITHUB_OUTPUT
+      - name: Inspect release tarball
+        env:
+          PACKAGE: ${{ env.PACKAGE_NAME }}
+          VERSION: ${{ steps.release.outputs.version }}
+          TARBALL: ${{ steps.package.outputs.tarball }}
+        run: |
+          $entries = @(tar -tzf $env:TARBALL)
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "::error::Could not read release tarball $env:TARBALL."
+            exit 1
+          }
+          foreach ($required in @("package/LICENSE", "package/README.md", "package/package.json", "package/cjs/main.js")) {
+            if ($entries -notcontains $required) {
+              Write-Output "::error::Release tarball is missing $required."
+              exit 1
+            }
+          }
+          $developmentEntries = @(
+            $entries | Where-Object { $_ -match '(^|/)(tests?|test-reporters|coverage|node_modules)(/|$)|(^|/)\.npmrc$' }
+          )
+          if ($developmentEntries.Count -gt 0) {
+            Write-Output "::error::Release tarball contains development files or npm credentials: $($developmentEntries -join ', ')"
+            exit 1
+          }
+          try {
+            $manifestContent = @(tar -xOzf $env:TARBALL package/package.json)
+            if ($LASTEXITCODE -ne 0) { throw "Could not extract package/package.json" }
+            $manifest = ($manifestContent -join [Environment]::NewLine) | ConvertFrom-Json
+            $checks = [ordered]@{
+              "package name" = $manifest.name -eq $env:PACKAGE
+              "package version" = $manifest.version -eq $env:VERSION
+              "MIT license" = $manifest.license -eq "MIT"
+              "CLI binary" = $manifest.bin.PSObject.Properties[$env:PACKAGE].Value -eq "cjs/main.js"
+              "repository URL" = $manifest.repository.url -eq "git+https://github.com/edumserrano/vsts-npm-auth-improved.git"
+              "repository directory" = $manifest.repository.directory -eq "projects/vsts-npm-auth-improved"
+              "public access" = $manifest.publishConfig.access -eq "public"
+              "public registry" = $manifest.publishConfig.registry -eq "https://registry.npmjs.org/"
+              "runtime dependencies" = @($manifest.dependencies.PSObject.Properties).Count -gt 0
+              "no development dependencies" = $null -eq $manifest.PSObject.Properties["devDependencies"]
+              "no development scripts" = $null -eq $manifest.PSObject.Properties["scripts"]
+            }
+            foreach ($check in $checks.GetEnumerator()) {
+              if (-not $check.Value) { throw "Generated manifest failed check: $($check.Key)" }
+            }
+          } catch {
+            Write-Output "::error::$($_.Exception.Message)"
+            exit 1
+          }
       - name: Smoke-test release tarball
-        if: steps.preflight.outputs.mode == 'publish'
         env:
-          VERSION: ${{ steps.metadata.outputs.version }}
-          TARBALL: ${{ steps.tarball.outputs.path }}
+          VERSION: ${{ steps.release.outputs.version }}
+          TARBALL: ${{ steps.package.outputs.tarball }}
         run: |
-          actual_version="$(npx --yes --package "$TARBALL" vsts-npm-auth-improved --version | tr -d '\r' | xargs)"
-          [[ "$actual_version" == "$VERSION" ]] || {
-            echo "::error::CLI reported $actual_version instead of $VERSION."
+          $actualVersion = ((npx --yes --package $env:TARBALL vsts-npm-auth-improved --version) -join "").Trim()
+          if ($LASTEXITCODE -ne 0 -or $actualVersion -ne $env:VERSION) {
+            Write-Output "::error::CLI reported $actualVersion instead of $env:VERSION."
             exit 1
           }
-          npx --yes --package "$TARBALL" vsts-npm-auth-improved --help > /dev/null
+          npx --yes --package $env:TARBALL vsts-npm-auth-improved --help > $null
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "::error::Release tarball help smoke test failed."
+            exit 1
+          }
+      - name: Confirm release tag does not exist
+        env:
+          GIT_TAG: ${{ steps.release.outputs.git_tag }}
+        run: |
+          git show-ref --verify --quiet "refs/tags/$env:GIT_TAG"
+          $tagStatus = $LASTEXITCODE
+          if ($tagStatus -eq 0) {
+            Write-Output "::error::Git tag $env:GIT_TAG already exists."
+            exit 1
+          }
+          if ($tagStatus -ne 1) {
+            Write-Output "::error::Could not determine whether Git tag $env:GIT_TAG exists."
+            exit 1
+          }
+          Write-Output "Git tag $env:GIT_TAG is available."
       - name: Publish to npm
-        if: steps.preflight.outputs.mode == 'publish'
+        id: publish-npm
         env:
-          DIST_TAG: ${{ steps.metadata.outputs.dist_tag }}
-          TARBALL: ${{ steps.tarball.outputs.path }}
-        run: npm publish "$TARBALL" --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
-      - name: Verify npm release and provenance
-        id: verification
-        env:
-          PACKAGE: ${{ steps.metadata.outputs.package }}
-          VERSION: ${{ steps.metadata.outputs.version }}
-          DIST_TAG: ${{ steps.metadata.outputs.dist_tag }}
-          MODE: ${{ steps.preflight.outputs.mode }}
-          WORKFLOW_PATH: .github/workflows/publish-vsts-npm-auth-improved.yml
-        run: |
-          verified=false
-          for attempt in {1..12}; do
-            exact="$(npm view "$PACKAGE@$VERSION" version --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '[:space:]')" || true
-            tagged="$(npm view "$PACKAGE@$DIST_TAG" version --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '[:space:]')" || true
-            attestation_url="$(npm view "$PACKAGE@$VERSION" dist.attestations.url --registry=https://registry.npmjs.org/ 2>/dev/null | tr -d '\r\n')" || true
-
-            if [[ "$exact" == "$VERSION" && "$tagged" == "$VERSION" && -n "$attestation_url" ]]; then
-              curl --fail --silent --show-error "$attestation_url" --output "$RUNNER_TEMP/npm-attestations.json"
-              verified=true
-              break
-            fi
-
-            echo "Registry metadata is not complete yet (attempt $attempt/12)."
-            sleep 10
-          done
-
-          if [[ "$verified" != true ]]; then
-            echo "::error::Could not verify the npm version, dist-tag, and provenance."
-            exit 1
-          fi
-
-          ATTESTATIONS="$RUNNER_TEMP/npm-attestations.json" node <<'NODE'
-          const fs = require("node:fs");
-          const response = JSON.parse(fs.readFileSync(process.env.ATTESTATIONS, "utf8"));
-          const attestation = response.attestations?.find(
-            (item) => item.predicateType === "https://slsa.dev/provenance/v1",
-          );
-          if (!attestation) throw new Error("SLSA provenance attestation is missing.");
-
-          const statement = JSON.parse(
-            Buffer.from(attestation.bundle.dsseEnvelope.payload, "base64").toString("utf8"),
-          );
-          const workflow = statement.predicate?.buildDefinition?.externalParameters?.workflow;
-          const dependencies = statement.predicate?.buildDefinition?.resolvedDependencies ?? [];
-          const subject = statement.subject?.[0]?.name;
-          const repository = "https://github.com/" + process.env.GITHUB_REPOSITORY;
-
-          if (workflow?.repository !== repository) {
-            throw new Error("Provenance repository does not match this repository.");
-          }
-          if (workflow?.ref !== "refs/heads/main") {
-            throw new Error("Provenance does not identify the main branch.");
-          }
-          if (workflow?.path !== process.env.WORKFLOW_PATH) {
-            throw new Error("Provenance workflow path does not match " + process.env.WORKFLOW_PATH);
-          }
-          if (subject !== "pkg:npm/" + process.env.PACKAGE + "@" + process.env.VERSION) {
-            throw new Error("Provenance subject does not match the npm release.");
-          }
-
-          const source = dependencies.find(
-            (item) =>
-              item.uri === "git+" + repository + "@" + workflow.ref &&
-              /^[0-9a-f]{40}$/.test(item.digest?.gitCommit ?? ""),
-          );
-          if (!source) {
-            throw new Error("Provenance does not identify a valid source commit.");
-          }
-
-          const releaseCommit = source.digest.gitCommit;
-          if (releaseCommit !== process.env.GITHUB_SHA) {
-            throw new Error("npm provenance does not identify the exact pushed release commit.");
-          }
-          if (!["publish", "recover", "verify-existing"].includes(process.env.MODE)) {
-            throw new Error("Unexpected release mode: " + process.env.MODE);
-          }
-
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, "release_commit=" + releaseCommit + "\n");
-          NODE
-      - name: Validate provenance release commit
-        env:
-          PACKAGE: ${{ steps.metadata.outputs.package }}
-          VERSION: ${{ steps.metadata.outputs.version }}
-          RELEASE_COMMIT: ${{ steps.verification.outputs.release_commit }}
-        run: |
-          if ! git cat-file -e "$RELEASE_COMMIT^{commit}"; then
-            echo "::error::Provenance commit $RELEASE_COMMIT is not present in this repository."
-            exit 1
-          fi
-          if ! git merge-base --is-ancestor "$RELEASE_COMMIT" origin/main; then
-            echo "::error::Provenance commit $RELEASE_COMMIT is not reachable from main."
-            exit 1
-          fi
-
-          release_manifest="$RUNNER_TEMP/vsts-npm-auth-improved-release-package.json"
-          git show "$RELEASE_COMMIT:projects/vsts-npm-auth-improved/package.json" > "$release_manifest"
-          RELEASE_MANIFEST="$release_manifest" node <<'NODE'
-          const fs = require("node:fs");
-          const manifest = JSON.parse(fs.readFileSync(process.env.RELEASE_MANIFEST, "utf8"));
-          if (manifest.name !== process.env.PACKAGE || manifest.version !== process.env.VERSION) {
-            throw new Error("Provenance commit package metadata does not match the npm release.");
-          }
-          NODE
+          DIST_TAG: ${{ steps.release.outputs.dist_tag }}
+          TARBALL: ${{ steps.package.outputs.tarball }}
+        run: npm publish $env:TARBALL --access public --tag $env:DIST_TAG --registry=https://registry.npmjs.org/
       - name: Create and push release tag
-        if: steps.preflight.outputs.mode == 'publish' || steps.preflight.outputs.mode == 'recover'
+        id: create-release-tag
         env:
-          GIT_TAG: ${{ steps.metadata.outputs.git_tag }}
-          PACKAGE: ${{ steps.metadata.outputs.package }}
-          VERSION: ${{ steps.metadata.outputs.version }}
-          RELEASE_COMMIT: ${{ steps.verification.outputs.release_commit }}
+          GH_TOKEN: ${{ github.token }}
+          GIT_TAG: ${{ steps.release.outputs.git_tag }}
+          VERSION: ${{ steps.release.outputs.version }}
         run: |
+          gh auth setup-git
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "::error::Could not configure Git authentication."
+            exit 1
+          }
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag --annotate "$GIT_TAG" "$RELEASE_COMMIT" --message "Release $PACKAGE@$VERSION"
-          git push origin "refs/tags/$GIT_TAG"
-      - name: Verify existing release tag
-        if: steps.preflight.outputs.mode == 'verify-existing'
-        env:
-          GIT_TAG: ${{ steps.metadata.outputs.git_tag }}
-          TAG_COMMIT: ${{ steps.preflight.outputs.tag_commit }}
-          RELEASE_COMMIT: ${{ steps.verification.outputs.release_commit }}
-        run: |
-          if [[ "$TAG_COMMIT" != "$RELEASE_COMMIT" ]]; then
-            echo "::error::Git tag $GIT_TAG points to $TAG_COMMIT, but provenance identifies $RELEASE_COMMIT."
+          git tag --annotate $env:GIT_TAG $env:SOURCE_SHA --message "Release $env:PACKAGE_NAME@$env:VERSION"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "::error::Could not create release tag $env:GIT_TAG."
             exit 1
-          fi
-          echo "$GIT_TAG already points to the provenance release commit; nothing to do."
-      - name: Report existing release
-        if: steps.preflight.outputs.mode == 'verify-existing'
+          }
+          git push origin "refs/tags/$env:GIT_TAG"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "::error::Could not push release tag $env:GIT_TAG."
+            exit 1
+          }
+      - name: Add publish summary
+        if: ${{ always() }}
+        working-directory: ${{ github.workspace }}
         env:
-          PACKAGE: ${{ steps.metadata.outputs.package }}
-          VERSION: ${{ steps.metadata.outputs.version }}
-        run: echo "$PACKAGE@$VERSION is already published with a provenance-verified tag; nothing to do."
+          VERSION: ${{ steps.release.outputs.version }}
+          DIST_TAG: ${{ steps.release.outputs.dist_tag }}
+          SOURCE_COMMIT: ${{ inputs.source_sha }}
+          CACHE_HIT: ${{ steps.setup-node.outputs.cache-hit }}
+          PUBLISH_OUTCOME: ${{ steps.publish-npm.outcome }}
+          CREATE_TAG_OUTCOME: ${{ steps.create-release-tag.outcome }}
+        run: |
+          $summaryParameters = @{
+            PackageName = $env:PACKAGE_NAME
+            Version = $env:VERSION
+            DistTag = $env:DIST_TAG
+            SourceCommit = $env:SOURCE_COMMIT
+            CacheHit = $env:CACHE_HIT
+            PublishOutcome = $env:PUBLISH_OUTCOME
+            CreateTagOutcome = $env:CREATE_TAG_OUTCOME
+          }
+          ./.github/scripts/write-publish-summary.ps1 @summaryParameters

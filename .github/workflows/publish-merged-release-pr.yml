@@ -1,0 +1,146 @@
+name: Publish merged release PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+defaults:
+  run:
+    shell: pwsh
+
+permissions: {}
+
+jobs:
+  identify-release:
+    name: Identify release
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.user.login == 'vsts-npm-auth-release-bot[bot]' &&
+      contains(github.event.pull_request.labels.*.name, 'release-preparation')
+    runs-on: ubuntu-latest
+    outputs:
+      package-name: ${{ steps.release-info.outputs.package_name }}
+      old-version: ${{ steps.release-info.outputs.old_version }}
+      new-version: ${{ steps.release-info.outputs.new_version }}
+      source-sha: ${{ steps.release-info.outputs.source_sha }}
+    steps:
+      - name: Get release information from merged PR
+        id: release-info
+        env:
+          LABELS_JSON: ${{ toJson(github.event.pull_request.labels) }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          SOURCE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          $labels = @(
+            $env:LABELS_JSON |
+              ConvertFrom-Json |
+              ForEach-Object { [string]$_.name }
+          )
+          $packageLabels = @(
+            $labels |
+              Where-Object { $_.StartsWith("release-package:") }
+          )
+          if ($packageLabels.Count -ne 1) {
+            Write-Output "::error::The merged release PR must have exactly one release-package label."
+            exit 1
+          }
+
+          switch ($packageLabels[0]) {
+            "release-package:vsts-npm-auth-improved" {
+              $packageName = "vsts-npm-auth-improved"
+            }
+            "release-package:create-vsts-npm-auth-improved" {
+              $packageName = "create-vsts-npm-auth-improved"
+            }
+            default {
+              Write-Output "::error::Unsupported release package label: $($packageLabels[0])"
+              exit 1
+            }
+          }
+
+          $oldVersionMatch = [regex]::Match([string]$env:PR_BODY, '(?m)^- Old version: `([^`]+)`\r?$')
+          $newVersionMatch = [regex]::Match([string]$env:PR_BODY, '(?m)^- New version: `([^`]+)`\r?$')
+          $oldVersion = if ($oldVersionMatch.Success) { $oldVersionMatch.Groups[1].Value } else { "" }
+          $newVersion = if ($newVersionMatch.Success) { $newVersionMatch.Groups[1].Value } else { "" }
+
+          "package_name=$packageName" >> $env:GITHUB_OUTPUT
+          "old_version=$oldVersion" >> $env:GITHUB_OUTPUT
+          "new_version=$newVersion" >> $env:GITHUB_OUTPUT
+          "source_sha=$env:SOURCE_SHA" >> $env:GITHUB_OUTPUT
+          Write-Output "package_name=$packageName"
+          Write-Output "old_version=$oldVersion"
+          Write-Output "new_version=$newVersion"
+          Write-Output "source_sha=$env:SOURCE_SHA"
+
+  publish-vsts-npm-auth-improved:
+    name: Publish vsts-npm-auth-improved
+    needs:
+      - identify-release
+    if: >-
+      needs.identify-release.outputs.package-name ==
+      'vsts-npm-auth-improved'
+    uses: ./.github/workflows/publish-vsts-npm-auth-improved.yml
+    with:
+      source_sha: ${{ needs.identify-release.outputs.source-sha }}
+    permissions:
+      contents: write
+      id-token: write
+
+  publish-create-vsts-npm-auth-improved:
+    name: Publish create-vsts-npm-auth-improved
+    needs:
+      - identify-release
+    if: >-
+      needs.identify-release.outputs.package-name ==
+      'create-vsts-npm-auth-improved'
+    uses: ./.github/workflows/publish-create-vsts-npm-auth-improved.yml
+    with:
+      source_sha: ${{ needs.identify-release.outputs.source-sha }}
+    permissions:
+      contents: write
+      id-token: write
+
+  release-summary:
+    name: Add release summary
+    needs:
+      - identify-release
+      - publish-vsts-npm-auth-improved
+      - publish-create-vsts-npm-auth-improved
+    if: ${{ always() && needs.identify-release.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out summary script
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Add release summary
+        env:
+          CREATE_PACKAGE_OUTCOME: ${{ needs.publish-create-vsts-npm-auth-improved.result }}
+          NEW_VERSION: ${{ needs.identify-release.outputs.new-version }}
+          OLD_VERSION: ${{ needs.identify-release.outputs.old-version }}
+          PACKAGE_NAME: ${{ needs.identify-release.outputs.package-name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          SOURCE_SHA: ${{ needs.identify-release.outputs.source-sha }}
+          VSTS_PACKAGE_OUTCOME: ${{ needs.publish-vsts-npm-auth-improved.result }}
+        run: |
+          $publishOutcome = if ($env:PACKAGE_NAME -eq "vsts-npm-auth-improved") {
+            $env:VSTS_PACKAGE_OUTCOME
+          } else {
+            $env:CREATE_PACKAGE_OUTCOME
+          }
+          $summaryParameters = @{
+            PackageName = $env:PACKAGE_NAME
+            OldVersion = $env:OLD_VERSION
+            NewVersion = $env:NEW_VERSION
+            PullRequestNumber = $env:PR_NUMBER
+            PullRequestUrl = $env:PR_URL
+            SourceCommit = $env:SOURCE_SHA
+            PublishOutcome = $publishOutcome
+          }
+          ./.github/scripts/write-publish-merged-release-pr-summary.ps1 @summaryParameters
