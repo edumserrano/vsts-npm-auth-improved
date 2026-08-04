@@ -4,6 +4,7 @@ param(
   [string] $PackageName,
   [string] $PullRequestNumber,
   [string] $PullRequestUrl,
+  [string] $IsDependabotMerge,
   [Parameter(Mandatory)]
   [string] $IdentificationJobOutcome,
   [Parameter(Mandatory)]
@@ -65,15 +66,20 @@ $dispatchResult = switch ($DispatchJobOutcome) {
 $summary = [Collections.Generic.List[string]]::new()
 $summary.Add("# 🤖 Dependabot release preparation")
 $summary.Add("")
-$summary.Add("| Release | Value |")
-$summary.Add("| --- | --- |")
-$summary.Add("| Package | $packageDisplay |")
-$summary.Add("| Dependabot PR | $pullRequestDisplay |")
-$summary.Add("| Merge commit | $commitDisplay |")
-$summary.Add("")
-$summary.Add("## 🚀 Preparation result")
-$summary.Add("")
-$summary.Add("- **Package identification:** $identificationResult")
-$summary.Add("- **Prepare release workflow:** $dispatchResult")
+if ($IdentificationJobOutcome -eq "success" -and $IsDependabotMerge -eq "false") {
+  $summary.Add("The commit $commitDisplay was not a merge from a Dependabot PR.")
+}
+else {
+  $summary.Add("| Release | Value |")
+  $summary.Add("| --- | --- |")
+  $summary.Add("| Package | $packageDisplay |")
+  $summary.Add("| Dependabot PR | $pullRequestDisplay |")
+  $summary.Add("| Merge commit | $commitDisplay |")
+  $summary.Add("")
+  $summary.Add("## 🚀 Preparation result")
+  $summary.Add("")
+  $summary.Add("- **Package identification:** $identificationResult")
+  $summary.Add("- **Prepare release workflow:** $dispatchResult")
+}
 
 $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
