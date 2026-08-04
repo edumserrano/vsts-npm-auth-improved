@@ -1,0 +1,78 @@
+name: Enable auto-merge for Dependabot PRs
+run-name: Enable auto-merge for Dependabot PR #${{ github.event.pull_request.number }}
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+defaults:
+  run:
+    shell: pwsh
+
+concurrency:
+  group: dependabot-auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  enable-auto-merge:
+    name: Enable auto-merge
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    environment: vsts-npm-auth-release-bot
+    steps:
+      - name: Create vsts-npm-auth-release-bot app token
+        id: release-app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.VSTS_NPM_AUTH_RELEASE_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Enable squash auto-merge
+        env:
+          GH_TOKEN: ${{ steps.release-app-token.outputs.token }}
+          DEPENDABOT_PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          $pullRequestNumber = [string]$env:DEPENDABOT_PR_NUMBER
+          if ($pullRequestNumber -notmatch '^[1-9]\d*$') {
+            Write-Output "::error::The Dependabot PR number is invalid."
+            exit 1
+          }
+
+          $pullRequest = gh pr view $pullRequestNumber `
+            --repo $env:GITHUB_REPOSITORY `
+            --json autoMergeRequest,isDraft,state,url | ConvertFrom-Json
+
+          if ([string]$pullRequest.state -ne "OPEN") {
+            Write-Output "::notice::Dependabot PR #$pullRequestNumber is no longer open."
+            exit 0
+          }
+
+          if ([bool]$pullRequest.isDraft) {
+            Write-Output "::notice::Dependabot PR #$pullRequestNumber is still a draft."
+            exit 0
+          }
+
+          if ($null -ne $pullRequest.autoMergeRequest) {
+            Write-Output "::notice::Auto-merge is already enabled for Dependabot PR #$pullRequestNumber ($($pullRequest.url))."
+            exit 0
+          }
+
+          gh pr merge $pullRequestNumber `
+            --repo $env:GITHUB_REPOSITORY `
+            --auto `
+            --squash
+
+          Write-Output "::notice::Enabled squash auto-merge for Dependabot PR #$pullRequestNumber ($($pullRequest.url))."
