@@ -11,14 +11,9 @@ commit.
 
 ## Start a release
 
-In GitHub Actions, open the workflow for the package being released:
-
-| Package                         | Preparation workflow                            |
-| ------------------------------- | ----------------------------------------------- |
-| `vsts-npm-auth-improved`        | `Prepare release vsts-npm-auth-improved`        |
-| `create-vsts-npm-auth-improved` | `Prepare release create-vsts-npm-auth-improved` |
-
-Run the workflow from branch `main` and set `version` as follows:
+In GitHub Actions, open the `Prepare release` workflow. Run it from branch `main`, select either
+`vsts-npm-auth-improved` or `create-vsts-npm-auth-improved` in the `package` input, and set `version`
+as follows:
 
 - Use `auto` for the normal release. A stable version gets a patch increment. A prerelease keeps its
   channel and increments its number: for example, `1.0.0-alpha.2` becomes `1.0.0-alpha.3`.
@@ -32,8 +27,8 @@ to stable therefore requires an explicit version.
 The equivalent GitHub CLI commands are:
 
 ```shell
-gh workflow run prepare-release-vsts-npm-auth-improved.yml --ref main -f version=auto
-gh workflow run prepare-release-create-vsts-npm-auth-improved.yml --ref main -f version=auto
+gh workflow run prepare-release.yml --ref main -f package=vsts-npm-auth-improved -f version=auto
+gh workflow run prepare-release.yml --ref main -f package=create-vsts-npm-auth-improved -f version=auto
 ```
 
 Replace `auto` with the explicit version when promoting or selecting a version. The separate build

@@ -1,8 +1,16 @@
-name: Prepare release vsts-npm-auth-improved
+name: Prepare release
+run-name: Prepare release ${{ inputs.package }} (${{ inputs.version }})
 
 on:
   workflow_dispatch:
     inputs:
+      package:
+        description: npm package
+        required: true
+        type: choice
+        options:
+          - vsts-npm-auth-improved
+          - create-vsts-npm-auth-improved
       version:
         description: SemVer version, or "auto"
         required: true
@@ -16,15 +24,17 @@ defaults:
 env:
   NODE_VERSION: 24.18.1
   NPM_VERSION: 12.0.2
+  PACKAGE_NAME: ${{ inputs.package }}
+  PACKAGE_DIRECTORY: projects/${{ inputs.package }}
 
 concurrency:
-  group: release-preparation-vsts-npm-auth-improved
+  group: release-preparation-${{ inputs.package }}
   cancel-in-progress: false
   queue: max # https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency#example-queueing-multiple-pending-runs
 
 jobs:
   validate-release-request:
-    name: Validate release request vsts-npm-auth-improved
+    name: Validate release request ${{ inputs.package }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -45,7 +55,7 @@ jobs:
         run: |
           Set-StrictMode -Version Latest
           $PSNativeCommandUseErrorActionPreference = $true
-          $packageName = "vsts-npm-auth-improved"
+          $packageName = $env:PACKAGE_NAME
           $packageLabel = "release-package:$packageName"
           $matchingPullRequests = @(
             gh pr list `
@@ -66,14 +76,11 @@ jobs:
           Write-Output "No open release PR was found for package $packageName."
 
   build-and-test:
-    name: Build and test vsts-npm-auth-improved
+    name: Build and test ${{ inputs.package }}
     needs: validate-release-request
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    defaults:
-      run:
-        working-directory: projects/vsts-npm-auth-improved
     steps:
       - name: Check out repo
         uses: actions/checkout@v6
@@ -83,10 +90,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: projects/vsts-npm-auth-improved/package-lock.json
+          cache-dependency-path: ${{ env.PACKAGE_DIRECTORY }}/package-lock.json
       - name: Set up npm
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         run: npm install --global "npm@$env:NPM_VERSION"
       - name: Show npm configuration
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         run: |
           Write-Output "::group::npm config list"
           npm config list
@@ -95,27 +104,27 @@ jobs:
           npm config list -l
           Write-Output "::endgroup::"
       - name: Install dependencies
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         run: npm ci
       - name: Build
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         run: npm run build
       - name: Test
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         run: npm test
       - name: Add job summary
         if: ${{ always() }}
         working-directory: ${{ github.workspace }}
         env:
           CACHE_HIT: ${{ steps.setup-node.outputs.cache-hit }}
-        run: ./.github/scripts/write-build-test-summary.ps1 -ProjectDirectory "projects/vsts-npm-auth-improved" -CacheHit $env:CACHE_HIT
+        run: ./.github/scripts/write-build-test-summary.ps1 -ProjectDirectory $env:PACKAGE_DIRECTORY -CacheHit $env:CACHE_HIT
 
   prepare-release:
-    name: Prepare release vsts-npm-auth-improved
+    name: Prepare release ${{ inputs.package }}
     needs: build-and-test
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    env:
-      PACKAGE_NAME: vsts-npm-auth-improved
-      PACKAGE_DIRECTORY: projects/vsts-npm-auth-improved
     environment: vsts-npm-auth-release-bot
     steps:
       - name: Check out repo
@@ -153,7 +162,7 @@ jobs:
           gh auth setup-git
       - name: Update package version and calculate release tag
         id: update-package-version
-        working-directory: projects/vsts-npm-auth-improved
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         env:
           REQUESTED_VERSION: ${{ inputs.version }}
         run: |
