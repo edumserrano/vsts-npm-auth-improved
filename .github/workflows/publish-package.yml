@@ -1,8 +1,12 @@
-name: Publish vsts-npm-auth-improved
+name: Publish package
 
 on:
   workflow_call:
     inputs:
+      package_name:
+        description: npm package to publish
+        required: true
+        type: string
       source_sha:
         description: Exact merged release commit
         required: true
@@ -15,24 +19,22 @@ defaults:
 env:
   NODE_VERSION: 24.18.1
   NPM_VERSION: 12.0.2
+  PACKAGE_NAME: ${{ inputs.package_name }}
+  PACKAGE_DIRECTORY: projects/${{ inputs.package_name }}
 
 jobs:
   publish:
-    name: Publish vsts-npm-auth-improved
+    name: Publish ${{ inputs.package_name }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
       id-token: write
     environment: npm-publish
     concurrency:
-      group: npm-publish-vsts-npm-auth-improved
+      group: npm-publish-${{ inputs.package_name }}
       cancel-in-progress: false
       queue: max
-    defaults:
-      run:
-        working-directory: projects/vsts-npm-auth-improved
     env:
-      PACKAGE_NAME: vsts-npm-auth-improved
       SOURCE_SHA: ${{ inputs.source_sha }}
     steps:
       - name: Check out release commit
@@ -48,9 +50,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
           cache: npm
-          cache-dependency-path: projects/vsts-npm-auth-improved/package-lock.json
+          cache-dependency-path: ${{ env.PACKAGE_DIRECTORY }}/package-lock.json
       - name: Set up npm and read release values
         id: release
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         run: |
           npm install --global "npm@$env:NPM_VERSION"
           if ($LASTEXITCODE -ne 0) {
@@ -83,9 +86,11 @@ jobs:
           Write-Output "dist_tag=$distTag"
           Write-Output "git_tag=$env:PACKAGE_NAME@$version"
       - name: Install dependencies
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         run: npm ci
       - name: Build and pack
         id: package
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         env:
           VERSION: ${{ steps.release.outputs.version }}
         run: |
@@ -95,7 +100,7 @@ jobs:
             exit 1
           }
 
-          $packageDirectory = Join-Path $env:GITHUB_WORKSPACE "projects/vsts-npm-auth-improved/dist/vsts-npm-auth-improved-package"
+          $packageDirectory = Join-Path $env:GITHUB_WORKSPACE "$env:PACKAGE_DIRECTORY/dist/$env:PACKAGE_NAME-package"
           $tarball = Join-Path $packageDirectory "$env:PACKAGE_NAME-$env:VERSION.tgz"
           if (-not (Test-Path $tarball -PathType Leaf)) {
             Write-Output "::error::Expected release tarball was not created: $tarball"
@@ -103,6 +108,7 @@ jobs:
           }
           "tarball=$tarball" >> $env:GITHUB_OUTPUT
       - name: Inspect release tarball
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         env:
           PACKAGE: ${{ env.PACKAGE_NAME }}
           VERSION: ${{ steps.release.outputs.version }}
@@ -136,7 +142,7 @@ jobs:
               "MIT license" = $manifest.license -eq "MIT"
               "CLI binary" = $manifest.bin.PSObject.Properties[$env:PACKAGE].Value -eq "cjs/main.js"
               "repository URL" = $manifest.repository.url -eq "git+https://github.com/edumserrano/vsts-npm-auth-improved.git"
-              "repository directory" = $manifest.repository.directory -eq "projects/vsts-npm-auth-improved"
+              "repository directory" = $manifest.repository.directory -eq $env:PACKAGE_DIRECTORY
               "public access" = $manifest.publishConfig.access -eq "public"
               "public registry" = $manifest.publishConfig.registry -eq "https://registry.npmjs.org/"
               "runtime dependencies" = @($manifest.dependencies.PSObject.Properties).Count -gt 0
@@ -151,21 +157,23 @@ jobs:
             exit 1
           }
       - name: Smoke-test release tarball
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         env:
           VERSION: ${{ steps.release.outputs.version }}
           TARBALL: ${{ steps.package.outputs.tarball }}
         run: |
-          $actualVersion = ((npx --yes --package $env:TARBALL vsts-npm-auth-improved --version) -join "").Trim()
+          $actualVersion = ((npx --yes --package $env:TARBALL $env:PACKAGE_NAME --version) -join "").Trim()
           if ($LASTEXITCODE -ne 0 -or $actualVersion -ne $env:VERSION) {
             Write-Output "::error::CLI reported $actualVersion instead of $env:VERSION."
             exit 1
           }
-          npx --yes --package $env:TARBALL vsts-npm-auth-improved --help > $null
+          npx --yes --package $env:TARBALL $env:PACKAGE_NAME --help > $null
           if ($LASTEXITCODE -ne 0) {
             Write-Output "::error::Release tarball help smoke test failed."
             exit 1
           }
       - name: Confirm release tag does not exist
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         env:
           GIT_TAG: ${{ steps.release.outputs.git_tag }}
         run: |
@@ -182,12 +190,14 @@ jobs:
           Write-Output "Git tag $env:GIT_TAG is available."
       - name: Publish to npm
         id: publish-npm
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         env:
           DIST_TAG: ${{ steps.release.outputs.dist_tag }}
           TARBALL: ${{ steps.package.outputs.tarball }}
         run: npm publish $env:TARBALL --access public --tag $env:DIST_TAG --registry=https://registry.npmjs.org/
       - name: Create and push release tag
         id: create-release-tag
+        working-directory: ${{ env.PACKAGE_DIRECTORY }}
         env:
           GH_TOKEN: ${{ github.token }}
           GIT_TAG: ${{ steps.release.outputs.git_tag }}

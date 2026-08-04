@@ -135,9 +135,10 @@ Use the following recovery according to where the chain stopped:
   pull request or merge no longer matches the trusted shape.
 - **Build, pack, or npm publish:** Inspect the matching `Publish <package>` workflow. Fix a genuine
   package defect with a new release version. For a transient runner, registry, OIDC, or trusted
-  publisher failure, rerun the failed publisher job. npm trusted-publisher configuration must name
-  the unchanged matching workflow file: `.github/workflows/publish-vsts-npm-auth-improved.yml` or
-  `.github/workflows/publish-create-vsts-npm-auth-improved.yml`.
+  publisher failure, rerun the failed publisher job. npm trusted-publisher configuration for both
+  packages must name the calling workflow: `.github/workflows/publish-merged-release-pr.yml`. The
+  package-specific work is implemented by the shared `.github/workflows/publish-package.yml`
+  reusable workflow.
 - **npm verification or provenance:** Registry metadata is retried for about two minutes. If it is
   still incomplete, rerun the failed publisher job. If provenance exists but identifies a different
   repository, ref, workflow, subject, or commit, stop: do not create or move a tag and do not try to
@@ -156,15 +157,13 @@ workflow file and squash commit, then rerun only the failed jobs:
 RELEASE_SHA=replace-me
 PUBLISH_RUN_ID=replace-me
 
-gh run list --workflow publish-vsts-npm-auth-improved.yml --commit "$RELEASE_SHA" --json databaseId,conclusion,url,headSha
+gh run list --workflow publish-merged-release-pr.yml --commit "$RELEASE_SHA" --json databaseId,conclusion,url,headSha
 gh run rerun "$PUBLISH_RUN_ID" --failed
 ```
 
-Use `publish-create-vsts-npm-auth-improved.yml` for the create package. Do not dispatch another
-preparation, make an empty push, or create the tag locally. On rerun, the publisher detects that npm
-already contains the version, verifies that its provenance identifies the original `GITHUB_SHA`,
-and creates only the missing annotated tag. If both npm and the correct tag already exist, the rerun
-is a provenance-verified successful no-op.
+The merged-release workflow run contains the reusable publisher job for the package selected from
+the release PR. Do not dispatch another preparation, make an empty push, or create the tag locally.
+On rerun, the publisher uses the original merged release commit.
 
 ## Rotate or revoke the release App key
 

@@ -75,29 +75,13 @@ jobs:
           Write-Output "new_version=$newVersion"
           Write-Output "source_sha=$env:SOURCE_SHA"
 
-  publish-vsts-npm-auth-improved:
-    name: Publish vsts-npm-auth-improved
+  publish:
+    name: Publish ${{ needs.identify-release.outputs.package-name }}
     needs:
       - identify-release
-    if: >-
-      needs.identify-release.outputs.package-name ==
-      'vsts-npm-auth-improved'
-    uses: ./.github/workflows/publish-vsts-npm-auth-improved.yml
+    uses: ./.github/workflows/publish-package.yml
     with:
-      source_sha: ${{ needs.identify-release.outputs.source-sha }}
-    permissions:
-      contents: write
-      id-token: write
-
-  publish-create-vsts-npm-auth-improved:
-    name: Publish create-vsts-npm-auth-improved
-    needs:
-      - identify-release
-    if: >-
-      needs.identify-release.outputs.package-name ==
-      'create-vsts-npm-auth-improved'
-    uses: ./.github/workflows/publish-create-vsts-npm-auth-improved.yml
-    with:
+      package_name: ${{ needs.identify-release.outputs.package-name }}
       source_sha: ${{ needs.identify-release.outputs.source-sha }}
     permissions:
       contents: write
@@ -107,8 +91,7 @@ jobs:
     name: Add release summary
     needs:
       - identify-release
-      - publish-vsts-npm-auth-improved
-      - publish-create-vsts-npm-auth-improved
+      - publish
     if: ${{ always() && needs.identify-release.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
@@ -120,20 +103,14 @@ jobs:
           persist-credentials: false
       - name: Add release summary
         env:
-          CREATE_PACKAGE_OUTCOME: ${{ needs.publish-create-vsts-npm-auth-improved.result }}
           NEW_VERSION: ${{ needs.identify-release.outputs.new-version }}
           OLD_VERSION: ${{ needs.identify-release.outputs.old-version }}
           PACKAGE_NAME: ${{ needs.identify-release.outputs.package-name }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          PUBLISH_OUTCOME: ${{ needs.publish.result }}
           SOURCE_SHA: ${{ needs.identify-release.outputs.source-sha }}
-          VSTS_PACKAGE_OUTCOME: ${{ needs.publish-vsts-npm-auth-improved.result }}
         run: |
-          $publishOutcome = if ($env:PACKAGE_NAME -eq "vsts-npm-auth-improved") {
-            $env:VSTS_PACKAGE_OUTCOME
-          } else {
-            $env:CREATE_PACKAGE_OUTCOME
-          }
           $summaryParameters = @{
             PackageName = $env:PACKAGE_NAME
             OldVersion = $env:OLD_VERSION
@@ -141,6 +118,6 @@ jobs:
             PullRequestNumber = $env:PR_NUMBER
             PullRequestUrl = $env:PR_URL
             SourceCommit = $env:SOURCE_SHA
-            PublishOutcome = $publishOutcome
+            PublishOutcome = $env:PUBLISH_OUTCOME
           }
           ./.github/scripts/write-publish-merged-release-pr-summary.ps1 @summaryParameters

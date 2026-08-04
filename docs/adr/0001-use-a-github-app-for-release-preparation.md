@@ -48,8 +48,8 @@ and label the pull request, and enable squash auto-merge. These actions are attr
 `vsts-npm-auth-release-bot[bot]`, and their resulting events are not subject to the workflow-chaining
 restrictions applied to the repository's `GITHUB_TOKEN`.
 
-After the App-created pull request is merged, the merge workflow directly calls the selected
-package's reusable `workflow_call` publisher. The exact merge commit is passed as a workflow input.
+After the App-created pull request is merged, the merge workflow directly calls the shared reusable
+`workflow_call` publisher with the selected package name and exact merge commit as workflow inputs.
 The App token is not used for that handoff or by the publish workflow.
 
 npm trusted publishing validates the calling workflow when `workflow_call` is used. Both packages
