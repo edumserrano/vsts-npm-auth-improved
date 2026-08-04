@@ -69,8 +69,8 @@ required-pull-request rule and a force-push rule; those omissions are not an alt
 path. Confirm that the ruleset remains active and strict if a preparation pull request appears able
 to merge with stale or pending checks.
 
-After the squash merge, both publish workflows inspect the push to `main`, but only the workflow
-whose package and trusted pull-request metadata match enters its `publish` job:
+After the squash merge, the publish workflow inspects the push to `main` and enters its `publish`
+job only when the package and trusted pull-request metadata match:
 
 | Package                                          | Publisher                       | npm tag                  | Git tag               |
 | ------------------------------------------------ | ------------------------------- | ------------------------ | --------------------- |
@@ -129,16 +129,16 @@ Use the following recovery according to where the chain stopped:
   mode with `gh pr merge "$PR_NUMBER" --auto --squash`. Never force-merge a failing or stale
   preparation.
 - **Release identification:** An ordinary push is an intentional successful no-op. For a preparation
-  squash, inspect `Identify trusted <package> release`. A mismatch in App author, source repository,
-  branch, exact title, labels, audit body, changed files, version transition, associated pull request,
-  or squash SHA fails closed. Do not edit markers to force publication; determine why the generated
-  pull request or merge no longer matches the trusted shape.
+  squash, inspect `Identify release`. A mismatch in App author, source repository, release branch,
+  labels, changed files, package metadata, version transition, associated pull request, or squash SHA
+  fails closed. Do not edit markers to force publication; determine why the generated pull request or
+  merge no longer matches the trusted shape.
 - **Build, pack, or npm publish:** Inspect the matching `Publish <package>` workflow. Fix a genuine
   package defect with a new release version. For a transient runner, registry, OIDC, or trusted
   publisher failure, rerun the failed publisher job. npm trusted-publisher configuration for both
   packages must name the calling workflow: `.github/workflows/publish-merged-release-pr.yml`. The
-  package-specific work is implemented by the shared `.github/workflows/publish-package.yml`
-  reusable workflow.
+  package-specific steps are implemented by the shared
+  `.github/actions/publish-package/action.yml` composite action.
 - **npm verification or provenance:** Registry metadata is retried for about two minutes. If it is
   still incomplete, rerun the failed publisher job. If provenance exists but identifies a different
   repository, ref, workflow, subject, or commit, stop: do not create or move a tag and do not try to

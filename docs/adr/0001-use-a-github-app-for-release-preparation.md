@@ -13,10 +13,10 @@ The pull request is part of a larger workflow chain:
 
 1. The `pull_request` event runs the build-and-test workflows and supplies the required checks for
    the release-preparation pull request.
-2. After the pull request is merged, a `pull_request` `closed` workflow selects the package from
-   its release label and calls the matching reusable publish workflow with the exact merge commit
-   SHA.
-3. The called publish workflow checks out that immutable commit and publishes the package.
+2. After the pull request is merged, the resulting push to `main` runs the publish workflow, which
+   selects the package from the release label associated with the pushed commit.
+3. The publish job checks out that immutable commit and calls the shared package-publishing
+   composite action.
 
 The repository-provided `GITHUB_TOKEN` can be granted sufficient `contents`, `issues`, and
 `pull-requests` permissions to push a branch and create or update a pull request. Missing permission
@@ -29,7 +29,7 @@ manual approval.
 
 That behavior protects repositories from accidental recursive workflow execution, but it conflicts
 with this release process. Release preparation must start required pull-request checks without a
-manual approval step. The later reusable publish workflow call does not require the App.
+manual approval step. The later push-triggered publish job does not require the App.
 
 ## Decision
 
@@ -48,14 +48,15 @@ and label the pull request, and enable squash auto-merge. These actions are attr
 `vsts-npm-auth-release-bot[bot]`, and their resulting events are not subject to the workflow-chaining
 restrictions applied to the repository's `GITHUB_TOKEN`.
 
-After the App-created pull request is merged, the merge workflow directly calls the shared reusable
-`workflow_call` publisher with the selected package name and exact merge commit as workflow inputs.
-The App token is not used for that handoff or by the publish workflow.
+After the App-created pull request is merged, the push-triggered merged-release workflow resolves
+and validates the associated pull request, then runs its environment-protected publish job with the
+selected package name and exact pushed commit. The job delegates its package-specific steps to a
+local composite action. The App token is not used for that handoff or by the publish job.
 
-npm trusted publishing validates the calling workflow when `workflow_call` is used. Both packages
-therefore configure `publish-merged-release-pr.yml` as their trusted publisher workflow and retain
-the `npm-publish` environment restriction. The caller and reusable publisher both grant
-`id-token: write` for the OIDC exchange.
+npm trusted publishing validates `publish-merged-release-pr.yml`, which remains the workflow that
+runs `npm publish`. Both packages therefore retain that trusted publisher workflow and the
+`npm-publish` environment restriction. Its publish job grants `id-token: write` for the OIDC
+exchange.
 
 The default workflow token remains the preferred credential for read-only operations. In
 particular, the existing-release-PR check uses `${{ github.token }}` with only
@@ -70,7 +71,7 @@ stored in the `VSTS_NPM_AUTH_RELEASE_BOT_PRIVATE_KEY` secret in the
 ### Positive
 
 - Required pull-request workflows can start without manual approval.
-- A merged release pull request calls only the matching publisher with its exact merge SHA.
+- A merged release pull request publishes only the selected package from its exact merge SHA.
 - Publishing is part of the trusted merged-release workflow run and cannot be started manually.
 - Release automation is attributed to a dedicated bot instead of a maintainer's user account.
 - The installation token is short-lived and limited by the App installation and requested
@@ -106,14 +107,14 @@ broader or longer-lived access than the GitHub App installation token.
 
 Rejected. Dispatching the build-and-test workflows explicitly could avoid the approval restriction,
 but it would duplicate the normal `pull_request` check orchestration and make the relationship with
-required status checks less direct. The release process keeps the App for PR creation and calls a
-reusable publisher only after a trusted App-created PR has merged.
+required status checks less direct. The release process keeps the App for PR creation and lets the
+resulting trusted merge push run the publisher.
 
 ## References
 
 - [Triggering a workflow from a workflow](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow#triggering-a-workflow-from-a-workflow)
 - [The `GITHUB_TOKEN` security model](https://docs.github.com/en/actions/concepts/security/github_token)
-- [Reuse workflows](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows)
+- [Creating a composite action](https://docs.github.com/en/actions/tutorials/create-actions/create-a-composite-action)
 - [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/)
 - [Making authenticated API requests with a GitHub App in a GitHub Actions workflow](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow)
 - [Generating an installation access token for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)
