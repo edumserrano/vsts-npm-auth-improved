@@ -196,7 +196,7 @@ jobs:
           Write-Output "source_sha=$env:GITHUB_SHA"
 
   publish:
-    name: Publish ${{ needs.identify-release.outputs.package-name }}
+    name: Publish package
     needs:
       - identify-release
     if: needs.identify-release.outputs.is-release == 'true'
@@ -232,7 +232,7 @@ jobs:
           npm-version: 12.0.2
 
   github-release:
-    name: Create GitHub Release ${{ needs.publish.outputs.git-tag }}
+    name: Create GitHub Release
     needs:
       - identify-release
       - publish
@@ -375,7 +375,7 @@ jobs:
       - identify-release
       - publish
       - github-release
-    if: ${{ always() && needs.identify-release.result == 'success' && needs.identify-release.outputs.is-release == 'true' }}
+    if: ${{ always() && needs.identify-release.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -400,7 +400,8 @@ jobs:
           PUBLISH_JOB_OUTCOME: ${{ needs.publish.result }}
           GITHUB_RELEASE_JOB_OUTCOME: ${{ needs.github-release.result }}
           GITHUB_RELEASE_URL: ${{ needs.github-release.outputs.url }}
-          SOURCE_SHA: ${{ needs.identify-release.outputs.source-sha }}
+          IS_RELEASE: ${{ needs.identify-release.outputs.is-release }}
+          SOURCE_SHA: ${{ github.sha }}
         run: |
           $summaryParameters = @{
             PackageName = $env:PACKAGE_NAME
@@ -408,6 +409,7 @@ jobs:
             NewVersion = $env:NEW_VERSION
             PullRequestNumber = $env:PR_NUMBER
             PullRequestUrl = $env:PR_URL
+            IsRelease = $env:IS_RELEASE
             SourceCommit = $env:SOURCE_SHA
             DistTag = $env:DIST_TAG
             NodeVersion = $env:NODE_VERSION

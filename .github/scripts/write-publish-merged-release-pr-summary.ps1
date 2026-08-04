@@ -1,12 +1,12 @@
 param(
-  [Parameter(Mandatory)]
   [string] $PackageName,
   [string] $OldVersion,
   [string] $NewVersion,
-  [Parameter(Mandatory)]
   [string] $PullRequestNumber,
-  [Parameter(Mandatory)]
   [string] $PullRequestUrl,
+  [Parameter(Mandatory)]
+  [ValidateSet("true", "false")]
+  [string] $IsRelease,
   [Parameter(Mandatory)]
   [string] $SourceCommit,
   [string] $DistTag,
@@ -44,6 +44,14 @@ if ($SourceCommit -match '^[0-9a-f]{40}$') {
 }
 
 $summary = [Collections.Generic.List[string]]::new()
+if ($IsRelease -eq "false") {
+  $summary.Add("# 🚀 Release publishing")
+  $summary.Add("")
+  $summary.Add("The commit $commitDisplay was not associated with a release preparation PR.")
+  $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+  return
+}
+
 $summary.Add("# 🚀 $PackageName release")
 $summary.Add("")
 $summary.Add("| Release | Value |")
