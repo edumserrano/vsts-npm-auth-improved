@@ -7,7 +7,8 @@ param(
   [Parameter(Mandatory)]
   [string] $IdentificationJobOutcome,
   [Parameter(Mandatory)]
-  [string] $DispatchJobOutcome
+  [string] $DispatchJobOutcome,
+  [string] $PrepareReleaseRunUrl
 )
 
 Set-StrictMode -Version Latest
@@ -38,7 +39,17 @@ $identificationResult = switch ($IdentificationJobOutcome) {
 }
 
 $dispatchResult = switch ($DispatchJobOutcome) {
-  "success" { "✅ Dispatched" }
+  "success" {
+    $workflowRunUrlPattern = '^' +
+      [Regex]::Escape("$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/") +
+      '[1-9]\d*$'
+    if ($PrepareReleaseRunUrl -match $workflowRunUrlPattern) {
+      "✅ [Dispatched prepare release workflow]($PrepareReleaseRunUrl)"
+    }
+    else {
+      "✅ Dispatched"
+    }
+  }
   "failure" { "❌ Dispatch failed" }
   "cancelled" { "🚫 Dispatch cancelled" }
   default {

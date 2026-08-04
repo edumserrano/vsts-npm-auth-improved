@@ -65,7 +65,18 @@ $jobResult = switch ($PublishJobOutcome) {
 $summary.Add("- **Publish job:** $jobResult")
 
 $npmResult = switch ($NpmPublishOutcome) {
-  "success" { "✅ Published" }
+  "success" {
+    if (
+      -not [string]::IsNullOrWhiteSpace($PackageName) -and
+      -not [string]::IsNullOrWhiteSpace($NewVersion)
+    ) {
+      $npmPackageUrl = "https://www.npmjs.com/package/$([Uri]::EscapeDataString($PackageName))/v/$([Uri]::EscapeDataString($NewVersion))"
+      "✅ Published [``$PackageName@$NewVersion``]($npmPackageUrl)"
+    }
+    else {
+      "✅ Published"
+    }
+  }
   "failure" { "❌ Publish failed" }
   "cancelled" { "🚫 Publish cancelled" }
   default { "⏭️ Not published" }
@@ -73,7 +84,19 @@ $npmResult = switch ($NpmPublishOutcome) {
 $summary.Add("- **npm:** $npmResult")
 
 $tagResult = switch ($GitTagOutcome) {
-  "success" { "✅ Tag created" }
+  "success" {
+    if (
+      -not [string]::IsNullOrWhiteSpace($PackageName) -and
+      -not [string]::IsNullOrWhiteSpace($NewVersion)
+    ) {
+      $releaseTag = "$PackageName@$NewVersion"
+      $gitTagUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/tree/$([Uri]::EscapeDataString($releaseTag))"
+      "✅ Created [``$releaseTag``]($gitTagUrl)"
+    }
+    else {
+      "✅ Tag created"
+    }
+  }
   "failure" { "❌ Tag creation failed" }
   "cancelled" { "🚫 Tag creation cancelled" }
   default { "⏭️ Not created" }

@@ -107,6 +107,7 @@ jobs:
             Write-Output "The merged Dependabot PR does not update a configured npm package."
             exit 0
           }
+
           if ($packageLabels.Count -ne 1) {
             Write-Output "::error::The merged Dependabot PR must have exactly one dependabot-package label; found $($packageLabels -join ', ')."
             exit 1
@@ -141,8 +142,11 @@ jobs:
     permissions:
       actions: write
       contents: read
+    outputs:
+      workflow-run-url: ${{ steps.dispatch-release-preparation.outputs.workflow_run_url }}
     steps:
       - name: Dispatch prepare release workflow
+        id: dispatch-release-preparation
         env:
           GH_TOKEN: ${{ github.token }}
           PACKAGE_NAME: ${{ needs.identify-affected-package.outputs.package-name }}
@@ -150,15 +154,44 @@ jobs:
           DEPENDABOT_PR_URL: ${{ needs.identify-affected-package.outputs.pull-request-url }}
         run: |
           Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
           $PSNativeCommandUseErrorActionPreference = $true
 
-          gh workflow run prepare-release.yml `
-            --repo $env:GITHUB_REPOSITORY `
-            --ref main `
-            -f package=$env:PACKAGE_NAME `
-            -f version=auto
+          $dispatchRequest = [ordered]@{
+            ref = "main"
+            inputs = [ordered]@{
+              package = $env:PACKAGE_NAME
+              version = "auto"
+            }
+            return_run_details = $true
+          } | ConvertTo-Json -Depth 3 -Compress
 
-          Write-Output "Dispatched release preparation for $env:PACKAGE_NAME after merging Dependabot PR #$env:DEPENDABOT_PR_NUMBER ($env:DEPENDABOT_PR_URL)."
+          $dispatchResponse = $dispatchRequest |
+            gh api `
+              --method POST `
+              -H "Accept: application/vnd.github+json" `
+              "repos/$env:GITHUB_REPOSITORY/actions/workflows/prepare-release.yml/dispatches" `
+              --input - |
+            ConvertFrom-Json
+
+          if ($null -eq $dispatchResponse) {
+            Write-Output "::error::The prepare release workflow dispatch returned no run details."
+            exit 1
+          }
+
+          $workflowRunId = 0L
+          $workflowRunUrl = [string]$dispatchResponse.html_url
+          if (
+            -not [long]::TryParse([string]$dispatchResponse.workflow_run_id, [ref]$workflowRunId) -or
+            $workflowRunId -le 0 -or
+            [string]::IsNullOrWhiteSpace($workflowRunUrl)
+          ) {
+            Write-Output "::error::The prepare release workflow dispatch returned invalid run details."
+            exit 1
+          }
+
+          "workflow_run_url=$workflowRunUrl" >> $env:GITHUB_OUTPUT
+          Write-Output "Dispatched release preparation for $env:PACKAGE_NAME after merging Dependabot PR #$env:DEPENDABOT_PR_NUMBER ($env:DEPENDABOT_PR_URL): $workflowRunUrl"
 
   release-preparation-summary:
     name: Add release preparation summary
@@ -182,6 +215,7 @@ jobs:
           DEPENDABOT_PR_URL: ${{ needs.identify-affected-package.outputs.pull-request-url }}
           IDENTIFICATION_JOB_OUTCOME: ${{ needs.identify-affected-package.result }}
           DISPATCH_JOB_OUTCOME: ${{ needs.dispatch-release-preparation.result }}
+          PREPARE_RELEASE_RUN_URL: ${{ needs.dispatch-release-preparation.outputs.workflow-run-url }}
         run: |
           $summaryParameters = @{
             SourceCommit = $env:SOURCE_COMMIT
@@ -190,5 +224,6 @@ jobs:
             PullRequestUrl = $env:DEPENDABOT_PR_URL
             IdentificationJobOutcome = $env:IDENTIFICATION_JOB_OUTCOME
             DispatchJobOutcome = $env:DISPATCH_JOB_OUTCOME
+            PrepareReleaseRunUrl = $env:PREPARE_RELEASE_RUN_URL
           }
           ./.github/scripts/write-prepare-releases-after-merged-dependabot-pr-summary.ps1 @summaryParameters
