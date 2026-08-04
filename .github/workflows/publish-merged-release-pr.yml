@@ -1,11 +1,9 @@
 name: Publish merged release PR
 
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types:
-      - closed
 
 defaults:
   run:
@@ -16,29 +14,70 @@ permissions: {}
 jobs:
   identify-release:
     name: Identify release
-    if: >-
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.user.login == 'vsts-npm-auth-release-bot[bot]' &&
-      contains(github.event.pull_request.labels.*.name, 'release-preparation')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
+      is-release: ${{ steps.release-info.outputs.is_release }}
       package-name: ${{ steps.release-info.outputs.package_name }}
       old-version: ${{ steps.release-info.outputs.old_version }}
       new-version: ${{ steps.release-info.outputs.new_version }}
+      pull-request-number: ${{ steps.release-info.outputs.pull_request_number }}
+      pull-request-url: ${{ steps.release-info.outputs.pull_request_url }}
       source-sha: ${{ steps.release-info.outputs.source_sha }}
     steps:
+      - name: Check out pushed commit for release identification
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
       - name: Get release information from merged PR
         id: release-info
         env:
-          LABELS_JSON: ${{ toJson(github.event.pull_request.labels) }}
-          PR_BODY: ${{ github.event.pull_request.body }}
-          SOURCE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_APP_LOGIN: vsts-npm-auth-release-bot[bot]
         run: |
-          $labels = @(
-            $env:LABELS_JSON |
-              ConvertFrom-Json |
-              ForEach-Object { [string]$_.name }
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          if ($env:GITHUB_REF -ne "refs/heads/main") {
+            Write-Output "::error::Release identification requires refs/heads/main; got $env:GITHUB_REF."
+            exit 1
+          }
+          if ((git rev-parse HEAD) -ne $env:GITHUB_SHA) {
+            Write-Output "::error::Identification checkout does not equal GITHUB_SHA."
+            exit 1
+          }
+
+          $pullRequests = @(
+            gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "repos/$env:GITHUB_REPOSITORY/commits/$env:GITHUB_SHA/pulls?per_page=100" |
+              ConvertFrom-Json
           )
+          $signalledPullRequests = @(
+            $pullRequests | Where-Object {
+              $candidateLabels = @($_.labels | ForEach-Object { [string]$_.name })
+              ([string]$_.title).StartsWith("[release-prep] ") -or
+                ([string]$_.head.ref).StartsWith("release-prep/") -or
+                $candidateLabels -contains "release-preparation" -or
+                @($candidateLabels | Where-Object { $_.StartsWith("release-package:") }).Count -gt 0
+            }
+          )
+          if ($signalledPullRequests.Count -eq 0) {
+            "is_release=false" >> $env:GITHUB_OUTPUT
+            Write-Output "The pushed commit is not associated with a release preparation PR."
+            exit 0
+          }
+
+          if ($pullRequests.Count -ne 1 -or $signalledPullRequests.Count -ne 1) {
+            Write-Output "::error::A release commit must have exactly one associated release preparation PR."
+            exit 1
+          }
+
+          $pullRequest = $signalledPullRequests[0]
+          $labels = @($pullRequest.labels | ForEach-Object { [string]$_.name })
           $packageLabels = @(
             $labels |
               Where-Object { $_.StartsWith("release-package:") }
@@ -61,38 +100,141 @@ jobs:
             }
           }
 
-          $oldVersionMatch = [regex]::Match([string]$env:PR_BODY, '(?m)^- Old version: `([^`]+)`\r?$')
-          $newVersionMatch = [regex]::Match([string]$env:PR_BODY, '(?m)^- New version: `([^`]+)`\r?$')
-          $oldVersion = if ($oldVersionMatch.Success) { $oldVersionMatch.Groups[1].Value } else { "" }
-          $newVersion = if ($newVersionMatch.Success) { $newVersionMatch.Groups[1].Value } else { "" }
+          $checks = [ordered]@{
+            "PR base is main" = [string]$pullRequest.base.ref -eq "main"
+            "PR is merged" = -not [string]::IsNullOrWhiteSpace([string]$pullRequest.merged_at)
+            "PR merge commit equals the pushed commit" = [string]$pullRequest.merge_commit_sha -eq $env:GITHUB_SHA
+            "PR author is the release App" = [string]$pullRequest.user.login -eq $env:RELEASE_APP_LOGIN
+            "PR head repository is this repository" = [string]$pullRequest.head.repo.full_name -eq $env:GITHUB_REPOSITORY
+            "PR uses the package release branch" = ([string]$pullRequest.head.ref).StartsWith("release-prep/$packageName/")
+            "PR has the release-preparation label" = $labels -contains "release-preparation"
+          }
+          foreach ($check in $checks.GetEnumerator()) {
+            if (-not $check.Value) {
+              Write-Output "::error::Release identification failed: $($check.Key)."
+              exit 1
+            }
+          }
 
+          $parentLine = (git rev-list --parents -n 1 $env:GITHUB_SHA).Trim()
+          $commitAndParents = @($parentLine.Split(' ', [StringSplitOptions]::RemoveEmptyEntries))
+          if ($commitAndParents.Count -ne 2) {
+            Write-Output "::error::The release commit must have exactly one parent."
+            exit 1
+          }
+
+          $parentSha = $commitAndParents[1]
+          $packageDirectory = "projects/$packageName"
+          $expectedPaths = @(
+            "$packageDirectory/package.json"
+            "$packageDirectory/package-lock.json"
+          )
+          $changedPaths = @(git diff --name-only --no-renames "$parentSha..$env:GITHUB_SHA")
+          $unexpectedPaths = @($changedPaths | Where-Object { $_ -notin $expectedPaths })
+          $missingPaths = @($expectedPaths | Where-Object { $_ -notin $changedPaths })
+          if ($unexpectedPaths.Count -gt 0 -or $missingPaths.Count -gt 0) {
+            Write-Output "::error::The release commit must change exactly $($expectedPaths -join ', ')."
+            exit 1
+          }
+
+          $currentManifest = Get-Content "$packageDirectory/package.json" -Raw | ConvertFrom-Json
+          $currentLockfile = Get-Content "$packageDirectory/package-lock.json" -Raw | ConvertFrom-Json -AsHashtable
+          $parentManifest = (git show "${parentSha}:$packageDirectory/package.json" | Out-String) | ConvertFrom-Json
+          $parentLockfile = (git show "${parentSha}:$packageDirectory/package-lock.json" | Out-String) | ConvertFrom-Json -AsHashtable
+          $currentRootLock = $currentLockfile["packages"][""]
+          $parentRootLock = $parentLockfile["packages"][""]
+          $oldVersion = [string]$parentManifest.version
+          $newVersion = [string]$currentManifest.version
+          $semVerPattern = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$'
+          if ($oldVersion -notmatch $semVerPattern -or $newVersion -notmatch $semVerPattern) {
+            Write-Output "::error::The release commit contains an invalid SemVer version."
+            exit 1
+          }
+
+          $currentSemanticVersion = [System.Management.Automation.SemanticVersion]$newVersion
+          $parentSemanticVersion = [System.Management.Automation.SemanticVersion]$oldVersion
+          $metadataChecks = [ordered]@{
+            "current package name" = [string]$currentManifest.name -eq $packageName
+            "current lockfile name" = [string]$currentLockfile["name"] -eq $packageName
+            "current lockfile version" = [string]$currentLockfile["version"] -eq $newVersion
+            "current root lock entry" = [string]$currentRootLock["name"] -eq $packageName -and [string]$currentRootLock["version"] -eq $newVersion
+            "parent package name" = [string]$parentManifest.name -eq $packageName
+            "parent lockfile name" = [string]$parentLockfile["name"] -eq $packageName
+            "parent lockfile version" = [string]$parentLockfile["version"] -eq $oldVersion
+            "parent root lock entry" = [string]$parentRootLock["name"] -eq $packageName -and [string]$parentRootLock["version"] -eq $oldVersion
+            "version increased" = $currentSemanticVersion -gt $parentSemanticVersion
+          }
+          foreach ($check in $metadataChecks.GetEnumerator()) {
+            if (-not $check.Value) {
+              Write-Output "::error::Release package metadata failed validation: $($check.Key)."
+              exit 1
+            }
+          }
+
+          $pullRequestNumber = [string]$pullRequest.number
+          if ($pullRequestNumber -notmatch '^[1-9]\d*$') {
+            Write-Output "::error::The associated release PR number is invalid."
+            exit 1
+          }
+
+          $pullRequestUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/pull/$pullRequestNumber"
+          "is_release=true" >> $env:GITHUB_OUTPUT
           "package_name=$packageName" >> $env:GITHUB_OUTPUT
           "old_version=$oldVersion" >> $env:GITHUB_OUTPUT
           "new_version=$newVersion" >> $env:GITHUB_OUTPUT
-          "source_sha=$env:SOURCE_SHA" >> $env:GITHUB_OUTPUT
+          "pull_request_number=$pullRequestNumber" >> $env:GITHUB_OUTPUT
+          "pull_request_url=$pullRequestUrl" >> $env:GITHUB_OUTPUT
+          "source_sha=$env:GITHUB_SHA" >> $env:GITHUB_OUTPUT
+          Write-Output "is_release=true"
           Write-Output "package_name=$packageName"
           Write-Output "old_version=$oldVersion"
           Write-Output "new_version=$newVersion"
-          Write-Output "source_sha=$env:SOURCE_SHA"
+          Write-Output "pull_request_number=$pullRequestNumber"
+          Write-Output "source_sha=$env:GITHUB_SHA"
 
   publish:
     name: Publish ${{ needs.identify-release.outputs.package-name }}
     needs:
       - identify-release
-    uses: ./.github/workflows/publish-package.yml
-    with:
-      package_name: ${{ needs.identify-release.outputs.package-name }}
-      source_sha: ${{ needs.identify-release.outputs.source-sha }}
+    if: needs.identify-release.outputs.is-release == 'true'
+    outputs:
+      dist-tag: ${{ steps.publish-package.outputs.dist-tag }}
+      installed-node-version: ${{ steps.publish-package.outputs.installed-node-version }}
+      installed-npm-version: ${{ steps.publish-package.outputs.installed-npm-version }}
+      cache-hit: ${{ steps.publish-package.outputs.cache-hit }}
+      npm-publish-outcome: ${{ steps.publish-package.outputs.npm-publish-outcome }}
+      git-tag-outcome: ${{ steps.publish-package.outputs.git-tag-outcome }}
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       id-token: write
+    environment: npm-publish
+    concurrency:
+      group: npm-publish-${{ needs.identify-release.outputs.package-name }}
+      cancel-in-progress: false
+      queue: max
+    steps:
+      - name: Check out release commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.identify-release.outputs.source-sha }}
+          fetch-tags: true
+          persist-credentials: false
+      - name: Publish package
+        id: publish-package
+        uses: ./.github/actions/publish-package
+        with:
+          package-name: ${{ needs.identify-release.outputs.package-name }}
+          source-sha: ${{ needs.identify-release.outputs.source-sha }}
+          node-version: 24.18.1
+          npm-version: 12.0.2
 
   release-summary:
     name: Add release summary
     needs:
       - identify-release
       - publish
-    if: ${{ always() && needs.identify-release.result == 'success' }}
+    if: ${{ always() && needs.identify-release.result == 'success' && needs.identify-release.outputs.is-release == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -106,9 +248,15 @@ jobs:
           NEW_VERSION: ${{ needs.identify-release.outputs.new-version }}
           OLD_VERSION: ${{ needs.identify-release.outputs.old-version }}
           PACKAGE_NAME: ${{ needs.identify-release.outputs.package-name }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          PUBLISH_OUTCOME: ${{ needs.publish.result }}
+          PR_NUMBER: ${{ needs.identify-release.outputs.pull-request-number }}
+          PR_URL: ${{ needs.identify-release.outputs.pull-request-url }}
+          DIST_TAG: ${{ needs.publish.outputs.dist-tag }}
+          NODE_VERSION: ${{ needs.publish.outputs.installed-node-version }}
+          NPM_VERSION: ${{ needs.publish.outputs.installed-npm-version }}
+          CACHE_HIT: ${{ needs.publish.outputs.cache-hit }}
+          NPM_PUBLISH_OUTCOME: ${{ needs.publish.outputs.npm-publish-outcome }}
+          GIT_TAG_OUTCOME: ${{ needs.publish.outputs.git-tag-outcome }}
+          PUBLISH_JOB_OUTCOME: ${{ needs.publish.result }}
           SOURCE_SHA: ${{ needs.identify-release.outputs.source-sha }}
         run: |
           $summaryParameters = @{
@@ -118,6 +266,12 @@ jobs:
             PullRequestNumber = $env:PR_NUMBER
             PullRequestUrl = $env:PR_URL
             SourceCommit = $env:SOURCE_SHA
-            PublishOutcome = $env:PUBLISH_OUTCOME
+            DistTag = $env:DIST_TAG
+            NodeVersion = $env:NODE_VERSION
+            NpmVersion = $env:NPM_VERSION
+            CacheHit = $env:CACHE_HIT
+            NpmPublishOutcome = $env:NPM_PUBLISH_OUTCOME
+            GitTagOutcome = $env:GIT_TAG_OUTCOME
+            PublishJobOutcome = $env:PUBLISH_JOB_OUTCOME
           }
           ./.github/scripts/write-publish-merged-release-pr-summary.ps1 @summaryParameters
