@@ -21,6 +21,7 @@ jobs:
       package-name: ${{ steps.dependabot-release-info.outputs.package_name }}
       pull-request-number: ${{ steps.dependabot-release-info.outputs.pull_request_number }}
       pull-request-url: ${{ steps.dependabot-release-info.outputs.pull_request_url }}
+      is-dependabot-merge: ${{ steps.dependabot-release-info.outputs.is_dependabot_merge }}
     steps:
       - name: Get affected package from merged Dependabot PR
         id: dependabot-release-info
@@ -32,6 +33,7 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
 
           "package_name=" >> $env:GITHUB_OUTPUT
+          "is_dependabot_merge=false" >> $env:GITHUB_OUTPUT
 
           if ($env:GITHUB_REF -ne "refs/heads/main") {
             Write-Output "::error::Dependabot release identification requires refs/heads/main; got $env:GITHUB_REF."
@@ -63,6 +65,8 @@ jobs:
             Write-Output "::error::The pushed commit is associated with more than one merged Dependabot PR."
             exit 1
           }
+
+          "is_dependabot_merge=true" >> $env:GITHUB_OUTPUT
 
           $pullRequest = $dependabotPullRequests[0]
           $pullRequestNumber = [string]$pullRequest.number
@@ -213,6 +217,7 @@ jobs:
           PACKAGE_NAME: ${{ needs.identify-affected-package.outputs.package-name }}
           DEPENDABOT_PR_NUMBER: ${{ needs.identify-affected-package.outputs.pull-request-number }}
           DEPENDABOT_PR_URL: ${{ needs.identify-affected-package.outputs.pull-request-url }}
+          IS_DEPENDABOT_MERGE: ${{ needs.identify-affected-package.outputs.is-dependabot-merge }}
           IDENTIFICATION_JOB_OUTCOME: ${{ needs.identify-affected-package.result }}
           DISPATCH_JOB_OUTCOME: ${{ needs.dispatch-release-preparation.result }}
           PREPARE_RELEASE_RUN_URL: ${{ needs.dispatch-release-preparation.outputs.workflow-run-url }}
@@ -222,6 +227,7 @@ jobs:
             PackageName = $env:PACKAGE_NAME
             PullRequestNumber = $env:DEPENDABOT_PR_NUMBER
             PullRequestUrl = $env:DEPENDABOT_PR_URL
+            IsDependabotMerge = $env:IS_DEPENDABOT_MERGE
             IdentificationJobOutcome = $env:IDENTIFICATION_JOB_OUTCOME
             DispatchJobOutcome = $env:DISPATCH_JOB_OUTCOME
             PrepareReleaseRunUrl = $env:PREPARE_RELEASE_RUN_URL
