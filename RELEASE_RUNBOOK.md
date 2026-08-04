@@ -3,7 +3,7 @@
 This repository releases `vsts-npm-auth-improved` and `create-vsts-npm-auth-improved`
 independently. A maintainer chooses a version by manually starting a package preparation workflow
 from `main`; that workflow prepares a pull request, waits for its checks and squash merge, and lets
-the matching push-triggered publisher publish to npm and create the Git tag.
+the matching push-triggered publisher create the Git tag and then publish to npm.
 
 Do not publish with a local `npm publish`, create a release tag manually, or bypass the preparation
 pull request. The automated publisher binds the npm provenance and annotated tag to the exact squash
@@ -133,37 +133,53 @@ Use the following recovery according to where the chain stopped:
   labels, changed files, package metadata, version transition, associated pull request, or squash SHA
   fails closed. Do not edit markers to force publication; determine why the generated pull request or
   merge no longer matches the trusted shape.
-- **Build, pack, or npm publish:** Inspect the matching `Publish <package>` workflow. Fix a genuine
-  package defect with a new release version. For a transient runner, registry, OIDC, or trusted
-  publisher failure, rerun the failed publisher job. npm trusted-publisher configuration for both
-  packages must name the calling workflow: `.github/workflows/publish-merged-release-pr.yml`. The
-  package-specific steps are implemented by the shared
-  `.github/actions/publish-package/action.yml` composite action.
-- **npm verification or provenance:** Registry metadata is retried for about two minutes. If it is
-  still incomplete, rerun the failed publisher job. If provenance exists but identifies a different
-  repository, ref, workflow, subject, or commit, stop: do not create or move a tag and do not try to
-  overwrite the npm version. Compare the attestation URL and release squash SHA, then investigate
-  the npm trusted-publisher configuration and the original workflow run.
-- **Tag:** If npm has the version but the tag step failed, use the idempotent rerun below. If a tag
-  exists without the npm version, or its peeled commit differs from the provenance commit, stop and
-  investigate; the workflow deliberately refuses to publish or move that tag.
+- **Build or pack:** Inspect the matching `Publish <package>` workflow. These steps run before the
+  release tag is created, so fix a genuine package defect with a new release version or rerun a
+  transient failure normally.
+- **Tag:** Tag creation and push run before `npm publish`. If either fails, npm is not attempted. Check
+  whether the remote tag exists before rerunning: a rejected push can still have reached GitHub. If
+  the tag is absent, rerun the failed publisher job. If the tag exists, use the recovery procedure
+  below.
+- **npm publish:** A publish failure can leave the release tag on GitHub. First check whether npm
+  accepted the version despite the reported failure. If it did, retain the tag and verify the
+  published package and provenance. If npm does not have the version, use the recovery procedure
+  below to remove the stranded tag before rerunning or preparing a corrected release. npm
+  trusted-publisher configuration for both packages must name the calling workflow:
+  `.github/workflows/publish-merged-release-pr.yml`. The package-specific steps are implemented by
+  the shared `.github/actions/publish-package/action.yml` composite action.
+- **npm verification or provenance:** If provenance exists but identifies a different repository,
+  ref, workflow, subject, or commit, stop: do not delete or move the tag and do not try to overwrite
+  the npm version. Compare the attestation URL and release squash SHA, then investigate the npm
+  trusted-publisher configuration and the original workflow run.
 
-### Recover a missing tag after npm succeeded
+### Recover a stranded tag after publication fails
 
-Rerun the original failed push-triggered publisher, preserving its original event SHA. Find it by
-workflow file and squash commit, then rerun only the failed jobs:
+Only remove a release tag after confirming that npm does not contain the package version and that
+the tag peels to the original release squash commit. Find the failed push-triggered publisher by
+workflow file and squash commit, inspect the npm package page and provenance, and verify the remote
+tag:
 
 ```shell
 RELEASE_SHA=replace-me
 PUBLISH_RUN_ID=replace-me
+RELEASE_TAG=replace-me
 
 gh run list --workflow publish-merged-release-pr.yml --commit "$RELEASE_SHA" --json databaseId,conclusion,url,headSha
+git ls-remote origin "refs/tags/$RELEASE_TAG" "refs/tags/$RELEASE_TAG^{}"
+```
+
+Stop if npm contains the version, the tag is missing, or the peeled tag commit does not equal
+`RELEASE_SHA`. After those checks pass, delete only the stranded remote tag and rerun the original
+failed job, preserving its original event SHA:
+
+```shell
+git push origin --delete "refs/tags/$RELEASE_TAG"
 gh run rerun "$PUBLISH_RUN_ID" --failed
 ```
 
-The merged-release workflow run contains the reusable publisher job for the package selected from
-the release PR. Do not dispatch another preparation, make an empty push, or create the tag locally.
-On rerun, the publisher uses the original merged release commit.
+Do not dispatch another preparation, make an empty push, or create or move the tag locally. On
+rerun, the publisher uses the original merged release commit and recreates the tag before attempting
+publication.
 
 ## Rotate or revoke the release App key
 

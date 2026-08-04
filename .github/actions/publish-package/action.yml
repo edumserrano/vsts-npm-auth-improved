@@ -1,5 +1,5 @@
 name: Publish package
-description: Build, inspect, smoke-test, publish, and tag an npm package release
+description: Build, inspect, smoke-test, tag, and publish an npm package release
 
 inputs:
   package-name:
@@ -203,14 +203,6 @@ runs:
 
         Write-Output "Git tag $env:GIT_TAG is available."
         exit 0
-    - name: Publish to npm
-      id: publish-npm
-      shell: pwsh
-      working-directory: projects/${{ inputs.package-name }}
-      env:
-        DIST_TAG: ${{ steps.release.outputs.dist_tag }}
-        TARBALL: ${{ steps.package.outputs.tarball }}
-      run: npm publish $env:TARBALL --access public --tag $env:DIST_TAG --registry=https://registry.npmjs.org/
     - name: Create and push release tag
       id: create-release-tag
       shell: pwsh
@@ -241,6 +233,14 @@ runs:
           Write-Output "::error::Could not push release tag $env:GIT_TAG."
           exit 1
         }
+    - name: Publish to npm
+      id: publish-npm
+      shell: pwsh
+      working-directory: projects/${{ inputs.package-name }}
+      env:
+        DIST_TAG: ${{ steps.release.outputs.dist_tag }}
+        TARBALL: ${{ steps.package.outputs.tarball }}
+      run: npm publish $env:TARBALL --access public --tag $env:DIST_TAG --registry=https://registry.npmjs.org/
     - name: Collect publish results
       id: publish-results
       if: ${{ always() }}
