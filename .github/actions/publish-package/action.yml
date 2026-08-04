@@ -72,10 +72,6 @@ runs:
         $versionParts = $versionWithoutBuildMetadata.Split("-", 2)
         if ($versionParts.Count -eq 2) {
           $distTag = $versionParts[1].Split(".", 2)[0]
-          if ($distTag -notin @("alpha", "beta", "rc")) {
-            Write-Output "::error::Unsupported prerelease channel: $distTag"
-            exit 1
-          }
         }
 
         "version=$version" >> $env:GITHUB_OUTPUT

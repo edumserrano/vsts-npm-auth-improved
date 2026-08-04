@@ -152,6 +152,12 @@ jobs:
           }
 
           $newVersion = [string](Get-Content package.json -Raw | ConvertFrom-Json).version
+          $releaseVersionPattern = '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(alpha|beta|rc)\.(0|[1-9]\d*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$'
+          if ($newVersion -cnotmatch $releaseVersionPattern) {
+            Write-Output "::error::Unsupported release version: $newVersion. Use a stable SemVer version or an alpha.N, beta.N, or rc.N prerelease."
+            exit 1
+          }
+
           $releaseTag = "$env:PACKAGE_NAME@$newVersion"
           "old_version=$oldVersion" >> $env:GITHUB_OUTPUT
           "new_version=$newVersion" >> $env:GITHUB_OUTPUT
