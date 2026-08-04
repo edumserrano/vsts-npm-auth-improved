@@ -84,40 +84,12 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v6
-      - name: Set up Node.js
-        id: setup-node
-        uses: actions/setup-node@v6
+      - name: Build and test package
+        uses: ./.github/actions/build-and-test-package
         with:
+          project-directory: ${{ env.PACKAGE_DIRECTORY }}
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ${{ env.PACKAGE_DIRECTORY }}/package-lock.json
-      - name: Set up npm
-        working-directory: ${{ env.PACKAGE_DIRECTORY }}
-        run: npm install --global "npm@$env:NPM_VERSION"
-      - name: Show npm configuration
-        working-directory: ${{ env.PACKAGE_DIRECTORY }}
-        run: |
-          Write-Output "::group::npm config list"
-          npm config list
-          Write-Output "::endgroup::"
-          Write-Output "::group::npm config list -l - show all defaults"
-          npm config list -l
-          Write-Output "::endgroup::"
-      - name: Install dependencies
-        working-directory: ${{ env.PACKAGE_DIRECTORY }}
-        run: npm ci
-      - name: Build
-        working-directory: ${{ env.PACKAGE_DIRECTORY }}
-        run: npm run build
-      - name: Test
-        working-directory: ${{ env.PACKAGE_DIRECTORY }}
-        run: npm test
-      - name: Add job summary
-        if: ${{ always() }}
-        working-directory: ${{ github.workspace }}
-        env:
-          CACHE_HIT: ${{ steps.setup-node.outputs.cache-hit }}
-        run: ./.github/scripts/write-build-test-summary.ps1 -ProjectDirectory $env:PACKAGE_DIRECTORY -CacheHit $env:CACHE_HIT
+          npm-version: ${{ env.NPM_VERSION }}
 
   prepare-release:
     name: Prepare release ${{ inputs.package }}

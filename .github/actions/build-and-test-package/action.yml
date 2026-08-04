@@ -1,0 +1,60 @@
+name: Build and test package
+description: Set up Node.js and npm, install dependencies, build, test, and summarize an npm package
+
+inputs:
+  project-directory:
+    description: Repository-relative npm project directory
+    required: true
+  node-version:
+    description: Node.js version to install
+    required: true
+  npm-version:
+    description: npm version to install
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      id: setup-node
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+        cache-dependency-path: ${{ inputs.project-directory }}/package-lock.json
+    - name: Set up npm
+      shell: pwsh
+      working-directory: ${{ inputs.project-directory }}
+      env:
+        NPM_VERSION: ${{ inputs.npm-version }}
+      run: npm install --global "npm@$env:NPM_VERSION"
+    - name: Show npm configuration
+      shell: pwsh
+      working-directory: ${{ inputs.project-directory }}
+      run: |
+        Write-Output "::group::npm config list"
+        npm config list
+        Write-Output "::endgroup::"
+        Write-Output "::group::npm config list -l - show all defaults"
+        npm config list -l
+        Write-Output "::endgroup::"
+    - name: Install dependencies
+      shell: pwsh
+      working-directory: ${{ inputs.project-directory }}
+      run: npm ci
+    - name: Build
+      shell: pwsh
+      working-directory: ${{ inputs.project-directory }}
+      run: npm run build
+    - name: Test
+      shell: pwsh
+      working-directory: ${{ inputs.project-directory }}
+      run: npm test
+    - name: Add job summary
+      if: ${{ always() }}
+      shell: pwsh
+      working-directory: ${{ github.workspace }}
+      env:
+        CACHE_HIT: ${{ steps.setup-node.outputs.cache-hit }}
+        PROJECT_DIRECTORY: ${{ inputs.project-directory }}
+      run: ./.github/scripts/write-build-test-summary.ps1 -ProjectDirectory $env:PROJECT_DIRECTORY -CacheHit $env:CACHE_HIT

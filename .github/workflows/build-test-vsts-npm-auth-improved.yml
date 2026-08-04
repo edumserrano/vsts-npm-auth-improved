@@ -23,32 +23,9 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v6
-      - name: Set up Node.js
-        id: setup-node
-        uses: actions/setup-node@v6
+      - name: Build and test package
+        uses: ./.github/actions/build-and-test-package
         with:
+          project-directory: projects/vsts-npm-auth-improved
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: projects/vsts-npm-auth-improved/package-lock.json
-      - name: Set up npm
-        run: npm install --global "npm@$env:NPM_VERSION"
-      - name: Show npm configuration
-        run: |
-          Write-Output "::group::npm config list"
-          npm config list
-          Write-Output "::endgroup::"
-          Write-Output "::group::npm config list -l - show all defaults"
-          npm config list -l
-          Write-Output "::endgroup::"
-      - name: Install dependencies
-        run: npm ci
-      - name: Build
-        run: npm run build
-      - name: Test
-        run: npm test
-      - name: Add job summary
-        if: ${{ always() }}
-        working-directory: ${{ github.workspace }}
-        env:
-          CACHE_HIT: ${{ steps.setup-node.outputs.cache-hit }}
-        run: ./.github/scripts/write-build-test-summary.ps1 -ProjectDirectory "projects/vsts-npm-auth-improved" -CacheHit $env:CACHE_HIT
+          npm-version: ${{ env.NPM_VERSION }}
