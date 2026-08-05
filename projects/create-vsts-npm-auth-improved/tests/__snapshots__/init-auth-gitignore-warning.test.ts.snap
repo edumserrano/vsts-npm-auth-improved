@@ -29,7 +29,9 @@ exports[`displays the Git ignore warning when changed npmrc files are ignored 1`
 │
 ◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
 │
-▲  The following .npmrc files were created or updated but are ignored by Git. Project-level .npmrc files are often committed so npm settings are shared with other contributors. Review each file for credentials or other secrets, then remove the relevant .gitignore rules and commit and push any files that are safe to share:
+▲  The following .npmrc files were created or updated but are ignored by Git.
+│  Project-level .npmrc files are often committed so npm settings are shared with other contributors.
+│  Review each file for credentials or other secrets, then remove the relevant .gitignore rules and commit and push any files that are safe to share:
 │
 │  - .npmrc
 │

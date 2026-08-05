@@ -263,7 +263,9 @@ function validateRegistryUrl(value: string | undefined): string | undefined {
 function formatNpmrcGitignoreWarning(ignoredDisplayPaths: readonly string[]): string {
   const files = ignoredDisplayPaths.map(displayPath => `- ${displayPath}`).join("\n");
   return [
-    "The following .npmrc files were created or updated but are ignored by Git. Project-level .npmrc files are often committed so npm settings are shared with other contributors. Review each file for credentials or other secrets, then remove the relevant .gitignore rules and commit and push any files that are safe to share:",
+    "The following .npmrc files were created or updated but are ignored by Git.",
+    "Project-level .npmrc files are often committed so npm settings are shared with other contributors.",
+    "Review each file for credentials or other secrets, then remove the relevant .gitignore rules and commit and push any files that are safe to share:",
     "",
     files,
   ].join("\n");
