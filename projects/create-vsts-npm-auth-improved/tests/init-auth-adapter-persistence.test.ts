@@ -88,7 +88,6 @@ test("reports a later rejected adapter save as potentially partial", async () =>
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .toggleMultiselectItem()
     .acceptMultiselectValues();

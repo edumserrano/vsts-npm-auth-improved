@@ -4,10 +4,10 @@ exports[`configures package.json content: creates managed scripts and the develo
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -32,10 +32,10 @@ exports[`configures package.json content: overwrites conflicts while preserving 
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -60,10 +60,10 @@ exports[`configures package.json content: replaces non-object script and depende
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │

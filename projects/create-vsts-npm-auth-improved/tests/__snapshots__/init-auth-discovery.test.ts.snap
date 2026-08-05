@@ -4,10 +4,10 @@ exports[`does not follow a symbolic-link directory during discovery 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -30,10 +30,10 @@ exports[`excludes node_modules case-insensitively 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 2 package.json files.
 │
@@ -57,9 +57,9 @@ exports[`reports that no packages were discovered 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█│  ./█◇  Where should package.json files be searched for?
+◇  Where should package.json files be searched for?
 │  ./
 │
 ◇  Found 0 package.json files.
@@ -75,10 +75,10 @@ exports[`reports that packages were discovered but none were selected 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -101,10 +101,10 @@ exports[`shows deterministic nested discovery while excluding dependency and hid
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 8 package.json files.
 │

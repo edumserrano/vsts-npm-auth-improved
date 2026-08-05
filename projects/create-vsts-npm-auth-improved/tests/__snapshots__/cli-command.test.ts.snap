@@ -4,10 +4,10 @@ exports[`dispatches the default command through the real workflow 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 0 package.json files.
 │
@@ -22,10 +22,10 @@ exports[`dispatches the explicit init-auth command through the real workflow 1`]
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 0 package.json files.
 │
@@ -112,10 +112,10 @@ exports[`reports a known Error from the package adapter boundary 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │

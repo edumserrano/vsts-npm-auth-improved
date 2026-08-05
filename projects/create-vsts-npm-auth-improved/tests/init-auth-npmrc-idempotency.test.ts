@@ -77,7 +77,6 @@ test(
     });
     const secondCommand = InitAuthCommand.invokeAsync();
     await new PromptsInteraction()
-      .enterText(".")
       .submitText()
       .down()
       .toggleMultiselectItem()

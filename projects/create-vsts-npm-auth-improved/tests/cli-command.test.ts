@@ -73,7 +73,7 @@ test.each([
   const command = InitAuthCommand.invokeAsync({
     invocation: invocation satisfies InitAuthInvocation,
   });
-  await new PromptsInteraction().enterText(".").submitText();
+  await new PromptsInteraction().submitText();
   await command;
 
   expect(process.exitCode ?? 0).toBe(0);
@@ -161,7 +161,6 @@ test("reports a known Error from the package adapter boundary", async () => {
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .down()
     .toggleMultiselectItem()

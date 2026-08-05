@@ -82,8 +82,8 @@ async function getConfigPathAsync(options: AuthCommandOptionsFromCli): Promise<s
 
   const configPathPromptResult = await prompts.text({
     message: "Where is the NPM configuration file?",
-    defaultValue: "./.npmrc",
     placeholder: "./.npmrc",
+    initialValue: "./.npmrc",
     validate: value => {
       if (typeof value === "undefined") {
         return undefined; // valid, no validation error message displayed
