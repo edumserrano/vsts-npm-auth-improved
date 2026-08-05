@@ -13,8 +13,6 @@ type IsolatedConfigLocations = {
 
 const CORRECT_MANAGED_CONFIG = [
   "package-lock=true",
-  "lockfile-version=3",
-  "legacy-peer-deps=true",
   "audit=false",
   "fund=false",
 ].join("\n");
@@ -76,6 +74,8 @@ test.each([
     const content = await project.readFileAsync(".npmrc");
     expect(content).toContain("registry=https://prompted.example/");
     expectManagedConfig(content);
+    expect(content).not.toContain("lockfile-version=");
+    expect(content).not.toContain("legacy-peer-deps=");
     await expectInheritedConfigsUnchanged(project, isolated);
   },
 );
@@ -185,7 +185,7 @@ test("uses npm's effective final duplicate project registry", async () => {
   expect(await project.readFileAsync(".npmrc")).toBe(originalContent);
 });
 
-test("corrects managed values while preserving registries, credentials, and unrelated settings", async () => {
+test("corrects managed values while preserving registries, credentials, and unmanaged settings", async () => {
   const project = await NpmProject.createAsync("managed-values");
   await project.createPackageAsync({
     npmrc: [
@@ -219,6 +219,8 @@ test("corrects managed values while preserving registries, credentials, and unre
   expect(content).toContain("registry=https://project.example/");
   expect(content).not.toContain("must-not-replace");
   expectManagedConfig(content);
+  expect(content).toContain("lockfile-version=2");
+  expect(content).toContain("legacy-peer-deps=false");
   expect(content.toLowerCase()).not.toContain("always-auth");
   expect(content).toContain("@example:registry=https://scoped.example/");
   expect(content).toContain("//pkgs.example/:_authToken=secret-token");

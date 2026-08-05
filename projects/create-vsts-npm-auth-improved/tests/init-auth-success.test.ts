@@ -254,8 +254,6 @@ function canonicalNpmrc(registry: string): string {
   return [
     `registry=${registry}`,
     "package-lock=true",
-    "lockfile-version=3",
-    "legacy-peer-deps=true",
     "audit=false",
     "fund=false",
   ].join("\n");

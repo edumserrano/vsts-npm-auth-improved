@@ -45,6 +45,7 @@ const scenarios: readonly NpmrcWorkflowScenario[] = [
       registry: promptedRegistry,
       ...EXPECTED_MANAGED_NPM_CONFIG,
     },
+    absentKeys: ["lockfile-version", "legacy-peer-deps"],
     promptForRegistry: true,
   },
   {
@@ -55,6 +56,7 @@ const scenarios: readonly NpmrcWorkflowScenario[] = [
       "@scope:registry": "https://scope.test/",
       ...EXPECTED_MANAGED_NPM_CONFIG,
     },
+    absentKeys: ["lockfile-version", "legacy-peer-deps"],
     promptForRegistry: true,
   },
   {
@@ -68,6 +70,7 @@ const scenarios: readonly NpmrcWorkflowScenario[] = [
       registry: effectiveRegistry,
       ...EXPECTED_MANAGED_NPM_CONFIG,
     },
+    absentKeys: ["lockfile-version", "legacy-peer-deps"],
     promptForRegistry: false,
   },
   {
@@ -90,6 +93,8 @@ const scenarios: readonly NpmrcWorkflowScenario[] = [
       "@scope:registry": "https://scope.test/",
       "//existing.test/:_authToken": "secret",
       "custom-setting": "value",
+      "lockfile-version": "2",
+      "legacy-peer-deps": "false",
       ...EXPECTED_MANAGED_NPM_CONFIG,
     },
     absentKeys: ["always-auth", "//existing.test/:always-auth"],

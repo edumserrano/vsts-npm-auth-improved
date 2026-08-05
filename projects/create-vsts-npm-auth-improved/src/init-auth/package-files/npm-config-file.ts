@@ -3,9 +3,6 @@ import path from "node:path";
 
 const MANAGED_PROJECT_VALUES = {
   "package-lock": true,
-  // npm's bundled definition exposes this project's parsed value as a string.
-  "lockfile-version": "3",
-  "legacy-peer-deps": true,
   audit: false,
   fund: false,
 } as const;
