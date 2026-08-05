@@ -23,7 +23,7 @@ const existingRegistry = "https://existing.test/";
 
 const managedScripts = {
   "registry-auth":
-    "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read",
+    "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --no-force",
   "preinstall-packages": "npm run registry-auth",
   "install-packages": "npm i",
 } as const;
