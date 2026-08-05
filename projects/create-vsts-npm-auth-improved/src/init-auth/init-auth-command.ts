@@ -4,7 +4,6 @@ import { Command } from "commander";
 import { buildAuthSetupPlan, writeAuthSetupPlan } from "./auth-setup/auth-setup-plan";
 import { formatAuthSetupSummary, summarizeAuthSetupPlan } from "./auth-setup/auth-setup-summary";
 import { checkChangedNpmrcFilesForGitignore } from "./auth-setup/npmrc-gitignore-check";
-import { formatNpmrcGitignoreWarning } from "./auth-setup/npmrc-gitignore-warning";
 import { discoverPackageJsonFiles } from "./package-files/package-json-discovery";
 import { formatInitAuthFailure, InitAuthFailure } from "./init-auth-failure";
 import { PromptMessages, prompts } from "./prompts-utils";
@@ -135,13 +134,9 @@ async function handleInitAuthCommandAsync(): Promise<void> {
     spinnerPrompt.stop("Configuration files are ready.");
     spinnerPrompt = null;
     prompts.log.success(formatAuthSetupSummary(summary));
-    if (
-      gitignoreCheck.status === "checked" &&
-      gitignoreCheck.ignoredDisplayPaths.length > 0
-    ) {
-      prompts.log.warn(
-        formatNpmrcGitignoreWarning(gitignoreCheck.ignoredDisplayPaths),
-      );
+    if (gitignoreCheck.status === "checked" && gitignoreCheck.ignoredDisplayPaths.length > 0) {
+      const npmrcGitIgnoredWarningMessage = formatNpmrcGitignoreWarning(gitignoreCheck.ignoredDisplayPaths);
+      prompts.log.warn(npmrcGitIgnoredWarningMessage);
     }
 
     prompts.outro("Authentication configuration complete. 😊");
@@ -263,4 +258,13 @@ function validateRegistryUrl(value: string | undefined): string | undefined {
   }
 
   return undefined;
+}
+
+function formatNpmrcGitignoreWarning(ignoredDisplayPaths: readonly string[]): string {
+  const files = ignoredDisplayPaths.map(displayPath => `- ${displayPath}`).join("\n");
+  return [
+    "The following .npmrc files were created or updated but are ignored by Git. Project-level .npmrc files are often committed so npm settings are shared with other contributors. Review each file for credentials or other secrets, then remove the relevant .gitignore rules and commit and push any files that are safe to share:",
+    "",
+    files,
+  ].join("\n");
 }
