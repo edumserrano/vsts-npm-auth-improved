@@ -108,7 +108,7 @@ this order:
 ```json
 {
   "scripts": {
-    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read",
+    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --no-force",
     "preinstall-packages": "npm run registry-auth",
     "install-packages": "npm i"
   }
@@ -131,6 +131,13 @@ npm run install-packages
 
 Its `preinstall-packages` hook authenticates first, then `npm i` installs the
 project dependencies using the configured project registry.
+
+If authentication fails, retry from the project directory with forced token
+acquisition:
+
+```shell
+npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --force
+```
 
 Conflicting values for the managed dependency or scripts are overwritten.
 Unrelated fields, dependencies, and scripts are preserved, with unrelated
