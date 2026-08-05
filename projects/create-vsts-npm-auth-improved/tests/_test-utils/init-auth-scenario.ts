@@ -10,7 +10,7 @@ export type SinglePackageScenarioOptions = {
   readonly promptedRegistry?: string;
 };
 
-export async function runSinglePackageScenario({
+export async function runSinglePackageScenarioAsync({
   name,
   npmrc,
   packageJson,

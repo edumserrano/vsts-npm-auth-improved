@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { afterEach, expect, test, vi } from "vitest";
 import {
-  loadNpmPackageJsonFile,
+  loadNpmPackageJsonFileAsync,
   NpmPackageJsonFileError,
 } from "../src/init-auth/package-files/npm-package-json-file";
 import {
@@ -29,7 +29,7 @@ vi.mock(
     >();
     return {
       ...actual,
-      loadNpmPackageJsonFile: vi.fn(actual.loadNpmPackageJsonFile),
+      loadNpmPackageJsonFileAsync: vi.fn(actual.loadNpmPackageJsonFileAsync),
     };
   },
 );
@@ -152,7 +152,7 @@ test("reports a known Error from the package adapter boundary", async () => {
   const output = mockStdoutWrite({
     temporaryRoots: [project.root],
   });
-  vi.mocked(loadNpmPackageJsonFile).mockRejectedValueOnce(
+  vi.mocked(loadNpmPackageJsonFileAsync).mockRejectedValueOnce(
     new NpmPackageJsonFileError("read", project.path("package.json"), {
       cause: new Error("filesystem read failed"),
     }),

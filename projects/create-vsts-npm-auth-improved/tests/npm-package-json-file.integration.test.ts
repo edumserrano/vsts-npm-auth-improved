@@ -1,7 +1,7 @@
 import path from "node:path";
 import { afterEach, expect, test } from "vitest";
 import {
-  loadNpmPackageJsonFile,
+  loadNpmPackageJsonFileAsync,
   NpmPackageJsonFileError,
 } from "../src/init-auth/package-files/npm-package-json-file";
 import { NpmProject } from "@test-utils/npm-project";
@@ -73,14 +73,14 @@ test.each([
   const project = await NpmProject.createAsync(label);
   await project.createPackageAsync({ packageJson: JSON.stringify(initial) });
 
-  const adapter = await loadNpmPackageJsonFile({
+  const adapter = await loadNpmPackageJsonFileAsync({
     packageDirectory: project.root,
   });
   expect(adapter).toMatchObject({
     disposition: "updated",
     filePath: path.join(project.root, "package.json"),
   });
-  await adapter.save();
+  await adapter.saveAsync();
 
   expect(JSON.parse(await project.readFileAsync("package.json"))).toEqual(expected);
 });
@@ -98,10 +98,10 @@ test("passes all dependency sections through npm sorting and reconciliation", as
     })}`,
   });
 
-  const adapter = await loadNpmPackageJsonFile({
+  const adapter = await loadNpmPackageJsonFileAsync({
     packageDirectory: project.root,
   });
-  await adapter.save();
+  await adapter.saveAsync();
 
   const content = await project.readFileAsync("package.json");
   expect(content.startsWith("\uFEFF")).toBe(false);
@@ -129,23 +129,23 @@ test("is semantically idempotent on a second run without saving again", async ()
     }),
   });
 
-  const firstRun = await loadNpmPackageJsonFile({
+  const firstRun = await loadNpmPackageJsonFileAsync({
     packageDirectory: project.root,
   });
-  await firstRun.save();
+  await firstRun.saveAsync();
   const savedContent = await project.readFileAsync("package.json");
 
-  const secondRun = await loadNpmPackageJsonFile({
+  const secondRun = await loadNpmPackageJsonFileAsync({
     packageDirectory: project.root,
   });
   expect(secondRun.disposition).toBe("unchanged");
-  await secondRun.save();
+  await secondRun.saveAsync();
   expect(await project.readFileAsync("package.json")).toBe(savedContent);
 });
 test("maps a missing package file to a read failure", async () => {
   const project = await NpmProject.createAsync("missing-package-json");
 
-  await expect(loadNpmPackageJsonFile({ packageDirectory: project.root })).rejects.toMatchObject({
+  await expect(loadNpmPackageJsonFileAsync({ packageDirectory: project.root })).rejects.toMatchObject({
     filePath: project.path("package.json"),
     issue: undefined,
     name: "NpmPackageJsonFileError",
@@ -157,7 +157,7 @@ test("maps malformed JSON to an invalid-json failure", async () => {
   const project = await NpmProject.createAsync("malformed-package-json");
   await project.createPackageAsync({ packageJson: '{"name":' });
 
-  await expect(loadNpmPackageJsonFile({ packageDirectory: project.root })).rejects.toMatchObject({
+  await expect(loadNpmPackageJsonFileAsync({ packageDirectory: project.root })).rejects.toMatchObject({
     filePath: project.path("package.json"),
     issue: "invalid-json",
     name: "NpmPackageJsonFileError",
@@ -171,7 +171,7 @@ test.each(["null", "[]", '"package"', "42", "true"])(
     const project = await NpmProject.createAsync(`non-object-${packageJson}`);
     await project.createPackageAsync({ packageJson });
 
-    await expect(loadNpmPackageJsonFile({ packageDirectory: project.root })).rejects.toMatchObject({
+    await expect(loadNpmPackageJsonFileAsync({ packageDirectory: project.root })).rejects.toMatchObject({
       filePath: project.path("package.json"),
       issue: "root-not-object",
       name: "NpmPackageJsonFileError",

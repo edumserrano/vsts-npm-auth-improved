@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { canonicalNpmrc } from "@test-utils/configuration-fixtures";
-import { runSinglePackageScenario } from "@test-utils/init-auth-scenario";
+import { runSinglePackageScenarioAsync } from "@test-utils/init-auth-scenario";
 import { NpmProject } from "@test-utils/npm-project";
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
 
@@ -87,7 +87,7 @@ test.each([
 ] as const)(
   "configures package.json content: %s",
   async (_description, packageJson, expectedPackageJson) => {
-    const scenario = await runSinglePackageScenario({
+    const scenario = await runSinglePackageScenarioAsync({
       name: `package-json-${_description}`,
       packageJson,
       npmrc: canonicalNpmrc(existingRegistry),

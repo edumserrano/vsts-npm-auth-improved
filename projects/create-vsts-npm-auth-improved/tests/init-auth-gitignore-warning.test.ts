@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import {
-  checkChangedNpmrcFilesForGitignore,
+  checkChangedNpmrcFilesForGitignoreAsync,
   NpmrcGitignoreCheckResult,
 } from "../src/init-auth/auth-setup/npmrc-gitignore-check";
 import { packageJsonContent } from "@test-utils/configuration-fixtures";
@@ -24,8 +24,8 @@ vi.mock(
     >();
     return {
       ...actual,
-      checkChangedNpmrcFilesForGitignore: vi.fn(
-        actual.checkChangedNpmrcFilesForGitignore,
+      checkChangedNpmrcFilesForGitignoreAsync: vi.fn(
+        actual.checkChangedNpmrcFilesForGitignoreAsync,
       ),
     };
   },
@@ -93,7 +93,7 @@ async function invokeInitAuth(
   }
 
   if (scenario.checkResult !== undefined) {
-    vi.mocked(checkChangedNpmrcFilesForGitignore).mockResolvedValueOnce(
+    vi.mocked(checkChangedNpmrcFilesForGitignoreAsync).mockResolvedValueOnce(
       scenario.checkResult,
     );
   }
@@ -110,7 +110,7 @@ async function invokeInitAuth(
     .submitText();
   await command;
 
-  expect(checkChangedNpmrcFilesForGitignore).toHaveBeenCalledOnce();
+  expect(checkChangedNpmrcFilesForGitignoreAsync).toHaveBeenCalledOnce();
   expect(await project.existsAsync(".npmrc")).toBe(true);
   return output;
 }

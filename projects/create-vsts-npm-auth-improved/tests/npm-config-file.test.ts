@@ -1,11 +1,11 @@
 import path from "node:path";
 import { expect, test } from "vitest";
 import {
-  loadNpmConfigFileWithDependencies,
+  loadNpmConfigFileWithDependenciesAsync,
   NpmConfigFileError,
 } from "../src/init-auth/package-files/npm-config-file";
 
-type TestDependencies = Parameters<typeof loadNpmConfigFileWithDependencies>[1];
+type TestDependencies = Parameters<typeof loadNpmConfigFileWithDependenciesAsync>[1];
 
 type ConfigCall = {
   readonly key: string;
@@ -95,7 +95,7 @@ test("constructs a controlled package-local config and performs only required se
   const packageDirectory = path.resolve("fixtures", "package");
   const npmPath = path.resolve("fixtures", "npm-runtime");
 
-  const adapter = await loadNpmConfigFileWithDependencies(
+  const adapter = await loadNpmConfigFileWithDependenciesAsync(
     {
       argv: ["--registry=https://cli.example/", "--prefix=ignored"],
       env: environment,
@@ -146,7 +146,7 @@ test("constructs a controlled package-local config and performs only required se
 test("marks a missing file created and sets only a non-empty prompted registry", async () => {
   resetFakeConfig({ effectiveValues: { registry: "https://inherited.example/" } });
   const packageDirectory = path.resolve("fixtures", "missing-package");
-  const adapter = await loadNpmConfigFileWithDependencies(
+  const adapter = await loadNpmConfigFileWithDependenciesAsync(
     { packageDirectory },
     createDependencies(false),
   );
@@ -185,7 +185,7 @@ test("reports an already-correct project as unchanged without touching unmanaged
     rawProjectValues: { registry: "https://project.example/", color: true },
   });
 
-  const adapter = await loadNpmConfigFileWithDependencies(
+  const adapter = await loadNpmConfigFileWithDependenciesAsync(
     { packageDirectory: path.resolve("fixtures", "correct-package") },
     createDependencies(true),
   );
@@ -201,7 +201,7 @@ test("translates loading and saving failures into operation-specific adapter err
   const packageDirectory = path.resolve("fixtures", "failure-package");
 
   await expect(
-    loadNpmConfigFileWithDependencies({ packageDirectory }, createDependencies(true)),
+    loadNpmConfigFileWithDependenciesAsync({ packageDirectory }, createDependencies(true)),
   ).rejects.toMatchObject({
     cause: loadCause,
     filePath: path.join(packageDirectory, ".npmrc"),
@@ -211,11 +211,11 @@ test("translates loading and saving failures into operation-specific adapter err
 
   const saveCause = new Error("save exploded");
   resetFakeConfig({ saveFailure: saveCause });
-  const adapter = await loadNpmConfigFileWithDependencies(
+  const adapter = await loadNpmConfigFileWithDependenciesAsync(
     { packageDirectory },
     createDependencies(true),
   );
-  await expect(adapter.save()).rejects.toMatchObject({
+  await expect(adapter.saveAsync()).rejects.toMatchObject({
     cause: saveCause,
     filePath: path.join(packageDirectory, ".npmrc"),
     name: "NpmConfigFileError",
@@ -250,7 +250,7 @@ function createDependencies(fileExists: boolean): TestDependencies {
       },
       shorthands: {},
     },
-    async fileExists() {
+    async fileExistsAsync() {
       return fileExists;
     },
   };

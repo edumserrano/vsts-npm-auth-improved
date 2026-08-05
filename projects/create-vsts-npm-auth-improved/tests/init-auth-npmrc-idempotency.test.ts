@@ -7,7 +7,7 @@ import {
 } from "@test-utils/configuration-fixtures";
 import {
   restoreCapturedOutput,
-  runSinglePackageScenario,
+  runSinglePackageScenarioAsync,
 } from "@test-utils/init-auth-scenario";
 import { NpmProject } from "@test-utils/npm-project";
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
@@ -49,7 +49,7 @@ test(
       "legacy-peer-deps=false",
       "fund=true",
     ].join("\n");
-    const scenario = await runSinglePackageScenario({
+    const scenario = await runSinglePackageScenarioAsync({
       name: "npmrc-semantic-idempotency",
       packageJson: configuredPackageJsonContent(),
       npmrc,

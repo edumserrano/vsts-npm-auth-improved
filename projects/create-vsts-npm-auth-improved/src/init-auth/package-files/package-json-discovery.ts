@@ -14,7 +14,7 @@ export type PackageJsonDiscoveryResult =
   | { readonly status: "found"; readonly packageJsonPaths: readonly string[] }
   | { readonly status: "failed"; readonly failure: DirectorySearchFailure };
 
-export async function discoverPackageJsonFiles(
+export async function discoverPackageJsonFilesAsync(
   rootDirectory: string,
 ): Promise<PackageJsonDiscoveryResult> {
   const resolvedRoot = path.resolve(rootDirectory);

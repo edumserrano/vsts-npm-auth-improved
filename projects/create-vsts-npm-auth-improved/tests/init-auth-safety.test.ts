@@ -5,11 +5,11 @@ import { globby } from "globby";
 import { afterEach, expect, test, vi } from "vitest";
 import { packageJsonContent } from "@test-utils/configuration-fixtures";
 import {
-  loadNpmConfigFile,
+  loadNpmConfigFileAsync,
   NpmConfigFileError,
 } from "../src/init-auth/package-files/npm-config-file";
 import {
-  loadNpmPackageJsonFile,
+  loadNpmPackageJsonFileAsync,
   NpmPackageJsonFile,
   NpmPackageJsonFileError,
 } from "../src/init-auth/package-files/npm-package-json-file";
@@ -28,7 +28,7 @@ vi.mock("../src/init-auth/package-files/npm-config-file", async (importOriginal)
   const actual = await importOriginal<
     typeof import("../src/init-auth/package-files/npm-config-file")
   >();
-  return { ...actual, loadNpmConfigFile: vi.fn(actual.loadNpmConfigFile) };
+  return { ...actual, loadNpmConfigFileAsync: vi.fn(actual.loadNpmConfigFileAsync) };
 });
 
 vi.mock(
@@ -39,7 +39,7 @@ vi.mock(
     >();
     return {
       ...actual,
-      loadNpmPackageJsonFile: vi.fn(actual.loadNpmPackageJsonFile),
+      loadNpmPackageJsonFileAsync: vi.fn(actual.loadNpmPackageJsonFileAsync),
     };
   },
 );
@@ -96,8 +96,8 @@ test("reports a discovery failure before package reads or writes", async () => {
   await command;
 
   expect(process.exitCode).toBe(1);
-  expect(vi.mocked(loadNpmPackageJsonFile).mock.calls).toEqual([]);
-  expect(vi.mocked(loadNpmConfigFile).mock.calls).toEqual([]);
+  expect(vi.mocked(loadNpmPackageJsonFileAsync).mock.calls).toEqual([]);
+  expect(vi.mocked(loadNpmConfigFileAsync).mock.calls).toEqual([]);
   expect(await project.readTreeAsync()).toEqual(["package.json"]);
   expect(await project.readFileAsync("package.json")).toBe(originalPackageJson);
   expect(await project.existsAsync(".npmrc")).toBe(false);
@@ -154,7 +154,7 @@ test("reports a package.json read failure with relative context and zero writes"
   const output = mockStdoutWrite({
     temporaryRoots: [project.root],
   });
-  vi.mocked(loadNpmPackageJsonFile).mockRejectedValueOnce(
+  vi.mocked(loadNpmPackageJsonFileAsync).mockRejectedValueOnce(
     new NpmPackageJsonFileError("read", project.path("package.json"), {
       cause: nodeError("permission denied", "EACCES"),
     }),
@@ -193,7 +193,7 @@ test("reports an .npmrc read failure with relative context and zero writes", asy
   const output = mockStdoutWrite({
     temporaryRoots: [project.root],
   });
-  vi.mocked(loadNpmConfigFile).mockRejectedValueOnce(
+  vi.mocked(loadNpmConfigFileAsync).mockRejectedValueOnce(
     new NpmConfigFileError("read", project.path(".npmrc"), {
       cause: nodeError("sharing violation", "EBUSY"),
     }),
@@ -246,12 +246,12 @@ test("plans every selected package before the first registry prompt", async () =
 
   expect(process.exitCode).toBe(1);
   expect(
-    vi.mocked(loadNpmPackageJsonFile).mock.calls.map(([options]) =>
+    vi.mocked(loadNpmPackageJsonFileAsync).mock.calls.map(([options]) =>
       project.normalizePath(options.packageDirectory),
     ),
   ).toEqual(["<test-root>/alpha", "<test-root>/beta"]);
   expect(
-    vi.mocked(loadNpmConfigFile).mock.calls.map(([options]) =>
+    vi.mocked(loadNpmConfigFileAsync).mock.calls.map(([options]) =>
       project.normalizePath(options.packageDirectory),
     ),
   ).toEqual(["<test-root>/alpha", "<test-root>/beta"]);
@@ -297,11 +297,11 @@ test("surfaces a targeted write failure through the persistence spinner", async 
   const actualPackageJsonModule = await vi.importActual<
     typeof import("../src/init-auth/package-files/npm-package-json-file")
   >("../src/init-auth/package-files/npm-package-json-file");
-  vi.mocked(loadNpmPackageJsonFile).mockImplementationOnce(async (options) => {
-    const adapter = await actualPackageJsonModule.loadNpmPackageJsonFile(options);
+  vi.mocked(loadNpmPackageJsonFileAsync).mockImplementationOnce(async (options) => {
+    const adapter = await actualPackageJsonModule.loadNpmPackageJsonFileAsync(options);
     return {
       ...adapter,
-      async save() {
+      async saveAsync() {
         throw nodeError("disk is read-only", "EROFS");
       },
     } satisfies NpmPackageJsonFile;

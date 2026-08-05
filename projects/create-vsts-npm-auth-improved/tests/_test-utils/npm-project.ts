@@ -103,7 +103,7 @@ export class NpmProject {
   }
 
   public async readTreeAsync(): Promise<string[]> {
-    return readTree(this.root);
+    return readTreeAsync(this.root);
   }
 
   public normalizePath(filePath: string): string {
@@ -141,7 +141,7 @@ export class NpmProject {
   }
 }
 
-async function readTree(root: string, relativeDirectory = ""): Promise<string[]> {
+async function readTreeAsync(root: string, relativeDirectory = ""): Promise<string[]> {
   const directoryPath = path.join(root, relativeDirectory);
   const entries = await readdir(directoryPath, { withFileTypes: true });
   const paths: string[] = [];
@@ -151,7 +151,7 @@ async function readTree(root: string, relativeDirectory = ""): Promise<string[]>
     const relativePath = path.join(relativeDirectory, entry.name);
     paths.push(relativePath.replaceAll(path.sep, "/"));
     if (entry.isDirectory()) {
-      paths.push(...(await readTree(root, relativePath)));
+      paths.push(...(await readTreeAsync(root, relativePath)));
     }
   }
   return paths;

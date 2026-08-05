@@ -1,6 +1,6 @@
 import { symlink } from "node:fs/promises";
 import { afterEach, expect, test, vi } from "vitest";
-import { discoverPackageJsonFiles } from "../src/init-auth/package-files/package-json-discovery";
+import { discoverPackageJsonFilesAsync } from "../src/init-auth/package-files/package-json-discovery";
 import { packageJsonContent } from "@test-utils/configuration-fixtures";
 import { InitAuthCommand } from "@test-utils/init-auth-command";
 import { NpmProject } from "@test-utils/npm-project";
@@ -227,7 +227,7 @@ test("respects root, nested, and negated gitignore rules", async () => {
     "ignored/\nreincluded/\n!reincluded/\n!reincluded/package.json\n",
   );
 
-  const discoveryResult = await discoverPackageJsonFiles(project.root);
+  const discoveryResult = await discoverPackageJsonFilesAsync(project.root);
 
   expect(discoveryResult.status).toBe("found");
   if (discoveryResult.status !== "found") {
@@ -262,7 +262,7 @@ test("respects parent gitignore rules up to the repository root", async () => {
     packageJson: originalPackageJson,
   });
 
-  const discoveryResult = await discoverPackageJsonFiles(
+  const discoveryResult = await discoverPackageJsonFilesAsync(
     project.path("workspace"),
   );
 

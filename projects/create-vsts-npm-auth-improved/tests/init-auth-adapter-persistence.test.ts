@@ -1,11 +1,11 @@
 import path from "node:path";
 import { afterEach, expect, test, vi } from "vitest";
 import {
-  loadNpmConfigFile,
+  loadNpmConfigFileAsync,
   NpmConfigFile,
 } from "../src/init-auth/package-files/npm-config-file";
 import {
-  loadNpmPackageJsonFile,
+  loadNpmPackageJsonFileAsync,
   NpmPackageJsonFile,
 } from "../src/init-auth/package-files/npm-package-json-file";
 import { InitAuthCommand } from "@test-utils/init-auth-command";
@@ -17,7 +17,7 @@ vi.mock("../src/init-auth/package-files/npm-config-file", async (importOriginal)
   const actual = await importOriginal<
     typeof import("../src/init-auth/package-files/npm-config-file")
   >();
-  return { ...actual, loadNpmConfigFile: vi.fn() };
+  return { ...actual, loadNpmConfigFileAsync: vi.fn() };
 });
 
 vi.mock(
@@ -26,7 +26,7 @@ vi.mock(
     const actual = await importOriginal<
       typeof import("../src/init-auth/package-files/npm-package-json-file")
     >();
-    return { ...actual, loadNpmPackageJsonFile: vi.fn() };
+    return { ...actual, loadNpmPackageJsonFileAsync: vi.fn() };
   },
 );
 
@@ -55,12 +55,12 @@ test("reports a later rejected adapter save as potentially partial", async () =>
   const saves: string[] = [];
   const failure = new Error("disk full");
 
-  vi.mocked(loadNpmPackageJsonFile).mockImplementation(async ({ packageDirectory }) => {
+  vi.mocked(loadNpmPackageJsonFileAsync).mockImplementation(async ({ packageDirectory }) => {
     const name = path.basename(packageDirectory);
     return {
       disposition: "updated",
       filePath: path.join(packageDirectory, "package.json"),
-      save: vi.fn(async () => {
+      saveAsync: vi.fn(async () => {
         saves.push(`${name}/package.json`);
         if (name === "beta") {
           throw failure;
@@ -68,7 +68,7 @@ test("reports a later rejected adapter save as potentially partial", async () =>
       }),
     } satisfies NpmPackageJsonFile;
   });
-  vi.mocked(loadNpmConfigFile).mockImplementation(async ({ packageDirectory }) => {
+  vi.mocked(loadNpmConfigFileAsync).mockImplementation(async ({ packageDirectory }) => {
     const name = path.basename(packageDirectory);
     return {
       argv: [],
@@ -78,7 +78,7 @@ test("reports a later rejected adapter save as potentially partial", async () =>
       filePath: path.join(packageDirectory, ".npmrc"),
       localPrefix: packageDirectory,
       projectRegistry: "https://project.example/",
-      save: vi.fn(async () => {
+      saveAsync: vi.fn(async () => {
         saves.push(`${name}/.npmrc`);
       }),
       setPromptedRegistry: vi.fn(),

@@ -94,9 +94,9 @@ export class PromptsInteraction implements PromiseLike<void> {
   ): Promise<TResult1 | TResult2> {
     try {
       for (const operation of this.operations) {
-        await waitForPromptListener();
+        await waitForPromptListenerAsync();
         operation();
-        await waitForCompleteRender();
+        await waitForCompleteRenderAsync();
       }
 
       return onfulfilled?.(undefined) as TResult1;
@@ -130,7 +130,7 @@ function emitKeypress(sequence: string, name: string): void {
   process.stdin.emit("keypress", sequence, { name, sequence });
 }
 
-async function waitForPromptListener(): Promise<void> {
+async function waitForPromptListenerAsync(): Promise<void> {
   const deadline = Date.now() + 2_000;
   while (Date.now() < deadline) {
     const promptListenerAttached = process.stdin
@@ -145,7 +145,7 @@ async function waitForPromptListener(): Promise<void> {
   throw new Error("Timed out waiting for the Clack prompt to accept input.");
 }
 
-async function waitForCompleteRender(): Promise<void> {
+async function waitForCompleteRenderAsync(): Promise<void> {
   await new Promise<void>(resolve => setImmediate(resolve));
   await new Promise<void>(resolve => setImmediate(resolve));
   await new Promise<void>(resolve => setTimeout(resolve, 10));
