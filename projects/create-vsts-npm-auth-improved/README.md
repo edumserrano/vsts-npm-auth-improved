@@ -3,7 +3,9 @@
 `create-vsts-npm-auth-improved` is an interactive setup CLI for
 `vsts-npm-auth-improved`. It configures one or more projects so their npm
 registry settings and package scripts can use `vsts-npm-auth-improved`; it does
-not authenticate with a registry itself.
+not authenticate with a registry itself. As a post-write safeguard, it also
+checks whether `.npmrc` files changed during setup are excluded by applicable
+`.gitignore` rules and warns when they may not be shared through source control.
 
 ## Requirements
 
@@ -65,9 +67,33 @@ npx create-vsts-npm-auth-improved --version
 5. After every selected package has been read, parsed, and planned—and all
    required registry prompts have completed—the CLI writes only changed files
    and reports created, updated, and unchanged counts.
+6. If an `.npmrc` created or updated by the command is ignored by Git, the CLI
+   lists it in a warning. See [Git-ignore checking](#git-ignore-checking).
 
 Cancelling any prompt during planning exits before any file is written. Invalid
 or unreadable input also stops planning before persistence begins.
+
+## Git-ignore checking
+
+After configuration files are written successfully, the CLI checks every
+`.npmrc` file it created or updated against applicable `.gitignore` rules. This
+helps identify project-level npm settings that may otherwise remain local and
+unavailable to other contributors.
+
+The check:
+
+- considers only `.npmrc` files created or updated during the current run;
+- does not report selected `.npmrc` files that remained unchanged;
+- respects `.gitignore` files from the selected root up to the repository root,
+  nested `.gitignore` files, and negated rules;
+- does not apply a user's global Git ignore file; and
+- is best-effort: if the check cannot be completed, setup still succeeds and no
+  Git-ignore warning is displayed.
+
+When ignored files are found, the warning lists their paths and recommends
+reviewing each file for credentials or other secrets before changing
+`.gitignore` rules or committing it. The CLI does not modify `.gitignore`, stage
+files, create commits, or push changes automatically.
 
 ## Resulting configuration
 
