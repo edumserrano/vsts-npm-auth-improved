@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import { afterAll, afterEach, beforeEach, expect, test, vi } from "vitest";
 import { execa } from "execa";
 import { vol } from "memfs";
 import { AuthCommand } from "@test-utils/auth-command";
@@ -9,14 +9,27 @@ import { mockStdoutWrite } from "@test-utils/stdout";
  * CLI.
  */
 
+const { originalCiEnvironment } = vi.hoisted(() => {
+  const originalCiEnvironment = process.env.CI;
+  process.env.CI = "true";
+  return { originalCiEnvironment };
+});
+
 vi.mock("execa");
-vi.mock("ci-info", () => ({ isCI: true }));
 vi.mock("node:fs", async () => {
   const { fs } = await import("memfs");
   return fs;
 });
 
 let mockedPlatform: NodeJS.Platform;
+
+afterAll(() => {
+  if (originalCiEnvironment === undefined) {
+    delete process.env.CI;
+  } else {
+    process.env.CI = originalCiEnvironment;
+  }
+});
 
 beforeEach(() => {
   mockedPlatform = "win32";

@@ -1,10 +1,10 @@
 /**
- * Drives real terminal prompts with queued text and keypress events, waiting
- * for a prompt to accept input and for rendering to settle around each
- * interaction. Cleanup removes only prompt listeners observed by this helper.
+ * Drives real terminal prompts with only the text, selection, and cancellation
+ * interactions used by this project's tests. It waits for a prompt to accept
+ * input, lets rendering settle, and tracks listeners for safe cleanup.
  */
 
-type PromptOperation = () => void | Promise<void>;
+type PromptOperation = () => void;
 type KeypressListener = (...args: any[]) => void;
 
 const initialKeypressListeners = new Set(currentKeypressListeners());
@@ -15,22 +15,14 @@ const observedPromptListeners = new Set<KeypressListener>();
 export class PromptsInteraction implements PromiseLike<void> {
   private readonly operations: PromptOperation[] = [];
 
-  public enterText(text: string): this {
-    this.operations.push(() => {
-      process.stdin.emit("data", text);
-    });
-    return this;
-  }
-
-  public clearText(): this {
-    this.operations.push(() => {
-      emitKeypress("", "u", { ctrl: true });
-    });
-    return this;
-  }
-
   public replaceText(text: string): this {
-    return this.clearText().enterText(text);
+    this.operations.push(
+      () => emitKeypress("", "u", { ctrl: true }),
+      () => {
+        process.stdin.emit("data", text);
+      },
+    );
+    return this;
   }
 
   public submitText(): this {
@@ -47,14 +39,7 @@ export class PromptsInteraction implements PromiseLike<void> {
     return this;
   }
 
-  public toggleMultiselectItem(): this {
-    this.operations.push(() => {
-      emitKeypress(" ", "space");
-    });
-    return this;
-  }
-
-  public acceptMultiselectValues(): this {
+  public acceptSelectOption(): this {
     this.operations.push(() => {
       emitKeypress("\r", "return");
     });
@@ -65,16 +50,6 @@ export class PromptsInteraction implements PromiseLike<void> {
     this.operations.push(() => {
       emitKeypress("\u001b", "escape");
     });
-    return this;
-  }
-
-  /**
-   * Runs test-owned setup while the current prompt remains open. This is useful
-   * for reproducing filesystem changes that happen between discovery/planning
-   * and persistence without importing or mocking application internals.
-   */
-  public performAsync(operation: () => Promise<void>): this {
-    this.operations.push(operation);
     return this;
   }
 
@@ -89,7 +64,7 @@ export class PromptsInteraction implements PromiseLike<void> {
     try {
       for (const operation of this.operations) {
         await waitForPromptListenerAsync();
-        await operation();
+        operation();
         await waitForCompleteRenderAsync();
       }
 

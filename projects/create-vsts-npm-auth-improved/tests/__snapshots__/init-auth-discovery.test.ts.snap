@@ -97,6 +97,60 @@ exports[`reports that packages were discovered but none were selected 1`] = `
 "
 `;
 
+exports[`respects parent gitignore rules up to the repository root 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+│  ./│  w█│  wo█│  wor█│  work█│  works█│  worksp█│  workspa█│  workspac█│  workspace█◇  Where should package.json files be searched for?
+│  workspace
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ kept/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+◇  Which packages should be configured?
+│  none
+│
+●  No packages were selected.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`respects root, nested, and negated gitignore rules 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 3 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ◻ packages/kept/package.json
+│  ◻ packages/reincluded/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+◇  Which packages should be configured?
+│  none
+│
+●  No packages were selected.
+│
+└  No files were changed.
+
+"
+`;
+
 exports[`shows deterministic nested discovery while excluding dependency and hidden directories 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │

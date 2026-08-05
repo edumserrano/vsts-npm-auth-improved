@@ -27,8 +27,6 @@ exports[`a scoped registry without a global registry is rejected 1`] = `
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`a top-level non-Commander CLI failure is handled 1`] = `""`;
-
 exports[`an initial forced authentication failure does not retry 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑

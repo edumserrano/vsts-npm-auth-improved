@@ -1,10 +1,10 @@
-import { test, expect, afterEach, vi, beforeEach } from "vitest";
+import { test, expect, afterAll, afterEach, vi, beforeEach } from "vitest";
 import { AuthCommand, VstsNpmAuthImprovedCli } from "@test-utils/auth-command";
 import { vol } from "memfs";
 import { createInMemoryNpmrcFile } from "@test-utils/npm-configuration-file";
 import { mockStdoutWrite } from "@test-utils/stdout";
 import { mockVstsNpmAuth } from "@test-utils/vsts-npm-auth";
-import { PromptsInteraction } from "@test-utils/prompts";
+import { PromptsInteraction } from "@test-utils/prompts-interaction";
 
 /**
  * The tests below will test the auth command when all the options are provided via user prompts.
@@ -12,11 +12,24 @@ import { PromptsInteraction } from "@test-utils/prompts";
  * behavior is tested in auth-command-cli.test.ts.
  */
 
+const { originalCiEnvironment } = vi.hoisted(() => {
+  const originalCiEnvironment = process.env.CI;
+  process.env.CI = "false";
+  return { originalCiEnvironment };
+});
+
 vi.mock("execa");
-vi.mock("ci-info", () => ({ isCI: false }));
 vi.mock("node:fs", async () => {
   const { fs } = await import("memfs");
   return fs;
+});
+
+afterAll(() => {
+  if (originalCiEnvironment === undefined) {
+    delete process.env.CI;
+  } else {
+    process.env.CI = originalCiEnvironment;
+  }
 });
 
 beforeEach(() => {
@@ -24,6 +37,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  PromptsInteraction.resetPromptListeners();
   vi.resetAllMocks(); // clears history on module mocks like execa
   vi.restoreAllMocks(); // restores original implementations of spied functions
   vol.reset();

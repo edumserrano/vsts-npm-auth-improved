@@ -91,8 +91,7 @@ export async function loadNpmPackageJsonFileAsync(
   return loadNpmPackageJsonFileWithDependenciesAsync(options, dependencies);
 }
 
-/** @internal Exported only so unit tests can isolate the third-party boundary. */
-export async function loadNpmPackageJsonFileWithDependenciesAsync(
+async function loadNpmPackageJsonFileWithDependenciesAsync(
   options: LoadNpmPackageJsonFileOptions,
   dependencies: NpmPackageJsonFileDependencies,
 ): Promise<NpmPackageJsonFile> {

@@ -20,7 +20,14 @@ See:
 
 ## Public CLI Testing with Commander
 
-The tests in this folder invoke the imported `cliAsync` function in-process to validate the public CLI boundary. Execa and `node:fs` are mocked, so these are full-layer source tests rather than tests of the emitted executable, host filesystem, real authentication process, or Azure registry. This approach provides several benefits:
+The tests in this folder invoke the imported `cliAsync` function in-process to validate the public CLI boundary. Execa is mocked as the boundary to the external `npx vsts-npm-auth` process, and `node:fs` is replaced by memfs as the filesystem boundary. Environment and platform state may also be controlled directly. These are full-layer source tests rather than tests of the emitted executable, host filesystem, real authentication process, or Azure registry. This approach provides several benefits:
+
+Application modules beneath `src` are implementation details: tests must not
+import, dynamically load, mock, or assert calls to them. Production libraries
+are implementation choices and must also remain real unless they implement an
+approved external boundary. Execa is the explicit process-boundary exception;
+Commander and CI detection remain real. The `test:boundaries` check enforces
+these restrictions as well as the single `cliAsync` import.
 
 - **Testing the CLI interface**: All commands, options, and aliases are tested as users would interact with them.
 - **Testing CLI error handling**: Ensures error scenarios are handled correctly at the CLI level, including Commander's error handling.

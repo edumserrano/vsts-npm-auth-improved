@@ -21,12 +21,11 @@ See:
 
 ## npm-owned Serialization Contracts
 
-Adapter integration tests use real temporary directories and assert the semantic
-configuration produced by `@npmcli/config` and `@npmcli/package-json`. Workflow
-tests also compare parsed configuration except when proving that an unchanged
-file is not rewritten. Deterministic workflow read and write failures are
-injected at the local adapter boundary rather than by mocking filesystem calls
-inside the npm libraries.
+CLI workflow tests use real temporary directories and assert the semantic
+configuration produced by `@npmcli/config` and `@npmcli/package-json` through
+the public command. Tests compare parsed configuration except when proving that
+an unchanged file is not rewritten. Deterministic read and write failures are
+injected at external library or test-owned filesystem boundaries.
 
 The test contract deliberately does not guarantee `.npmrc` comments or inline
 comments, blank or malformed lines, exact key order, CRLF versus LF, BOMs, or
@@ -39,9 +38,16 @@ saved; unrelated semantic configuration remains covered.
 
 All the tests in this folder invoke the imported `cliAsync` function in-process
 to validate the public CLI boundary. Normal operations use isolated temporary
-directories on the host filesystem. Tests mock the narrow boundary responsible
-for the behavior under test, such as package adapters for file failures or the
-discovery library for search failures.
+directories on the host filesystem. Application modules beneath `src` are
+implementation details: tests must not import, dynamically load, mock, or assert
+calls to them. Production libraries such as Commander, Globby, and the npm
+configuration packages are also implementation choices and must remain real.
+Tests may replace external interactions at their system boundary, such as
+terminal streams or targeted Node filesystem operations that cannot be made to
+fail portably with a temporary fixture.
+
+The `test:boundaries` check enforces both the application-code boundary and the
+production-dependency restriction.
 
 The only exception to the above is the emitted-package integration test which builds and loads the compiled public API. The suite does not execute the emitted npm binary, run a real authentication process, or contact an Azure registry. This approach provides several benefits:
 

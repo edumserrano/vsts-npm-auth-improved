@@ -28,7 +28,63 @@ exports[`configures package.json content: creates managed scripts and the develo
 "
 `;
 
+exports[`configures package.json content: discards invalid managed entries while preserving valid entries 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
 exports[`configures package.json content: overwrites conflicts while preserving unrelated fields dependencies and scripts 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`configures package.json content: preserves and reconciles every dependency section 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?

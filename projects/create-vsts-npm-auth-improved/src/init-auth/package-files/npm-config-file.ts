@@ -110,8 +110,7 @@ export async function loadNpmConfigFileAsync(
   return loadNpmConfigFileWithDependenciesAsync(options, dependencies);
 }
 
-/** @internal Exported only so unit tests can isolate the third-party boundary. */
-export async function loadNpmConfigFileWithDependenciesAsync(
+async function loadNpmConfigFileWithDependenciesAsync(
   options: LoadNpmConfigFileOptions,
   dependencies: NpmConfigFileDependencies,
 ): Promise<NpmConfigFile> {

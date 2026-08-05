@@ -1,18 +1,22 @@
-import { test, expect, afterEach, beforeEach, vi } from "vitest";
+import { test, expect, afterAll, afterEach, beforeEach, vi } from "vitest";
 import { AuthCommand, VstsNpmAuthImprovedCli } from "@test-utils/auth-command";
 import { execa } from "execa";
 import { vol } from "memfs";
 import { createInMemoryNpmrcFile } from "@test-utils/npm-configuration-file";
 import { mockStderrWrite, mockStdoutWrite } from "@test-utils/stdout";
 import { mockVstsNpmAuth, MockVstsNpmAuthOptions } from "@test-utils/vsts-npm-auth";
-import { Command } from "commander";
 
 /**
  * The tests below will test the auth command when all the options are provided via the CLI.
  */
 
+const { originalCiEnvironment } = vi.hoisted(() => {
+  const originalCiEnvironment = process.env.CI;
+  process.env.CI = "false";
+  return { originalCiEnvironment };
+});
+
 vi.mock("execa");
-vi.mock("ci-info", () => ({ isCI: false }));
 vi.mock("node:fs", async () => {
   const { fs } = await import("memfs");
   return fs;
@@ -821,14 +825,12 @@ test("an unknown Commander command is captured through cliAsync", async () => {
   expect(stderrWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
-test("a top-level non-Commander CLI failure is handled", async () => {
-  const stdoutWriteFunctionMock = mockStdoutWrite();
+test("a top-level terminal failure is handled", async () => {
   const execaFunctionMock = vi.mocked(execa);
-  const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
-  const unexpectedValue = "Unexpected top-level non-Commander failure";
-  vi.spyOn(Command.prototype, "parseAsync").mockRejectedValueOnce(
-    unexpectedValue,
-  );
+  const unexpectedValue = "Unexpected top-level terminal failure";
+  const consoleLog = vi.spyOn(console, "log").mockImplementationOnce(() => {
+    throw unexpectedValue;
+  });
 
   await VstsNpmAuthImprovedCli.invokeAsync(["auth"]);
 
@@ -841,5 +843,12 @@ test("a top-level non-Commander CLI failure is handled", async () => {
     "🚨 Unexpected error:",
     unexpectedValue,
   );
-  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+});
+
+afterAll(() => {
+  if (originalCiEnvironment === undefined) {
+    delete process.env.CI;
+  } else {
+    process.env.CI = originalCiEnvironment;
+  }
 });

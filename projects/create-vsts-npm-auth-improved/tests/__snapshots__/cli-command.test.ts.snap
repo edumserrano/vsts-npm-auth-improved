@@ -108,34 +108,6 @@ exports[`renders complete short version output 1`] = `
 "
 `;
 
-exports[`reports a known Error from the package adapter boundary 1`] = `
-"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
-│
-◆  Where should package.json files be searched for?
-│  ./█
-└
-◇  Where should package.json files be searched for?
-│  ./
-│
-◇  Found 1 package.json file.
-│
-◆  Which packages should be configured?
-│  ◻ ALL (Configure every package)
-│  ◻ package.json
-│  ↑/↓ to navigate • Space: select • Enter: confirm
-└
-│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
-│  package.json
-│
-■  Could not read package.json: filesystem read failed.
-│
-└  No files were changed.
-
-"
-`;
-
-exports[`reports a top-level non-Commander CLI failure 1`] = `""`;
-
 exports[`reports an unexpected Error from the terminal boundary 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │

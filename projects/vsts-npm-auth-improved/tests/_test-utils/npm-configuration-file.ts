@@ -1,4 +1,3 @@
-import ini from "ini";
 import { Volume } from "memfs";
 
 /**
@@ -9,7 +8,6 @@ import { Volume } from "memfs";
 
 export type InMemoryNpmrcFile = {
   readonly path: string;
-  readonly registryValue: string;
 };
 
 export type CreateInMemoryNpmrcFileOptions = {
@@ -30,10 +28,7 @@ export function createInMemoryNpmrcFile(
     [pathToUse]: npmrcContents,
   });
 
-  const parsed = ini.parse(npmrcContents);
-  const registry = parsed.registry || "";
   return {
     path: pathToUse,
-    registryValue: registry,
   };
 }
