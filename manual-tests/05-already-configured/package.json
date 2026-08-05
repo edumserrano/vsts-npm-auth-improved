@@ -1,0 +1,14 @@
+{
+  "name": "manual-test-already-configured",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "registry-auth": "vsts-npm-auth-improved -c ./.npmrc --read",
+    "preinstall-packages": "npm run registry-auth",
+    "install-packages": "npm i",
+    "test": "node -e \"console.log('preserved test script')\""
+  },
+  "devDependencies": {
+    "vsts-npm-auth-improved": "alpha"
+  }
+}

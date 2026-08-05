@@ -1,0 +1,13 @@
+{
+  "name": "manual-test-existing-config",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Existing project fields should be preserved",
+  "scripts": {
+    "test": "node -e \"console.log('existing test script')\"",
+    "lint": "node -e \"console.log('existing lint script')\""
+  },
+  "dependencies": {
+    "is-number": "^7.0.0"
+  }
+}

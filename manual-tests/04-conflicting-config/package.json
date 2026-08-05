@@ -1,0 +1,15 @@
+{
+  "name": "manual-test-conflicting-config",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "registry-auth": "echo old registry auth",
+    "preinstall-packages": "echo old preinstall",
+    "install-packages": "yarn install",
+    "test": "node -e \"console.log('preserve me')\""
+  },
+  "devDependencies": {
+    "vsts-npm-auth-improved": "0.0.1",
+    "rimraf": "^6.0.0"
+  }
+}
