@@ -11,7 +11,7 @@ export type NpmrcGitignoreCheckResult =
       readonly cause: unknown;
     };
 
-export async function checkChangedNpmrcFilesForGitignore(
+export async function checkChangedNpmrcFilesForGitignoreAsync(
   rootDirectory: string,
   plan: AuthSetupPlan,
 ): Promise<NpmrcGitignoreCheckResult> {

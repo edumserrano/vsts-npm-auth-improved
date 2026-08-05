@@ -1,6 +1,6 @@
 import path from "node:path";
 import { afterEach, expect, test } from "vitest";
-import { loadNpmConfigFile } from "../src/init-auth/package-files/npm-config-file";
+import { loadNpmConfigFileAsync } from "../src/init-auth/package-files/npm-config-file";
 import { NpmProject } from "@test-utils/npm-project";
 
 type IsolatedConfigLocations = {
@@ -51,9 +51,9 @@ test.each([
       ...(initialNpmrc === undefined ? {} : { npmrc: initialNpmrc }),
       packageJson: JSON.stringify({ name: `initial-${existed}` }),
     });
-    const isolated = await createIsolatedConfigLocations(project);
+    const isolated = await createIsolatedConfigLocationsAsync(project);
 
-    const adapter = await loadNpmConfigFile({
+    const adapter = await loadNpmConfigFileAsync({
       env: isolated.env,
       packageDirectory: project.root,
     });
@@ -69,14 +69,14 @@ test.each([
     expect(await project.existsAsync(".npmrc")).toBe(existed);
 
     adapter.setPromptedRegistry("https://prompted.example/");
-    await adapter.save();
+    await adapter.saveAsync();
 
     const content = await project.readFileAsync(".npmrc");
     expect(content).toContain("registry=https://prompted.example/");
     expectManagedConfig(content);
     expect(content).not.toContain("lockfile-version=");
     expect(content).not.toContain("legacy-peer-deps=");
-    await expectInheritedConfigsUnchanged(project, isolated);
+    await expectInheritedConfigsUnchangedAsync(project, isolated);
   },
 );
 
@@ -118,9 +118,9 @@ test.each([
     await project.createPackageAsync({
       packageJson: JSON.stringify({ name: "inherited-registry" }),
     });
-    const isolated = await createIsolatedConfigLocations(project, userConfigText, globalConfigText);
+    const isolated = await createIsolatedConfigLocationsAsync(project, userConfigText, globalConfigText);
 
-    const adapter = await loadNpmConfigFile({
+    const adapter = await loadNpmConfigFileAsync({
       argv,
       env: {
         ...isolated.env,
@@ -142,9 +142,9 @@ test("does not count a scoped registry as the project registry", async () => {
     npmrc: "@example:registry=https://scoped.example/\n",
     packageJson: JSON.stringify({ name: "scoped-only-registry" }),
   });
-  const isolated = await createIsolatedConfigLocations(project);
+  const isolated = await createIsolatedConfigLocationsAsync(project);
 
-  const adapter = await loadNpmConfigFile({
+  const adapter = await loadNpmConfigFileAsync({
     env: isolated.env,
     packageDirectory: project.root,
   });
@@ -152,7 +152,7 @@ test("does not count a scoped registry as the project registry", async () => {
   expect(adapter.projectRegistry).toBeUndefined();
   expect(adapter.effectiveRegistry).toBe("https://user-sentinel.example/");
   adapter.setPromptedRegistry("https://prompted.example/");
-  await adapter.save();
+  await adapter.saveAsync();
   expect(await project.readFileAsync(".npmrc")).toContain(
     "@example:registry=https://scoped.example/",
   );
@@ -171,10 +171,10 @@ test("uses npm's effective final duplicate project registry", async () => {
     ].join("\n"),
     packageJson: JSON.stringify({ name: "duplicate-registry" }),
   });
-  const isolated = await createIsolatedConfigLocations(project);
+  const isolated = await createIsolatedConfigLocationsAsync(project);
   const originalContent = await project.readFileAsync(".npmrc");
 
-  const adapter = await loadNpmConfigFile({
+  const adapter = await loadNpmConfigFileAsync({
     env: isolated.env,
     packageDirectory: project.root,
   });
@@ -204,16 +204,16 @@ test("corrects managed values while preserving registries, credentials, and unma
     ].join("\n"),
     packageJson: JSON.stringify({ name: "managed-values" }),
   });
-  const isolated = await createIsolatedConfigLocations(project);
+  const isolated = await createIsolatedConfigLocationsAsync(project);
 
-  const adapter = await loadNpmConfigFile({
+  const adapter = await loadNpmConfigFileAsync({
     env: isolated.env,
     packageDirectory: project.root,
   });
   adapter.setPromptedRegistry("https://must-not-replace.example/");
   expect(adapter.projectRegistry).toBe("https://project.example/");
   expect(adapter.disposition).toBe("updated");
-  await adapter.save();
+  await adapter.saveAsync();
 
   const content = await project.readFileAsync(".npmrc");
   expect(content).toContain("registry=https://project.example/");
@@ -225,9 +225,9 @@ test("corrects managed values while preserving registries, credentials, and unma
   expect(content).toContain("@example:registry=https://scoped.example/");
   expect(content).toContain("//pkgs.example/:_authToken=secret-token");
   expect(content).toContain("color=false");
-  await expectInheritedConfigsUnchanged(project, isolated);
+  await expectInheritedConfigsUnchangedAsync(project, isolated);
 
-  const secondRun = await loadNpmConfigFile({
+  const secondRun = await loadNpmConfigFileAsync({
     env: isolated.env,
     packageDirectory: project.root,
   });
@@ -273,14 +273,14 @@ test.each([
       packageJson: JSON.stringify({ name: `target-${scenario.label}` }),
     });
   }
-  const isolated = await createIsolatedConfigLocations(project);
+  const isolated = await createIsolatedConfigLocationsAsync(project);
   const packageDirectory = project.path(scenario.packageDirectory);
 
-  const adapter = await loadNpmConfigFile({
+  const adapter = await loadNpmConfigFileAsync({
     env: isolated.env,
     packageDirectory,
   });
-  await adapter.save();
+  await adapter.saveAsync();
 
   expect(adapter.filePath).toBe(path.join(packageDirectory, ".npmrc"));
   expect(adapter.localPrefix).toBe(packageDirectory);
@@ -288,10 +288,10 @@ test.each([
   if (scenario.packageDirectory !== "") {
     expect(await project.readFileAsync(".npmrc")).toBe(rootNpmrc);
   }
-  await expectInheritedConfigsUnchanged(project, isolated);
+  await expectInheritedConfigsUnchangedAsync(project, isolated);
 });
 
-async function createIsolatedConfigLocations(
+async function createIsolatedConfigLocationsAsync(
   project: NpmProject,
   userConfigText = "registry=https://user-sentinel.example/\n",
   globalConfigText = "registry=https://global-sentinel.example/\n",
@@ -321,7 +321,7 @@ function expectManagedConfig(content: string): void {
   }
 }
 
-async function expectInheritedConfigsUnchanged(
+async function expectInheritedConfigsUnchangedAsync(
   project: NpmProject,
   isolated: IsolatedConfigLocations,
 ): Promise<void> {

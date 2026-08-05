@@ -1,28 +1,28 @@
 import path from "node:path";
 import { beforeEach, expect, test, vi } from "vitest";
-import { NpmConfigFile, loadNpmConfigFile } from "../src/init-auth/package-files/npm-config-file";
+import { NpmConfigFile, loadNpmConfigFileAsync } from "../src/init-auth/package-files/npm-config-file";
 import {
   NpmPackageJsonFile,
   NpmPackageJsonFileError,
-  loadNpmPackageJsonFile,
+  loadNpmPackageJsonFileAsync,
 } from "../src/init-auth/package-files/npm-package-json-file";
 import {
   AuthSetupPlan,
-  buildAuthSetupPlan,
-  writeAuthSetupPlan,
+  buildAuthSetupPlanAsync,
+  writeAuthSetupPlanAsync,
 } from "../src/init-auth/auth-setup/auth-setup-plan";
 import { summarizeAuthSetupPlan } from "../src/init-auth/auth-setup/auth-setup-summary";
 
 vi.mock("../src/init-auth/package-files/npm-config-file", async importOriginal => {
   const actual =
     await importOriginal<typeof import("../src/init-auth/package-files/npm-config-file")>();
-  return { ...actual, loadNpmConfigFile: vi.fn() };
+  return { ...actual, loadNpmConfigFileAsync: vi.fn() };
 });
 
 vi.mock("../src/init-auth/package-files/npm-package-json-file", async importOriginal => {
   const actual =
     await importOriginal<typeof import("../src/init-auth/package-files/npm-package-json-file")>();
-  return { ...actual, loadNpmPackageJsonFile: vi.fn() };
+  return { ...actual, loadNpmPackageJsonFileAsync: vi.fn() };
 });
 
 const rootDirectory = path.resolve("test-root");
@@ -37,17 +37,17 @@ test("loads all package adapters before npmrc adapters and prompts only for miss
   const betaPackageJson = packageJsonAdapter("beta", events, "unchanged");
   const alphaNpmrc = npmrcAdapter("alpha", events, undefined, "created");
   const betaNpmrc = npmrcAdapter("beta", events, "https://project.example/", "unchanged");
-  vi.mocked(loadNpmPackageJsonFile).mockImplementation(async ({ packageDirectory }) => {
+  vi.mocked(loadNpmPackageJsonFileAsync).mockImplementation(async ({ packageDirectory }) => {
     const name = path.basename(packageDirectory);
     events.push(`load package ${name}`);
     return name === "alpha" ? alphaPackageJson : betaPackageJson;
   });
-  vi.mocked(loadNpmConfigFile).mockImplementation(async ({ packageDirectory }) => {
+  vi.mocked(loadNpmConfigFileAsync).mockImplementation(async ({ packageDirectory }) => {
     const name = path.basename(packageDirectory);
     events.push(`load npmrc ${name}`);
     return name === "alpha" ? alphaNpmrc : betaNpmrc;
   });
-  const requestRegistry = vi.fn(async (displayPath: string) => {
+  const requestRegistryAsync = vi.fn(async (displayPath: string) => {
     events.push(`prompt ${displayPath}`);
     return {
       status: "provided" as const,
@@ -55,10 +55,10 @@ test("loads all package adapters before npmrc adapters and prompts only for miss
     };
   });
 
-  const result = await buildAuthSetupPlan(
+  const result = await buildAuthSetupPlanAsync(
     rootDirectory,
     [packagePath("alpha"), packagePath("beta")],
-    requestRegistry,
+    requestRegistryAsync,
   );
 
   expect(result.status).toBe("ready");
@@ -73,7 +73,7 @@ test("loads all package adapters before npmrc adapters and prompts only for miss
     "prompt alpha/package.json",
     "set registry alpha https://prompted.example/",
   ]);
-  expect(requestRegistry).toHaveBeenCalledOnce();
+  expect(requestRegistryAsync).toHaveBeenCalledOnce();
   expect(result.plan.packages).toMatchObject([
     {
       displayPath: "alpha/package.json",
@@ -113,27 +113,27 @@ test("loads all package adapters before npmrc adapters and prompts only for miss
 });
 
 test("prompts for a missing project registry even when an inherited registry is effective", async () => {
-  vi.mocked(loadNpmPackageJsonFile).mockResolvedValue(packageJsonAdapter("alpha", []));
+  vi.mocked(loadNpmPackageJsonFileAsync).mockResolvedValue(packageJsonAdapter("alpha", []));
   const npmrc = npmrcAdapter("alpha", [], undefined, "created");
   Object.defineProperty(npmrc, "effectiveRegistry", {
     value: "https://user.example/",
   });
-  vi.mocked(loadNpmConfigFile).mockResolvedValue(npmrc);
-  const requestRegistry = vi.fn(async () => ({
+  vi.mocked(loadNpmConfigFileAsync).mockResolvedValue(npmrc);
+  const requestRegistryAsync = vi.fn(async () => ({
     status: "provided" as const,
     registry: "https://project.example/",
   }));
 
-  const result = await buildAuthSetupPlan(rootDirectory, [packagePath("alpha")], requestRegistry);
+  const result = await buildAuthSetupPlanAsync(rootDirectory, [packagePath("alpha")], requestRegistryAsync);
 
   expect(result.status).toBe("ready");
-  expect(requestRegistry).toHaveBeenCalledWith("alpha/package.json");
+  expect(requestRegistryAsync).toHaveBeenCalledWith("alpha/package.json");
   expect(npmrc.setPromptedRegistry).toHaveBeenCalledWith("https://project.example/");
 });
 
 test("loads every selected adapter and returns an invalid package without prompting", async () => {
   const events: string[] = [];
-  vi.mocked(loadNpmPackageJsonFile).mockImplementation(async ({ packageDirectory }) => {
+  vi.mocked(loadNpmPackageJsonFileAsync).mockImplementation(async ({ packageDirectory }) => {
     const name = path.basename(packageDirectory);
     events.push(`load package ${name}`);
     if (name === "beta") {
@@ -144,17 +144,17 @@ test("loads every selected adapter and returns an invalid package without prompt
     }
     return packageJsonAdapter(name, events);
   });
-  vi.mocked(loadNpmConfigFile).mockImplementation(async ({ packageDirectory }) => {
+  vi.mocked(loadNpmConfigFileAsync).mockImplementation(async ({ packageDirectory }) => {
     const name = path.basename(packageDirectory);
     events.push(`load npmrc ${name}`);
     return npmrcAdapter(name, events, undefined, "created");
   });
-  const requestRegistry = vi.fn();
+  const requestRegistryAsync = vi.fn();
 
-  const result = await buildAuthSetupPlan(
+  const result = await buildAuthSetupPlanAsync(
     rootDirectory,
     [packagePath("alpha"), packagePath("beta")],
-    requestRegistry,
+    requestRegistryAsync,
   );
 
   expect(events.slice(0, 4)).toEqual([
@@ -171,16 +171,16 @@ test("loads every selected adapter and returns an invalid package without prompt
       issue: "invalid-json",
     },
   });
-  expect(requestRegistry).not.toHaveBeenCalled();
+  expect(requestRegistryAsync).not.toHaveBeenCalled();
 });
 
 test("returns an unreadable selected npmrc without prompting", async () => {
-  vi.mocked(loadNpmPackageJsonFile).mockResolvedValue(packageJsonAdapter("alpha", []));
+  vi.mocked(loadNpmPackageJsonFileAsync).mockResolvedValue(packageJsonAdapter("alpha", []));
   const readError = new Error("sharing violation");
-  vi.mocked(loadNpmConfigFile).mockRejectedValue(readError);
-  const requestRegistry = vi.fn();
+  vi.mocked(loadNpmConfigFileAsync).mockRejectedValue(readError);
+  const requestRegistryAsync = vi.fn();
 
-  const result = await buildAuthSetupPlan(rootDirectory, [packagePath("alpha")], requestRegistry);
+  const result = await buildAuthSetupPlanAsync(rootDirectory, [packagePath("alpha")], requestRegistryAsync);
 
   expect(result).toEqual({
     status: "failed",
@@ -190,7 +190,7 @@ test("returns an unreadable selected npmrc without prompting", async () => {
       cause: readError,
     },
   });
-  expect(requestRegistry).not.toHaveBeenCalled();
+  expect(requestRegistryAsync).not.toHaveBeenCalled();
 });
 
 test("cancels after applying earlier answers without saving any adapter", async () => {
@@ -200,13 +200,13 @@ test("cancels after applying earlier answers without saving any adapter", async 
     npmrcAdapter("alpha", events, undefined, "created"),
     npmrcAdapter("beta", events, undefined, "created"),
   ];
-  vi.mocked(loadNpmPackageJsonFile)
+  vi.mocked(loadNpmPackageJsonFileAsync)
     .mockResolvedValueOnce(packageAdapters[0]!)
     .mockResolvedValueOnce(packageAdapters[1]!);
-  vi.mocked(loadNpmConfigFile)
+  vi.mocked(loadNpmConfigFileAsync)
     .mockResolvedValueOnce(npmrcAdapters[0]!)
     .mockResolvedValueOnce(npmrcAdapters[1]!);
-  const requestRegistry = vi
+  const requestRegistryAsync = vi
     .fn()
     .mockResolvedValueOnce({
       status: "provided",
@@ -214,15 +214,15 @@ test("cancels after applying earlier answers without saving any adapter", async 
     })
     .mockResolvedValueOnce({ status: "cancelled" });
 
-  const result = await buildAuthSetupPlan(
+  const result = await buildAuthSetupPlanAsync(
     rootDirectory,
     [packagePath("alpha"), packagePath("beta")],
-    requestRegistry,
+    requestRegistryAsync,
   );
 
   expect(result).toEqual({ status: "cancelled" });
   for (const adapter of [...packageAdapters, ...npmrcAdapters]) {
-    expect(adapter.save).not.toHaveBeenCalled();
+    expect(adapter.saveAsync).not.toHaveBeenCalled();
   }
 });
 test("skips unchanged files and saves changed files in package then npmrc order", async () => {
@@ -234,7 +234,7 @@ test("skips unchanged files and saves changed files in package then npmrc order"
     ["beta/.npmrc", "updated", saves],
   ]);
 
-  await expect(writeAuthSetupPlan(plan)).resolves.toEqual({ status: "written" });
+  await expect(writeAuthSetupPlanAsync(plan)).resolves.toEqual({ status: "written" });
   expect(saves).toEqual(["alpha/package.json", "alpha/.npmrc", "beta/.npmrc"]);
 });
 
@@ -248,7 +248,7 @@ test("maps a rejected later save to its display path after earlier writes", asyn
     ["beta/.npmrc", "updated", saves],
   ]);
 
-  const result = await writeAuthSetupPlan(plan);
+  const result = await writeAuthSetupPlanAsync(plan);
 
   expect(result).toEqual({
     status: "failed",
@@ -277,7 +277,7 @@ function packageJsonAdapter(
   return {
     disposition,
     filePath: packagePath(name),
-    save: vi.fn(async () => {
+    saveAsync: vi.fn(async () => {
       events.push(`save package ${name}`);
     }),
   };
@@ -300,7 +300,7 @@ function npmrcAdapter(
     get projectRegistry() {
       return currentProjectRegistry;
     },
-    save: vi.fn(async () => {
+    saveAsync: vi.fn(async () => {
       events.push(`save npmrc ${name}`);
     }),
     setPromptedRegistry: vi.fn((registry: string) => {
@@ -322,7 +322,7 @@ function planWithFiles(specs: readonly FileSpec[]): AuthSetupPlan {
     displayPath,
     disposition,
     filePath: path.join(rootDirectory, ...displayPath.split("/")),
-    save: vi.fn(async () => {
+    saveAsync: vi.fn(async () => {
       saves.push(displayPath);
       if (failure !== undefined) {
         throw failure;

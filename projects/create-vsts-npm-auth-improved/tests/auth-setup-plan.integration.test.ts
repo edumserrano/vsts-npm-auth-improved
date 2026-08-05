@@ -1,8 +1,8 @@
 import { mkdir } from "node:fs/promises";
 import { afterEach, expect, test, vi } from "vitest";
 import {
-  buildAuthSetupPlan,
-  writeAuthSetupPlan,
+  buildAuthSetupPlanAsync,
+  writeAuthSetupPlanAsync,
 } from "../src/init-auth/auth-setup/auth-setup-plan";
 import { summarizeAuthSetupPlan } from "../src/init-auth/auth-setup/auth-setup-summary";
 import { NpmProject } from "@test-utils/npm-project";
@@ -22,12 +22,12 @@ test("an invalid later package prevents registry prompts and all writes", async 
     directory: "beta",
     packageJson: "{ malformed",
   });
-  const requestRegistry = vi.fn();
+  const requestRegistryAsync = vi.fn();
 
-  const result = await buildAuthSetupPlan(
+  const result = await buildAuthSetupPlanAsync(
     project.root,
     [project.path("alpha/package.json"), project.path("beta/package.json")],
-    requestRegistry,
+    requestRegistryAsync,
   );
 
   expect(result).toMatchObject({
@@ -38,7 +38,7 @@ test("an invalid later package prevents registry prompts and all writes", async 
       issue: "invalid-json",
     },
   });
-  expect(requestRegistry).not.toHaveBeenCalled();
+  expect(requestRegistryAsync).not.toHaveBeenCalled();
   expect(await project.readFileAsync("alpha/package.json")).toBe(originalAlpha);
   expect(await project.readFileAsync("beta/package.json")).toBe("{ malformed");
   expect(await project.existsAsync("alpha/.npmrc")).toBe(false);
@@ -50,12 +50,12 @@ test("an unreadable selected npmrc prevents prompts and writes", async () => {
   const originalPackageJson = JSON.stringify({ name: "unreadable-npmrc" });
   await project.createPackageAsync({ packageJson: originalPackageJson });
   await mkdir(project.path(".npmrc"));
-  const requestRegistry = vi.fn();
+  const requestRegistryAsync = vi.fn();
 
-  const result = await buildAuthSetupPlan(
+  const result = await buildAuthSetupPlanAsync(
     project.root,
     [project.path("package.json")],
-    requestRegistry,
+    requestRegistryAsync,
   );
 
   expect(result).toMatchObject({
@@ -65,7 +65,7 @@ test("an unreadable selected npmrc prevents prompts and writes", async () => {
       displayPath: ".npmrc",
     },
   });
-  expect(requestRegistry).not.toHaveBeenCalled();
+  expect(requestRegistryAsync).not.toHaveBeenCalled();
   expect(await project.readFileAsync("package.json")).toBe(originalPackageJson);
   expect(await project.readTreeAsync()).toEqual([".npmrc", "package.json"]);
 });
@@ -81,7 +81,7 @@ test("cancelling a later registry prompt leaves every selected package untouched
     directory: "beta",
     packageJson: originalPackageJson,
   });
-  const requestRegistry = vi
+  const requestRegistryAsync = vi
     .fn()
     .mockResolvedValueOnce({
       status: "provided",
@@ -89,14 +89,14 @@ test("cancelling a later registry prompt leaves every selected package untouched
     })
     .mockResolvedValueOnce({ status: "cancelled" });
 
-  const result = await buildAuthSetupPlan(
+  const result = await buildAuthSetupPlanAsync(
     project.root,
     [project.path("alpha/package.json"), project.path("beta/package.json")],
-    requestRegistry,
+    requestRegistryAsync,
   );
 
   expect(result).toEqual({ status: "cancelled" });
-  expect(requestRegistry).toHaveBeenCalledTimes(2);
+  expect(requestRegistryAsync).toHaveBeenCalledTimes(2);
   for (const directory of ["alpha", "beta"]) {
     expect(await project.readFileAsync(`${directory}/package.json`)).toBe(
       originalPackageJson,
@@ -109,15 +109,15 @@ test("a complete plan reports paths and counts before adapter persistence", asyn
   const project = await NpmProject.createAsync("plan-complete-persistence");
   const originalPackageJson = JSON.stringify({ name: "complete" });
   await project.createPackageAsync({ packageJson: originalPackageJson });
-  const requestRegistry = vi.fn(async () => ({
+  const requestRegistryAsync = vi.fn(async () => ({
     status: "provided" as const,
     registry: "https://project.example/",
   }));
 
-  const result = await buildAuthSetupPlan(
+  const result = await buildAuthSetupPlanAsync(
     project.root,
     [project.path("package.json")],
-    requestRegistry,
+    requestRegistryAsync,
   );
 
   expect(result.status).toBe("ready");
@@ -148,7 +148,7 @@ test("a complete plan reports paths and counts before adapter persistence", asyn
     unchangedFiles: 0,
   });
 
-  await expect(writeAuthSetupPlan(result.plan)).resolves.toEqual({
+  await expect(writeAuthSetupPlanAsync(result.plan)).resolves.toEqual({
     status: "written",
   });
   expect(JSON.parse(await project.readFileAsync("package.json"))).toMatchObject({

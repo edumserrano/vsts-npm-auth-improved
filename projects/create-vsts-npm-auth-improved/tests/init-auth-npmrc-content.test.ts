@@ -4,7 +4,7 @@ import {
   EXPECTED_MANAGED_NPM_CONFIG,
   parseNpmrcContent,
 } from "@test-utils/configuration-fixtures";
-import { runSinglePackageScenario } from "@test-utils/init-auth-scenario";
+import { runSinglePackageScenarioAsync } from "@test-utils/init-auth-scenario";
 import { NpmProject } from "@test-utils/npm-project";
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
 
@@ -105,7 +105,7 @@ const scenarios: readonly NpmrcWorkflowScenario[] = [
 test.each(scenarios)(
   "configures .npmrc content: $description",
   async ({ description, npmrc, expectedValues, absentKeys, promptForRegistry }) => {
-    const scenario = await runSinglePackageScenario({
+    const scenario = await runSinglePackageScenarioAsync({
       name: `npmrc-${description}`,
       packageJson: configuredPackageJsonContent(),
       npmrc,

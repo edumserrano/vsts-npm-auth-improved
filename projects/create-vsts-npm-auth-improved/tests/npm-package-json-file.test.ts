@@ -1,11 +1,11 @@
 import path from "node:path";
 import { beforeEach, expect, test } from "vitest";
 import {
-  loadNpmPackageJsonFileWithDependencies,
+  loadNpmPackageJsonFileWithDependenciesAsync,
   NpmPackageJsonFileError,
 } from "../src/init-auth/package-files/npm-package-json-file";
 
-type TestDependencies = Parameters<typeof loadNpmPackageJsonFileWithDependencies>[1];
+type TestDependencies = Parameters<typeof loadNpmPackageJsonFileWithDependenciesAsync>[1];
 
 const managedScripts = {
   "registry-auth":
@@ -68,7 +68,7 @@ test("loads the package directory and sends the complete safe update through npm
     peerDependencies: { peer: "4" },
   });
 
-  const adapter = await loadNpmPackageJsonFileWithDependencies(
+  const adapter = await loadNpmPackageJsonFileWithDependenciesAsync(
     { packageDirectory },
     createDependencies(),
   );
@@ -95,7 +95,7 @@ test("loads the package directory and sends the complete safe update through npm
     },
   ]);
 
-  await adapter.save();
+  await adapter.saveAsync();
   expect(fakePackageJson.saveCalls).toHaveLength(1);
 });
 
@@ -108,7 +108,7 @@ test("replaces unsupported script and development dependency containers", async 
     peerDependencies: ["leave-to-npm"],
   });
 
-  const adapter = await loadNpmPackageJsonFileWithDependencies(
+  const adapter = await loadNpmPackageJsonFileWithDependenciesAsync(
     { packageDirectory: path.resolve("fixtures", "invalid-containers") },
     createDependencies(),
   );
@@ -130,7 +130,7 @@ test("discards invalid entries from managed containers before calling npm", asyn
     devDependencies: { typescript: "7", invalid: false },
   });
 
-  await loadNpmPackageJsonFileWithDependencies(
+  await loadNpmPackageJsonFileWithDependenciesAsync(
     { packageDirectory: path.resolve("fixtures", "invalid-entries") },
     createDependencies(),
   );
@@ -155,11 +155,11 @@ test("reports semantic idempotency without updating or saving", async () => {
     },
   });
 
-  const adapter = await loadNpmPackageJsonFileWithDependencies(
+  const adapter = await loadNpmPackageJsonFileWithDependenciesAsync(
     { packageDirectory: path.resolve("fixtures", "unchanged") },
     createDependencies(),
   );
-  await adapter.save();
+  await adapter.saveAsync();
 
   expect(adapter.disposition).toBe("unchanged");
   expect(fakePackageJson.updateCalls).toEqual([]);
@@ -173,7 +173,7 @@ test.each([null, [], "package", 42, true])(
     const packageDirectory = path.resolve("fixtures", "non-object");
 
     await expect(
-      loadNpmPackageJsonFileWithDependencies({ packageDirectory }, createDependencies()),
+      loadNpmPackageJsonFileWithDependenciesAsync({ packageDirectory }, createDependencies()),
     ).rejects.toMatchObject({
       filePath: path.join(packageDirectory, "package.json"),
       issue: "root-not-object",
@@ -192,7 +192,7 @@ test.each([
   const packageDirectory = path.resolve("fixtures", _label);
 
   await expect(
-    loadNpmPackageJsonFileWithDependencies({ packageDirectory }, createDependencies()),
+    loadNpmPackageJsonFileWithDependenciesAsync({ packageDirectory }, createDependencies()),
   ).rejects.toMatchObject({
     cause,
     filePath: path.join(packageDirectory, "package.json"),
@@ -208,7 +208,7 @@ test("translates update and save failures at their adapter boundary", async () =
   const packageDirectory = path.resolve("fixtures", "update-failure");
 
   await expect(
-    loadNpmPackageJsonFileWithDependencies({ packageDirectory }, createDependencies()),
+    loadNpmPackageJsonFileWithDependenciesAsync({ packageDirectory }, createDependencies()),
   ).rejects.toMatchObject({
     cause: updateCause,
     operation: "read",
@@ -216,11 +216,11 @@ test("translates update and save failures at their adapter boundary", async () =
 
   const saveCause = new Error("save exploded");
   fakePackageJson = new FakePackageJson({}, saveCause);
-  const adapter = await loadNpmPackageJsonFileWithDependencies(
+  const adapter = await loadNpmPackageJsonFileWithDependenciesAsync(
     { packageDirectory },
     createDependencies(),
   );
-  await expect(adapter.save()).rejects.toMatchObject({
+  await expect(adapter.saveAsync()).rejects.toMatchObject({
     cause: saveCause,
     filePath: path.join(packageDirectory, "package.json"),
     name: "NpmPackageJsonFileError",
