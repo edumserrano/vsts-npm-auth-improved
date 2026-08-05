@@ -108,20 +108,20 @@ this order:
 ```json
 {
   "scripts": {
-    "registry-auth": "npm exec --yes --registry=https://registry.npmjs.org/ -- vsts-npm-auth-improved@alpha -- -c ./.npmrc --read",
+    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read",
     "preinstall-packages": "npm run registry-auth",
     "install-packages": "npm i"
   }
 }
 ```
 
-`registry-auth` uses npm's package executor so authentication can run before
+`registry-auth` uses npm's package runner so authentication can run before
 the project's dependencies have been installed. The explicit package spec and
 command-line registry select the current `alpha` release from the public npm
 registry, overriding the project-level global registry for this bootstrap
 request. npm caches the fetched package and reuses its package data while the
-same alpha release remains current. The second `--` passes the remaining
-options to `vsts-npm-auth-improved` instead of letting npm parse them.
+same alpha release remains current. All `npx` options precede the package spec,
+so the remaining options are passed to `vsts-npm-auth-improved`.
 
 Run the managed installation command immediately after configuration:
 
