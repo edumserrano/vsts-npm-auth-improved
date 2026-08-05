@@ -27,7 +27,11 @@ exports[`accepts a valid HTTPS registry through the real registry prompt 1`] = `
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+◆  Changed 2 files in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -61,7 +65,11 @@ exports[`accepts a valid custom-scheme registry through the real registry prompt
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+◆  Changed 2 files in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -107,7 +115,11 @@ exports[`reuses an existing global registry without showing a registry prompt 1`
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -147,7 +159,11 @@ exports[`shows empty registry feedback before accepting a valid correction 1`] =
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+◆  Changed 2 files in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -259,7 +275,11 @@ exports[`shows missing-scheme registry feedback before accepting a valid correct
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+◆  Changed 2 files in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -299,7 +319,11 @@ exports[`shows relative registry feedback before accepting a valid correction 1`
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+◆  Changed 2 files in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -339,7 +363,11 @@ exports[`shows whitespace registry feedback before accepting a valid correction 
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+◆  Changed 2 files in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 

@@ -27,7 +27,11 @@ exports[`displays the Git ignore warning when changed npmrc files are ignored 1`
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+◆  Changed 2 files in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    CREATED    .npmrc
 │
 ▲  The following .npmrc files were created or updated but are ignored by Git.
 │  Project-level .npmrc files are often committed so npm settings are shared with other contributors.
@@ -67,7 +71,11 @@ exports[`does not display the Git ignore warning when no changed npmrc files are
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+◆  Changed 2 files in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 

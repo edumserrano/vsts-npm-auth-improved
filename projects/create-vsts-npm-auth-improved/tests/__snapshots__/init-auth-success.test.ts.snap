@@ -27,7 +27,11 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 1`]
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 1 updated, 0 unchanged.
+◆  Changed 2 files in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -55,7 +59,11 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 2`]
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (0 changed, 1 unchanged); files: 0 created, 0 updated, 2 unchanged.
+◆  No files changed
+│
+│  ./
+│    UNCHANGED  package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -85,7 +93,19 @@ exports[`configures ALL mixed with an individual package through a complete CLI 
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 3 configured (3 changed, 0 unchanged); files: 0 created, 3 updated, 3 unchanged.
+◆  Changed 3 files across 3 packages
+│
+│  alpha/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
+│
+│  beta/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
+│
+│  gamma/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -115,7 +135,19 @@ exports[`configures ALL through a complete CLI selection 1`] = `
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 3 configured (3 changed, 0 unchanged); files: 0 created, 3 updated, 3 unchanged.
+◆  Changed 3 files across 3 packages
+│
+│  alpha/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
+│
+│  beta/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
+│
+│  gamma/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -145,7 +177,15 @@ exports[`configures a subset through a complete CLI selection 1`] = `
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 2 configured (2 changed, 0 unchanged); files: 0 created, 2 updated, 2 unchanged.
+◆  Changed 2 files across 2 packages
+│
+│  alpha/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
+│
+│  gamma/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -175,7 +215,19 @@ exports[`configures multiple individual packages through a complete CLI selectio
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 3 configured (3 changed, 0 unchanged); files: 0 created, 3 updated, 3 unchanged.
+◆  Changed 3 files across 3 packages
+│
+│  alpha/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
+│
+│  beta/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
+│
+│  gamma/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -205,7 +257,11 @@ exports[`configures one package through a complete CLI selection 1`] = `
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  beta/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -241,7 +297,19 @@ exports[`reports mixed created updated and unchanged outcomes in persistence ord
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 3 configured (2 changed, 1 unchanged); files: 1 created, 2 updated, 3 unchanged.
+◆  Changed 3 files across 2 of 3 packages
+│
+│  alpha/
+│    UNCHANGED  package.json
+│    UNCHANGED  .npmrc
+│
+│  beta/
+│    UPDATED    package.json
+│    UPDATED    .npmrc
+│
+│  gamma/
+│    UNCHANGED  package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 

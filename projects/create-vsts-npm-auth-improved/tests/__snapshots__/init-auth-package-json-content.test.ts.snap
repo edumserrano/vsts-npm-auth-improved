@@ -21,7 +21,11 @@ exports[`configures package.json content: creates managed scripts and the develo
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -49,7 +53,11 @@ exports[`configures package.json content: discards invalid managed entries while
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -77,7 +85,11 @@ exports[`configures package.json content: overwrites conflicts while preserving 
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -105,7 +117,11 @@ exports[`configures package.json content: preserves and reconciles every depende
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -133,7 +149,11 @@ exports[`configures package.json content: replaces non-object script and depende
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
 │
 └  Authentication configuration complete. 😊
 

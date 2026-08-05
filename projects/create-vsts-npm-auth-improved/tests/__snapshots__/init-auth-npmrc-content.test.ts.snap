@@ -21,7 +21,11 @@ exports[`configures .npmrc content: 'corrects managed values and preserves…' 1
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UNCHANGED  package.json
+│    UPDATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -55,7 +59,11 @@ exports[`configures .npmrc content: 'creates a missing project configurati…' 1
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 0 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UNCHANGED  package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -89,7 +97,11 @@ exports[`configures .npmrc content: 'replaces a whitespace-only project re…' 1
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UNCHANGED  package.json
+│    UPDATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -123,7 +135,11 @@ exports[`configures .npmrc content: 'treats a scoped registry as distinct …' 1
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UNCHANGED  package.json
+│    UPDATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -157,7 +173,11 @@ exports[`configures .npmrc content: 'updates an empty project configuration' 1`]
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UNCHANGED  package.json
+│    UPDATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -185,7 +205,11 @@ exports[`configures .npmrc content: 'uses npm\\'s effective final duplicate…' 
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UNCHANGED  package.json
+│    UPDATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -219,7 +243,11 @@ exports[`prompts for a project registry despite an inherited 'environment regist
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 0 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UNCHANGED  package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -253,7 +281,11 @@ exports[`prompts for a project registry despite an inherited 'global registry' 1
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 0 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UNCHANGED  package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -287,7 +319,11 @@ exports[`prompts for a project registry despite an inherited 'user registry' 1`]
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 1 created, 0 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  ./
+│    UNCHANGED  package.json
+│    CREATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -316,7 +352,11 @@ exports[`updates only the 'nested package' adjacent .npmrc 1`] = `
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  packages/nested/
+│    UNCHANGED  package.json
+│    UPDATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -344,7 +384,11 @@ exports[`updates only the 'standalone package' adjacent .npmrc 1`] = `
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 2 updated, 0 unchanged.
+◆  Changed 2 files in 1 package
+│
+│  ./
+│    UPDATED    package.json
+│    UPDATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
@@ -373,7 +417,11 @@ exports[`updates only the 'workspace member' adjacent .npmrc 1`] = `
 │
 ◇  Configuration files are ready.
 │
-◆  Packages: 1 configured (1 changed, 0 unchanged); files: 0 created, 1 updated, 1 unchanged.
+◆  Changed 1 file in 1 package
+│
+│  packages/member/
+│    UNCHANGED  package.json
+│    UPDATED    .npmrc
 │
 └  Authentication configuration complete. 😊
 
