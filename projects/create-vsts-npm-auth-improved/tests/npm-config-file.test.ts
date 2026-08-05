@@ -131,7 +131,6 @@ test("constructs a controlled package-local config and performs only required se
     projectRegistry: "https://project.example/",
   });
   expect(config.setCalls).toEqual([
-    { key: "lockfile-version", value: "3", where: "project" },
     { key: "audit", value: false, where: "project" },
   ]);
   expect(config.deleteCalls).toEqual([
@@ -141,7 +140,7 @@ test("constructs a controlled package-local config and performs only required se
 
   adapter.setPromptedRegistry("https://prompted.example/");
   expect(adapter.projectRegistry).toBe("https://project.example/");
-  expect(config.setCalls).toHaveLength(2);
+  expect(config.setCalls).toHaveLength(1);
 });
 
 test("marks a missing file created and sets only a non-empty prompted registry", async () => {
@@ -172,14 +171,14 @@ test("marks a missing file created and sets only a non-empty prompted registry",
   ]);
 });
 
-test("reports an already-correct project as unchanged without setting or deleting values", async () => {
+test("reports an already-correct project as unchanged without touching unmanaged values", async () => {
   resetFakeConfig({
     effectiveValues: { registry: "https://project.example/" },
     projectValues: {
       registry: "https://project.example/",
       "package-lock": true,
-      "lockfile-version": "3",
-      "legacy-peer-deps": true,
+      "lockfile-version": "2",
+      "legacy-peer-deps": false,
       audit: false,
       fund: false,
     },

@@ -3,7 +3,8 @@ import path from "node:path";
 const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "alpha";
 
 const REQUIRED_SCRIPTS = {
-  "registry-auth": "vsts-npm-auth-improved -c ./.npmrc --read",
+  "registry-auth":
+    `npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@${VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC} -c ./.npmrc --read --no-force`,
   "preinstall-packages": "npm run registry-auth",
   "install-packages": "npm i",
 } as const;

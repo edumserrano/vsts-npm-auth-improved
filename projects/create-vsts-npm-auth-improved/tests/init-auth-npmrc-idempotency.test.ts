@@ -66,6 +66,8 @@ test(
     const firstNpmrc = await scenario.project.readFileAsync(".npmrc");
     expect(parseNpmrcContent(firstNpmrc)).toMatchObject({
       registry: existingRegistry,
+      "lockfile-version": "2",
+      "legacy-peer-deps": "false",
       ...EXPECTED_MANAGED_NPM_CONFIG,
     });
     expect(scenario.output.normalizedOutput).toMatchSnapshot();
@@ -77,7 +79,6 @@ test(
     });
     const secondCommand = InitAuthCommand.invokeAsync();
     await new PromptsInteraction()
-      .enterText(".")
       .submitText()
       .down()
       .toggleMultiselectItem()

@@ -1,6 +1,6 @@
 {
   "name": "vsts-npm-auth-improved",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.9",
   "packageManager": "npm@12.0.2",
   "author": "Eduardo Serrano",
   "license": "MIT",

@@ -61,7 +61,7 @@ test("runs the no-packages flow through the emitted package entrypoint", async (
 
   process.chdir(project.root);
   const command = emittedPackage.invokeAsync(["init-auth"]);
-  await new PromptsInteraction().enterText("./").submitText();
+  await new PromptsInteraction().submitText();
   await command;
 
   expect(process.exitCode ?? 0).toBe(0);

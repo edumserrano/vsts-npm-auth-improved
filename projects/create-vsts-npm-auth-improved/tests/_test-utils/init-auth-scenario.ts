@@ -27,7 +27,6 @@ export async function runSinglePackageScenario({
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   const interaction = new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .down()
     .toggleMultiselectItem()

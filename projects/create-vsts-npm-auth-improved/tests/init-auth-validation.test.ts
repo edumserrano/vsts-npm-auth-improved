@@ -159,7 +159,6 @@ test.each([
     process.chdir(project.root);
     const command = InitAuthCommand.invokeAsync();
     await new PromptsInteraction()
-      .enterText(".")
       .submitText()
       .down()
       .toggleMultiselectItem()
@@ -205,7 +204,6 @@ test.each([
     process.chdir(project.root);
     const command = InitAuthCommand.invokeAsync();
     await new PromptsInteraction()
-      .enterText(".")
       .submitText()
       .down()
       .toggleMultiselectItem()
@@ -250,7 +248,6 @@ test("reuses an existing global registry without showing a registry prompt", asy
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .down()
     .toggleMultiselectItem()

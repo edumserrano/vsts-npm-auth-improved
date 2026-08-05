@@ -78,16 +78,15 @@ For a new `.npmrc`, the CLI configures these managed settings:
 ```ini
 registry=<registry entered in the prompt>
 package-lock=true
-lockfile-version=3
-legacy-peer-deps=true
 audit=false
 fund=false
 ```
 
-For an existing `.npmrc`, the CLI enforces those same six managed values. The
-effective non-empty project `registry` value is reused; the other five managed
+For an existing `.npmrc`, the CLI enforces those same four managed values. The
+effective non-empty project `registry` value is reused; the other three managed
 values are overwritten when they conflict. Credentials, unrelated settings,
 and scoped registry entries such as `@scope:registry=...` remain configured.
+`lockfile-version` and `legacy-peer-deps` are not added or changed.
 Both global `always-auth=...` and scoped `//registry/:always-auth=...` settings
 are removed.
 
@@ -109,11 +108,35 @@ this order:
 ```json
 {
   "scripts": {
-    "registry-auth": "vsts-npm-auth-improved -c ./.npmrc --read",
+    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --no-force",
     "preinstall-packages": "npm run registry-auth",
     "install-packages": "npm i"
   }
 }
+```
+
+`registry-auth` uses npm's package runner so authentication can run before
+the project's dependencies have been installed. The explicit package spec and
+command-line registry select the current `alpha` release from the public npm
+registry, overriding the project-level global registry for this bootstrap
+request. npm caches the fetched package and reuses its package data while the
+same alpha release remains current. All `npx` options precede the package spec,
+so the remaining options are passed to `vsts-npm-auth-improved`.
+
+Run the managed installation command immediately after configuration:
+
+```shell
+npm run install-packages
+```
+
+Its `preinstall-packages` hook authenticates first, then `npm i` installs the
+project dependencies using the configured project registry.
+
+If authentication fails, retry from the project directory with forced token
+acquisition:
+
+```shell
+npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --force
 ```
 
 Conflicting values for the managed dependency or scripts are overwritten.

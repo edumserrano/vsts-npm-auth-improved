@@ -9,7 +9,8 @@ import path from "node:path";
 export const DEFAULT_REGISTRY = "https://registry.example.test/";
 
 const EXPECTED_REQUIRED_SCRIPTS = {
-  "registry-auth": "vsts-npm-auth-improved -c ./.npmrc --read",
+  "registry-auth":
+    "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --no-force",
   "preinstall-packages": "npm run registry-auth",
   "install-packages": "npm i",
 } as const;
@@ -18,8 +19,6 @@ const EXPECTED_VSTS_NPM_AUTH_IMPROVED_SPEC = "alpha";
 
 export const EXPECTED_MANAGED_NPM_CONFIG = {
   "package-lock": "true",
-  "lockfile-version": "3",
-  "legacy-peer-deps": "true",
   audit: "false",
   fund: "false",
 } as const;
@@ -53,8 +52,6 @@ export function canonicalNpmrc(registry = DEFAULT_REGISTRY): string {
   return [
     `registry=${registry}`,
     "package-lock=true",
-    "lockfile-version=3",
-    "legacy-peer-deps=true",
     "audit=false",
     "fund=false",
   ].join("\n");
