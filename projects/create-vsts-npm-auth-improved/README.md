@@ -78,16 +78,15 @@ For a new `.npmrc`, the CLI configures these managed settings:
 ```ini
 registry=<registry entered in the prompt>
 package-lock=true
-lockfile-version=3
-legacy-peer-deps=true
 audit=false
 fund=false
 ```
 
-For an existing `.npmrc`, the CLI enforces those same six managed values. The
-effective non-empty project `registry` value is reused; the other five managed
+For an existing `.npmrc`, the CLI enforces those same four managed values. The
+effective non-empty project `registry` value is reused; the other three managed
 values are overwritten when they conflict. Credentials, unrelated settings,
 and scoped registry entries such as `@scope:registry=...` remain configured.
+`lockfile-version` and `legacy-peer-deps` are not added or changed.
 Both global `always-auth=...` and scoped `//registry/:always-auth=...` settings
 are removed.
 
