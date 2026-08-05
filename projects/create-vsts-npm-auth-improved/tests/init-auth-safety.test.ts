@@ -1,6 +1,5 @@
 import { accessSync } from "node:fs";
 import { mkdir, rename } from "node:fs/promises";
-import path from "node:path";
 import { globby } from "globby";
 import { afterEach, expect, test, vi } from "vitest";
 import {

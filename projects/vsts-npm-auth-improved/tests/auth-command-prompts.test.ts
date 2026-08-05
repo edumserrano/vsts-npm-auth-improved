@@ -4,7 +4,7 @@ import { vol } from "memfs";
 import { createInMemoryNpmrcFile } from "@test-utils/npm-configuration-file";
 import { mockStdoutWrite } from "@test-utils/stdout";
 import { mockVstsNpmAuth } from "@test-utils/vsts-npm-auth";
-import { PromptsInteraction } from "@test-utils/prompts";
+import { PromptsInteraction } from "@test-utils/prompts-interaction";
 
 /**
  * The tests below will test the auth command when all the options are provided via user prompts.
