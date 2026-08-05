@@ -66,7 +66,9 @@ be configured in the CI environment and exits successfully so the npm script can
 
 The command reads the registry from the selected `.npmrc`, invokes `vsts-npm-auth`, and writes the
 acquired credentials to the user's npm configuration at `~/.npmrc`. Failed token acquisition is
-retried once with forced acquisition unless `--force` was already supplied.
+retried once with forced acquisition unless `--force` was already supplied. The command does not
+pass an expiration time (`-E`) to `vsts-npm-auth`, so newly acquired tokens use the
+`vsts-npm-auth` default of 129,600 minutes (90 days).
 
 ### macOS and Linux
 
