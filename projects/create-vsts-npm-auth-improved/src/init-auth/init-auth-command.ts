@@ -135,9 +135,13 @@ async function handleInitAuthCommandAsync(): Promise<void> {
     spinnerPrompt.stop("Configuration files are ready.");
     spinnerPrompt = null;
     prompts.log.success(formatAuthSetupSummary(summary));
-    const gitignoreWarning = formatNpmrcGitignoreWarning(gitignoreCheck);
-    if (gitignoreWarning !== undefined) {
-      prompts.log.warn(gitignoreWarning);
+    if (
+      gitignoreCheck.status === "checked" &&
+      gitignoreCheck.ignoredDisplayPaths.length > 0
+    ) {
+      prompts.log.warn(
+        formatNpmrcGitignoreWarning(gitignoreCheck.ignoredDisplayPaths),
+      );
     }
 
     prompts.outro("Authentication configuration complete. 😊");

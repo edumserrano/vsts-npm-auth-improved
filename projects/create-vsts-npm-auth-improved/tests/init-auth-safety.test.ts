@@ -4,6 +4,7 @@ import path from "node:path";
 import { globby } from "globby";
 import { afterEach, expect, test, vi } from "vitest";
 import { packageJsonContent } from "@test-utils/configuration-fixtures";
+import { checkChangedNpmrcFilesForGitignore } from "../src/init-auth/auth-setup/npmrc-gitignore-check";
 import {
   loadNpmConfigFile,
   NpmConfigFileError,
@@ -51,6 +52,21 @@ vi.mock("globby", async (importOriginal) => {
     globby: vi.fn(actual.globby),
   };
 });
+
+vi.mock(
+  "../src/init-auth/auth-setup/npmrc-gitignore-check",
+  async (importOriginal) => {
+    const actual = await importOriginal<
+      typeof import("../src/init-auth/auth-setup/npmrc-gitignore-check")
+    >();
+    return {
+      ...actual,
+      checkChangedNpmrcFilesForGitignore: vi.fn(
+        actual.checkChangedNpmrcFilesForGitignore,
+      ),
+    };
+  },
+);
 
 vi.mock("node:fs", async (importOriginal) => {
   const actual = await importOriginal<typeof import("node:fs")>();
@@ -320,6 +336,41 @@ test("surfaces a targeted write failure through the persistence spinner", async 
   expect(await project.readTreeAsync()).toEqual([".npmrc", "package.json"]);
   expect(await project.readFileAsync("package.json")).toBe(originalPackageJson);
   expect(await project.readFileAsync(".npmrc")).toBe(originalNpmrc);
+  expect(output.normalizedOutput).toMatchSnapshot();
+});
+
+/**
+ * Tests failure of the best-effort Git ignore check after persistence.
+ * Verifies that:
+ * - The command remains successful after writing the planned files
+ * - The check failure and its cause are not displayed to the user
+ * - The complete terminal transcript contains no Git ignore warning
+ */
+test("silently completes after a Git ignore check failure", async () => {
+  const project = await NpmProject.createAsync("gitignore-check-failure");
+  await project.createPackageAsync({ packageJson: originalPackageJson });
+  const output = mockStdoutWrite({ temporaryRoots: [project.root] });
+  vi.mocked(checkChangedNpmrcFilesForGitignore).mockResolvedValueOnce({
+    status: "failed",
+    cause: new Error("ignore check failed"),
+  });
+
+  process.chdir(project.root);
+  const command = InitAuthCommand.invokeAsync();
+  await new PromptsInteraction()
+    .submitText()
+    .down()
+    .toggleMultiselectItem()
+    .acceptMultiselectValues()
+    .enterText("https://registry.example.test/")
+    .submitText();
+  await command;
+
+  expect(process.exitCode ?? 0).toBe(0);
+  expect(checkChangedNpmrcFilesForGitignore).toHaveBeenCalledOnce();
+  expect(await project.readTreeAsync()).toEqual([".npmrc", "package.json"]);
+  expect(output.normalizedOutput).not.toContain("ignore check failed");
+  expect(output.normalizedOutput).not.toContain("ignored by Git");
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
