@@ -91,13 +91,14 @@ async function invokeInitAuth(
   if (scenario.gitignore !== undefined) {
     await project.writeFileAsync(".gitignore", scenario.gitignore);
   }
+
   if (scenario.checkResult !== undefined) {
     vi.mocked(checkChangedNpmrcFilesForGitignore).mockResolvedValueOnce(
       scenario.checkResult,
     );
   }
-  const output = mockStdoutWrite({ temporaryRoots: [project.root] });
 
+  const output = mockStdoutWrite({ temporaryRoots: [project.root] });
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
