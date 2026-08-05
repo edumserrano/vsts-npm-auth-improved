@@ -1,38 +1,18 @@
 import { Command } from "commander";
 import { afterEach, expect, test, vi } from "vitest";
 import {
-  loadNpmPackageJsonFileAsync,
-  NpmPackageJsonFileError,
-} from "../src/init-auth/package-files/npm-package-json-file";
-import {
   CreateVstsNpmAuthImprovedCli,
   InitAuthCommand,
   InitAuthInvocation,
 } from "@test-utils/init-auth-command";
 import { NpmProject } from "@test-utils/npm-project";
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
-import {
-  captureProcessOutput,
-  mockStdoutWrite,
-} from "@test-utils/process-output";
+import { captureProcessOutput, mockStdoutWrite } from "@test-utils/process-output";
 
 /**
  * The tests below verify the create-vsts-npm-auth-improved CLI entry commands,
  * informational output, and top-level error handling.
  */
-
-vi.mock(
-  "../src/init-auth/package-files/npm-package-json-file",
-  async (importOriginal) => {
-    const actual = await importOriginal<
-      typeof import("../src/init-auth/package-files/npm-package-json-file")
-    >();
-    return {
-      ...actual,
-      loadNpmPackageJsonFileAsync: vi.fn(actual.loadNpmPackageJsonFileAsync),
-    };
-  },
-);
 
 const testSuiteCwd = process.cwd();
 
@@ -60,10 +40,7 @@ afterEach(async () => {
 test.each([
   ["default command", "default"],
   ["explicit init-auth command", "explicit"],
-] as const)("dispatches the %s through the real workflow", async (
-  _description,
-  invocation,
-) => {
+] as const)("dispatches the %s through the real workflow", async (_description, invocation) => {
   const project = await NpmProject.createAsync(`dispatch-${invocation}`);
   const output = mockStdoutWrite({
     temporaryRoots: [project.root],
@@ -135,48 +112,6 @@ test("reports an unknown command with the effective Commander exit code", async 
 });
 
 /**
- * Tests handling of an operational Error thrown while reading a package file.
- * Verifies that:
- * - The command exits with process exit code 1
- * - No package.json or .npmrc content is changed
- * - The contextual read failure is presented without the unexpected fallback
- */
-test("reports a known Error from the package adapter boundary", async () => {
-  const project = await NpmProject.createAsync("filesystem-read-failure");
-  await project.createPackageAsync({ packageJson: "{}" });
-  const originalState = {
-    tree: await project.readTreeAsync(),
-    packageJson: await project.readFileAsync("package.json"),
-    npmrcExists: await project.existsAsync(".npmrc"),
-  };
-  const output = mockStdoutWrite({
-    temporaryRoots: [project.root],
-  });
-  vi.mocked(loadNpmPackageJsonFileAsync).mockRejectedValueOnce(
-    new NpmPackageJsonFileError("read", project.path("package.json"), {
-      cause: new Error("filesystem read failed"),
-    }),
-  );
-
-  process.chdir(project.root);
-  const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction()
-    .submitText()
-    .down()
-    .toggleMultiselectItem()
-    .acceptMultiselectValues();
-  await command;
-
-  expect(process.exitCode).toBe(1);
-  expect({
-    tree: await project.readTreeAsync(),
-    packageJson: await project.readFileAsync("package.json"),
-    npmrcExists: await project.existsAsync(".npmrc"),
-  }).toEqual(originalState);
-  expect(output.normalizedOutput).toMatchSnapshot();
-});
-
-/**
  * Tests command-level handling when terminal output throws an Error outside
  * the modeled init-auth failure boundaries.
  */
@@ -237,19 +172,13 @@ test("reports a top-level non-Commander CLI failure", async () => {
   });
   const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
   const unexpectedValue = "Unexpected top-level non-Commander failure";
-  vi.spyOn(Command.prototype, "parseAsync").mockRejectedValueOnce(
-    unexpectedValue,
-  );
+  vi.spyOn(Command.prototype, "parseAsync").mockRejectedValueOnce(unexpectedValue);
 
   await CreateVstsNpmAuthImprovedCli.invokeAsync([]);
 
   expect(process.exitCode).toBe(1);
   expect(await project.readTreeAsync()).toEqual([]);
   expect(consoleLog).toHaveBeenNthCalledWith(1);
-  expect(consoleLog).toHaveBeenNthCalledWith(
-    2,
-    "🚨 Unexpected error:",
-    unexpectedValue,
-  );
+  expect(consoleLog).toHaveBeenNthCalledWith(2, "🚨 Unexpected error:", unexpectedValue);
   expect(output.normalizedOutput).toMatchSnapshot();
 });

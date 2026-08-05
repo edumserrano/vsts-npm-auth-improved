@@ -84,6 +84,45 @@ test.each([
       devDependencies: { "vsts-npm-auth-improved": "alpha" },
     },
   ],
+  [
+    "preserves and reconciles every dependency section",
+    `\uFEFF${JSON.stringify({
+      name: "all-dependency-types",
+      scripts: { test: "vitest" },
+      dependencies: { zebra: "1", sharedOptional: "2", alpha: "3" },
+      devDependencies: { zebraDev: "4", alphaDev: "5" },
+      optionalDependencies: { sharedOptional: "6", alphaOptional: "7" },
+      peerDependencies: { zebraPeer: "8", alphaPeer: "9" },
+    })}`,
+    {
+      name: "all-dependency-types",
+      scripts: { ...managedScripts, test: "vitest" },
+      dependencies: { alpha: "3", zebra: "1" },
+      devDependencies: {
+        alphaDev: "5",
+        "vsts-npm-auth-improved": "alpha",
+        zebraDev: "4",
+      },
+      optionalDependencies: { alphaOptional: "7", sharedOptional: "6" },
+      peerDependencies: { alphaPeer: "9", zebraPeer: "8" },
+    },
+  ],
+  [
+    "discards invalid managed entries while preserving valid entries",
+    JSON.stringify({
+      name: "invalid-managed-entries",
+      scripts: { test: "vitest", invalid: true },
+      devDependencies: { typescript: "7", invalid: false },
+    }),
+    {
+      name: "invalid-managed-entries",
+      scripts: { ...managedScripts, test: "vitest" },
+      devDependencies: {
+        typescript: "7",
+        "vsts-npm-auth-improved": "alpha",
+      },
+    },
+  ],
 ] as const)(
   "configures package.json content: %s",
   async (_description, packageJson, expectedPackageJson) => {
@@ -94,16 +133,11 @@ test.each([
     });
 
     expect(process.exitCode ?? 0).toBe(0);
-    expect(await scenario.project.readTreeAsync()).toEqual([
-      ".npmrc",
-      "package.json",
-    ]);
+    expect(await scenario.project.readTreeAsync()).toEqual([".npmrc", "package.json"]);
     expect(JSON.parse(await scenario.project.readFileAsync("package.json"))).toEqual(
       expectedPackageJson,
     );
-    expect(await scenario.project.readFileAsync(".npmrc")).toBe(
-      canonicalNpmrc(existingRegistry),
-    );
+    expect(await scenario.project.readFileAsync(".npmrc")).toBe(canonicalNpmrc(existingRegistry));
     expect(scenario.output.normalizedOutput).toMatchSnapshot();
   },
 );

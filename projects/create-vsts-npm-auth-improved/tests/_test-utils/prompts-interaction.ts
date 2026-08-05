@@ -4,7 +4,7 @@
  * removes only Clack listeners created after the test process was initialized.
  */
 
-type PromptOperation = () => void;
+type PromptOperation = () => void | Promise<void>;
 
 const trackedStdinEvents = ["data", "keypress"] as const;
 const initialListeners = new Map(
@@ -84,6 +84,16 @@ export class PromptsInteraction implements PromiseLike<void> {
     return this;
   }
 
+  /**
+   * Runs test-owned setup while the current prompt remains open. This is useful
+   * for reproducing filesystem changes that happen between discovery/planning
+   * and persistence without importing or mocking application internals.
+   */
+  public performAsync(operation: () => Promise<void>): this {
+    this.operations.push(operation);
+    return this;
+  }
+
   public async then<TResult1 = void, TResult2 = never>(
     onfulfilled?:
       | ((value: void) => TResult1 | PromiseLike<TResult1>)
@@ -95,7 +105,7 @@ export class PromptsInteraction implements PromiseLike<void> {
     try {
       for (const operation of this.operations) {
         await waitForPromptListenerAsync();
-        operation();
+        await operation();
         await waitForCompleteRenderAsync();
       }
 

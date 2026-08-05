@@ -1,8 +1,5 @@
+import { globby } from "globby";
 import { afterEach, expect, test, vi } from "vitest";
-import {
-  checkChangedNpmrcFilesForGitignoreAsync,
-  NpmrcGitignoreCheckResult,
-} from "../src/init-auth/auth-setup/npmrc-gitignore-check";
 import { packageJsonContent } from "@test-utils/configuration-fixtures";
 import { InitAuthCommand } from "@test-utils/init-auth-command";
 import { NpmProject } from "@test-utils/npm-project";
@@ -16,24 +13,13 @@ import { PromptsInteraction } from "@test-utils/prompts-interaction";
  * through InitAuthCommand.
  */
 
-vi.mock(
-  "../src/init-auth/auth-setup/npmrc-gitignore-check",
-  async (importOriginal) => {
-    const actual = await importOriginal<
-      typeof import("../src/init-auth/auth-setup/npmrc-gitignore-check")
-    >();
-    return {
-      ...actual,
-      checkChangedNpmrcFilesForGitignoreAsync: vi.fn(
-        actual.checkChangedNpmrcFilesForGitignoreAsync,
-      ),
-    };
-  },
-);
+vi.mock("globby", async importOriginal => {
+  const actual = await importOriginal<typeof import("globby")>();
+  return { ...actual, globby: vi.fn(actual.globby) };
+});
 
 const testSuiteCwd = process.cwd();
-const warningLead =
-  "The following .npmrc files were created or updated but are ignored by Git.";
+const warningLead = "The following .npmrc files were created or updated but are ignored by Git.";
 
 afterEach(async () => {
   process.chdir(testSuiteCwd);
@@ -65,10 +51,7 @@ test("does not display the Git ignore warning when no changed npmrc files are ig
 
 test("does not display the Git ignore warning when the check fails", async () => {
   const output = await invokeInitAuth("warning-check-failed", {
-    checkResult: {
-      status: "failed",
-      cause: new Error("ignore check failed"),
-    },
+    failGitignoreCheck: true,
   });
 
   expect(process.exitCode ?? 0).toBe(0);
@@ -78,7 +61,7 @@ test("does not display the Git ignore warning when the check fails", async () =>
 });
 
 type InitAuthWarningScenario = {
-  readonly checkResult?: NpmrcGitignoreCheckResult;
+  readonly failGitignoreCheck?: boolean;
   readonly gitignore?: string;
 };
 
@@ -92,10 +75,13 @@ async function invokeInitAuth(
     await project.writeFileAsync(".gitignore", scenario.gitignore);
   }
 
-  if (scenario.checkResult !== undefined) {
-    vi.mocked(checkChangedNpmrcFilesForGitignoreAsync).mockResolvedValueOnce(
-      scenario.checkResult,
-    );
+  if (scenario.failGitignoreCheck) {
+    vi.mocked(globby)
+      .mockImplementationOnce(async (...args) => {
+        const actual = await vi.importActual<typeof import("globby")>("globby");
+        return actual.globby(...args);
+      })
+      .mockRejectedValueOnce(new Error("ignore check failed"));
   }
 
   const output = mockStdoutWrite({ temporaryRoots: [project.root] });
@@ -110,7 +96,6 @@ async function invokeInitAuth(
     .submitText();
   await command;
 
-  expect(checkChangedNpmrcFilesForGitignoreAsync).toHaveBeenCalledOnce();
   expect(await project.existsAsync(".npmrc")).toBe(true);
   return output;
 }

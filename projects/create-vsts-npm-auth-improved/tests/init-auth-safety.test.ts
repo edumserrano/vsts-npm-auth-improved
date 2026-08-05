@@ -1,18 +1,12 @@
 import { accessSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
+import { mkdir, rename } from "node:fs/promises";
 import path from "node:path";
 import { globby } from "globby";
 import { afterEach, expect, test, vi } from "vitest";
-import { packageJsonContent } from "@test-utils/configuration-fixtures";
 import {
-  loadNpmConfigFileAsync,
-  NpmConfigFileError,
-} from "../src/init-auth/package-files/npm-config-file";
-import {
-  loadNpmPackageJsonFileAsync,
-  NpmPackageJsonFile,
-  NpmPackageJsonFileError,
-} from "../src/init-auth/package-files/npm-package-json-file";
+  configuredPackageJsonContent,
+  packageJsonContent,
+} from "@test-utils/configuration-fixtures";
 import { InitAuthCommand } from "@test-utils/init-auth-command";
 import { nodeError } from "@test-utils/node-error";
 import { NpmProject } from "@test-utils/npm-project";
@@ -24,27 +18,7 @@ import { mockStdoutWrite } from "@test-utils/process-output";
  * planning, and persistence failures without leaving partial project changes.
  */
 
-vi.mock("../src/init-auth/package-files/npm-config-file", async (importOriginal) => {
-  const actual = await importOriginal<
-    typeof import("../src/init-auth/package-files/npm-config-file")
-  >();
-  return { ...actual, loadNpmConfigFileAsync: vi.fn(actual.loadNpmConfigFileAsync) };
-});
-
-vi.mock(
-  "../src/init-auth/package-files/npm-package-json-file",
-  async (importOriginal) => {
-    const actual = await importOriginal<
-      typeof import("../src/init-auth/package-files/npm-package-json-file")
-    >();
-    return {
-      ...actual,
-      loadNpmPackageJsonFileAsync: vi.fn(actual.loadNpmPackageJsonFileAsync),
-    };
-  },
-);
-
-vi.mock("globby", async (importOriginal) => {
+vi.mock("globby", async importOriginal => {
   const actual = await importOriginal<typeof import("globby")>();
   return {
     ...actual,
@@ -52,7 +26,7 @@ vi.mock("globby", async (importOriginal) => {
   };
 });
 
-vi.mock("node:fs", async (importOriginal) => {
+vi.mock("node:fs", async importOriginal => {
   const actual = await importOriginal<typeof import("node:fs")>();
   return {
     ...actual,
@@ -86,9 +60,7 @@ test("reports a discovery failure before package reads or writes", async () => {
   const output = mockStdoutWrite({
     temporaryRoots: [project.root],
   });
-  vi.mocked(globby).mockRejectedValueOnce(
-    nodeError("directory read failed", "EIO"),
-  );
+  vi.mocked(globby).mockRejectedValueOnce(nodeError("directory read failed", "EIO"));
 
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
@@ -96,8 +68,6 @@ test("reports a discovery failure before package reads or writes", async () => {
   await command;
 
   expect(process.exitCode).toBe(1);
-  expect(vi.mocked(loadNpmPackageJsonFileAsync).mock.calls).toEqual([]);
-  expect(vi.mocked(loadNpmConfigFileAsync).mock.calls).toEqual([]);
   expect(await project.readTreeAsync()).toEqual(["package.json"]);
   expect(await project.readFileAsync("package.json")).toBe(originalPackageJson);
   expect(await project.existsAsync(".npmrc")).toBe(false);
@@ -115,51 +85,17 @@ test("reports a discovery failure before package reads or writes", async () => {
  */
 test.each([
   ["malformed JSON", "{ malformed"],
-  ["a non-object JSON value", "[]"],
-] as const)(
-  "reports %s with zero writes",
-  async (_description, packageJson) => {
-    const project = await NpmProject.createAsync(`invalid-${_description}`);
-    await project.createPackageAsync({ packageJson });
-    const output = mockStdoutWrite({
-      temporaryRoots: [project.root],
-    });
-    process.chdir(project.root);
-    const command = InitAuthCommand.invokeAsync();
-    await new PromptsInteraction()
-      .submitText()
-      .down()
-      .toggleMultiselectItem()
-      .acceptMultiselectValues();
-    await command;
-
-    expect(process.exitCode).toBe(1);
-    expect(await project.readTreeAsync()).toEqual(["package.json"]);
-    expect(await project.readFileAsync("package.json")).toBe(packageJson);
-    expect(await project.existsAsync(".npmrc")).toBe(false);
-    expect(output.normalizedOutput).toMatchSnapshot();
-  },
-);
-
-/**
- * Tests a permission failure while reading a selected package.json.
- * Verifies that:
- * - The command exits with process exit code 1
- * - The error identifies the package with project-relative context
- * - No files are written and the original package remains unchanged
- */
-test("reports a package.json read failure with relative context and zero writes", async () => {
-  const project = await NpmProject.createAsync("package-json-read-failure");
-  await project.createPackageAsync({ packageJson: originalPackageJson });
+  ["a null JSON root", "null"],
+  ["an array JSON root", "[]"],
+  ["a string JSON root", '"package"'],
+  ["a number JSON root", "42"],
+  ["a boolean JSON root", "true"],
+] as const)("reports %s with zero writes", async (_description, packageJson) => {
+  const project = await NpmProject.createAsync(`invalid-${_description}`);
+  await project.createPackageAsync({ packageJson });
   const output = mockStdoutWrite({
     temporaryRoots: [project.root],
   });
-  vi.mocked(loadNpmPackageJsonFileAsync).mockRejectedValueOnce(
-    new NpmPackageJsonFileError("read", project.path("package.json"), {
-      cause: nodeError("permission denied", "EACCES"),
-    }),
-  );
-
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
@@ -171,13 +107,57 @@ test("reports a package.json read failure with relative context and zero writes"
 
   expect(process.exitCode).toBe(1);
   expect(await project.readTreeAsync()).toEqual(["package.json"]);
-  expect(await project.readFileAsync("package.json")).toBe(originalPackageJson);
+  expect(await project.readFileAsync("package.json")).toBe(packageJson);
   expect(await project.existsAsync(".npmrc")).toBe(false);
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
 /**
- * Tests a sharing violation while reading a selected package's existing .npmrc.
+ * Tests a selected package.json disappearing or becoming unreadable after discovery.
+ * Verifies that:
+ * - The command exits with process exit code 1
+ * - The error identifies the package with project-relative context
+ * - No application writes occur and the test-owned original remains unchanged
+ */
+test.each([
+  ["missing", false],
+  ["unreadable", true],
+] as const)(
+  "reports a %s package.json after discovery with zero writes",
+  async (description, replaceWithDirectory) => {
+    const project = await NpmProject.createAsync(`package-json-${description}`);
+    await project.createPackageAsync({ packageJson: originalPackageJson });
+    const output = mockStdoutWrite({
+      temporaryRoots: [project.root],
+    });
+    process.chdir(project.root);
+    const command = InitAuthCommand.invokeAsync();
+    await new PromptsInteraction()
+      .submitText()
+      .down()
+      .toggleMultiselectItem()
+      .performAsync(async () => {
+        await rename(project.path("package.json"), project.path("package.json.original"));
+        if (replaceWithDirectory) {
+          await mkdir(project.path("package.json"));
+        }
+      })
+      .acceptMultiselectValues();
+    await command;
+
+    expect(process.exitCode).toBe(1);
+    expect(await project.readTreeAsync()).toEqual([
+      ...(replaceWithDirectory ? ["package.json"] : []),
+      "package.json.original",
+    ]);
+    expect(await project.readFileAsync("package.json.original")).toBe(originalPackageJson);
+    expect(await project.existsAsync(".npmrc")).toBe(false);
+    expect(output.normalizedOutput).toMatchSnapshot();
+  },
+);
+
+/**
+ * Tests a selected package whose existing .npmrc is not a regular file.
  * Verifies that:
  * - package.json is read before the targeted .npmrc failure is surfaced
  * - The command exits with process exit code 1 and relative file context
@@ -185,20 +165,13 @@ test("reports a package.json read failure with relative context and zero writes"
  */
 test("reports an .npmrc read failure with relative context and zero writes", async () => {
   const project = await NpmProject.createAsync("npmrc-read-failure");
-  const originalNpmrc = "registry=https://existing.test/\n";
   await project.createPackageAsync({
     packageJson: originalPackageJson,
-    npmrc: originalNpmrc,
   });
+  await mkdir(project.path(".npmrc"));
   const output = mockStdoutWrite({
     temporaryRoots: [project.root],
   });
-  vi.mocked(loadNpmConfigFileAsync).mockRejectedValueOnce(
-    new NpmConfigFileError("read", project.path(".npmrc"), {
-      cause: nodeError("sharing violation", "EBUSY"),
-    }),
-  );
-
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
@@ -211,7 +184,6 @@ test("reports an .npmrc read failure with relative context and zero writes", asy
   expect(process.exitCode).toBe(1);
   expect(await project.readTreeAsync()).toEqual([".npmrc", "package.json"]);
   expect(await project.readFileAsync("package.json")).toBe(originalPackageJson);
-  expect(await project.readFileAsync(".npmrc")).toBe(originalNpmrc);
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
@@ -223,7 +195,7 @@ test("reports an .npmrc read failure with relative context and zero writes", asy
  * - Invalid content in a later package prevents the first registry prompt
  * - No package receives partial changes and no writes occur
  */
-test("plans every selected package before the first registry prompt", async () => {
+test("rejects a later invalid package before prompting or writing", async () => {
   const project = await NpmProject.createAsync("complete-planning-failure");
   await project.createPackageAsync({
     directory: "alpha",
@@ -238,32 +210,17 @@ test("plans every selected package before the first registry prompt", async () =
   });
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction()
-    .submitText()
-    .toggleMultiselectItem()
-    .acceptMultiselectValues();
+  await new PromptsInteraction().submitText().toggleMultiselectItem().acceptMultiselectValues();
   await command;
 
   expect(process.exitCode).toBe(1);
-  expect(
-    vi.mocked(loadNpmPackageJsonFileAsync).mock.calls.map(([options]) =>
-      project.normalizePath(options.packageDirectory),
-    ),
-  ).toEqual(["<test-root>/alpha", "<test-root>/beta"]);
-  expect(
-    vi.mocked(loadNpmConfigFileAsync).mock.calls.map(([options]) =>
-      project.normalizePath(options.packageDirectory),
-    ),
-  ).toEqual(["<test-root>/alpha", "<test-root>/beta"]);
   expect(await project.readTreeAsync()).toEqual([
     "alpha",
     "alpha/package.json",
     "beta",
     "beta/package.json",
   ]);
-  expect(await project.readFileAsync("alpha/package.json")).toBe(
-    originalPackageJson,
-  );
+  expect(await project.readFileAsync("alpha/package.json")).toBe(originalPackageJson);
   expect(await project.existsAsync("alpha/.npmrc")).toBe(false);
   expect(await project.readFileAsync("beta/package.json")).toBe("{ malformed");
   expect(await project.existsAsync("beta/.npmrc")).toBe(false);
@@ -271,41 +228,46 @@ test("plans every selected package before the first registry prompt", async () =
 });
 
 /**
- * Tests failure of a planned package.json write during persistence.
+ * Tests failure of a planned package.json write after planning has completed.
  * Verifies that:
  * - The command exits with process exit code 1 and reports the failed file
- * - The attempted write uses the expected configured package.json content
- * - The package is rolled back so package.json and .npmrc retain their originals
+ * - No .npmrc is created after the package write fails
+ * - The test-owned original package content remains available for verification
  */
 test("surfaces a targeted write failure through the persistence spinner", async () => {
   const project = await NpmProject.createAsync("write-failure");
-  const originalNpmrc = [
-    "registry=https://existing.test/",
-    "package-lock=true",
-    "lockfile-version=3",
-    "legacy-peer-deps=true",
-    "audit=false",
-    "fund=false",
-  ].join("\n");
   await project.createPackageAsync({
     packageJson: originalPackageJson,
-    npmrc: originalNpmrc,
   });
   const output = mockStdoutWrite({
     temporaryRoots: [project.root],
   });
-  const actualPackageJsonModule = await vi.importActual<
-    typeof import("../src/init-auth/package-files/npm-package-json-file")
-  >("../src/init-auth/package-files/npm-package-json-file");
-  vi.mocked(loadNpmPackageJsonFileAsync).mockImplementationOnce(async (options) => {
-    const adapter = await actualPackageJsonModule.loadNpmPackageJsonFileAsync(options);
-    return {
-      ...adapter,
-      async saveAsync() {
-        throw nodeError("disk is read-only", "EROFS");
-      },
-    } satisfies NpmPackageJsonFile;
-  });
+  process.chdir(project.root);
+  const command = InitAuthCommand.invokeAsync();
+  await new PromptsInteraction()
+    .submitText()
+    .down()
+    .toggleMultiselectItem()
+    .acceptMultiselectValues()
+    .performAsync(async () => {
+      await rename(project.path("package.json"), project.path("package.json.original"));
+      await mkdir(project.path("package.json"));
+    })
+    .enterText("https://registry.example.test/")
+    .submitText();
+  await command;
+
+  expect(process.exitCode).toBe(1);
+  expect(await project.readTreeAsync()).toEqual(["package.json", "package.json.original"]);
+  expect(await project.readFileAsync("package.json.original")).toBe(originalPackageJson);
+  expect(await project.existsAsync(".npmrc")).toBe(false);
+  expect(output.normalizedOutput).toMatchSnapshot();
+});
+
+test("reports an .npmrc write failure after package.json is persisted", async () => {
+  const project = await NpmProject.createAsync("npmrc-write-failure");
+  await project.createPackageAsync({ packageJson: originalPackageJson });
+  const output = mockStdoutWrite({ temporaryRoots: [project.root] });
 
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
@@ -313,13 +275,59 @@ test("surfaces a targeted write failure through the persistence spinner", async 
     .submitText()
     .down()
     .toggleMultiselectItem()
-    .acceptMultiselectValues();
+    .acceptMultiselectValues()
+    .performAsync(async () => {
+      await mkdir(project.path(".npmrc"));
+    })
+    .enterText("https://registry.example.test/")
+    .submitText();
   await command;
 
   expect(process.exitCode).toBe(1);
+  expect(JSON.parse(await project.readFileAsync("package.json"))).toEqual(
+    JSON.parse(configuredPackageJsonContent()),
+  );
   expect(await project.readTreeAsync()).toEqual([".npmrc", "package.json"]);
-  expect(await project.readFileAsync("package.json")).toBe(originalPackageJson);
-  expect(await project.readFileAsync(".npmrc")).toBe(originalNpmrc);
+  expect(output.normalizedOutput).toMatchSnapshot();
+});
+
+test("reports a later write failure after preserving earlier completed writes", async () => {
+  const project = await NpmProject.createAsync("later-write-failure");
+  await project.createPackageAsync({
+    directory: "alpha",
+    packageJson: originalPackageJson,
+  });
+  await project.createPackageAsync({
+    directory: "beta",
+    packageJson: originalPackageJson,
+  });
+  const output = mockStdoutWrite({ temporaryRoots: [project.root] });
+
+  process.chdir(project.root);
+  const command = InitAuthCommand.invokeAsync();
+  await new PromptsInteraction()
+    .submitText()
+    .toggleMultiselectItem()
+    .acceptMultiselectValues()
+    .enterText("https://alpha.example.test/")
+    .submitText()
+    .performAsync(async () => {
+      await rename(project.path("beta/package.json"), project.path("beta/package.json.original"));
+      await mkdir(project.path("beta/package.json"));
+    })
+    .enterText("https://beta.example.test/")
+    .submitText();
+  await command;
+
+  expect(process.exitCode).toBe(1);
+  expect(JSON.parse(await project.readFileAsync("alpha/package.json"))).toEqual(
+    JSON.parse(configuredPackageJsonContent()),
+  );
+  expect(await project.readFileAsync("alpha/.npmrc")).toContain(
+    "registry=https://alpha.example.test/",
+  );
+  expect(await project.readFileAsync("beta/package.json.original")).toBe(originalPackageJson);
+  expect(await project.existsAsync("beta/.npmrc")).toBe(false);
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
@@ -354,14 +362,6 @@ test.each([
     await command;
 
     expect(process.exitCode ?? 0).toBe(0);
-    expect(
-      vi.mocked(accessSync).mock.calls.map(([directoryPath]) =>
-        project.normalizePath(String(directoryPath)),
-      ),
-    ).toEqual([
-      "<test-root>/blocked",
-      "<test-root>",
-    ]);
     expect(await project.readTreeAsync()).toEqual(["blocked"]);
     expect(output.normalizedOutput).toMatchSnapshot();
   },

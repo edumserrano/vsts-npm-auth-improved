@@ -48,7 +48,7 @@ exports[`maps a targeted EIO root access failure to prompt-safe text 1`] = `
 "
 `;
 
-exports[`plans every selected package before the first registry prompt 1`] = `
+exports[`rejects a later invalid package before prompting or writing 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
@@ -75,23 +75,7 @@ exports[`plans every selected package before the first registry prompt 1`] = `
 "
 `;
 
-exports[`reports a discovery failure before package reads or writes 1`] = `
-"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
-│
-◆  Where should package.json files be searched for?
-│  ./█
-└
-◇  Where should package.json files be searched for?
-│  ./
-│
-▲  Could not search <test-root>: directory read failed.
-│
-└  No files were changed.
-
-"
-`;
-
-exports[`reports a non-object JSON value with zero writes 1`] = `
+exports[`reports a boolean JSON root with zero writes 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
@@ -117,7 +101,62 @@ exports[`reports a non-object JSON value with zero writes 1`] = `
 "
 `;
 
-exports[`reports a package.json read failure with relative context and zero writes 1`] = `
+exports[`reports a discovery failure before package reads or writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+▲  Could not search <test-root>: directory read failed.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports a later write failure after preserving earlier completed writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 2 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ alpha/package.json
+│  ◻ beta/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◼ ALL (Configure every package)◇  Which packages should be configured?
+│  ALL
+│
+◆  Registry URL for alpha/package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://a█│  https://al█│  https://alp█│  https://alph█│  https://alpha█│  https://alpha.█│  https://alpha.e█│  https://alpha.ex█│  https://alpha.exa█│  https://alpha.exam█│  https://alpha.examp█│  https://alpha.exampl█│  https://alpha.example█│  https://alpha.example.█│  https://alpha.example.t█│  https://alpha.example.te█│  https://alpha.example.tes█│  https://alpha.example.test█│  https://alpha.example.test/█◇  Registry URL for alpha/package.json
+│  https://alpha.example.test/
+│
+◆  Registry URL for beta/package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://b█│  https://be█│  https://bet█│  https://beta█│  https://beta.█│  https://beta.e█│  https://beta.ex█│  https://beta.exa█│  https://beta.exam█│  https://beta.examp█│  https://beta.exampl█│  https://beta.example█│  https://beta.example.█│  https://beta.example.t█│  https://beta.example.te█│  https://beta.example.tes█│  https://beta.example.test█│  https://beta.example.test/█◇  Registry URL for beta/package.json
+│  https://beta.example.test/
+│
+▲  Could not write beta/package.json: EISDIR: illegal operation on a directory, open '<test-root>/beta/package.json'.
+│
+└  Operation failed. Configuration may be partially applied. Review the project files before retrying. Exiting - maybe another time? 👋
+
+"
+`;
+
+exports[`reports a missing package.json after discovery with zero writes 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
@@ -136,7 +175,111 @@ exports[`reports a package.json read failure with relative context and zero writ
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-■  Could not read package.json: permission denied.
+■  Could not read package.json: Could not read package.json: Error: ENOENT: no such file or directory, open '<test-root>/package.json'.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports a null JSON root with zero writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+■  Could not configure package.json: the top-level JSON value must be an object.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports a number JSON root with zero writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+■  Could not configure package.json: the top-level JSON value must be an object.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports a string JSON root with zero writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+■  Could not configure package.json: the top-level JSON value must be an object.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports a unreadable package.json after discovery with zero writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+■  Could not read package.json: Could not read package.json: Error: EISDIR: illegal operation on a directory, read.
 │
 └  No files were changed.
 
@@ -162,7 +305,65 @@ exports[`reports an .npmrc read failure with relative context and zero writes 1`
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-■  Could not read .npmrc: sharing violation.
+■  Could not read .npmrc: Expected a regular file at <test-root>/.npmrc.
+│
+└  No files were changed.
+
+"
+`;
+
+exports[`reports an .npmrc write failure after package.json is persisted 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://r█│  https://re█│  https://reg█│  https://regi█│  https://regis█│  https://regist█│  https://registr█│  https://registry█│  https://registry.█│  https://registry.e█│  https://registry.ex█│  https://registry.exa█│  https://registry.exam█│  https://registry.examp█│  https://registry.exampl█│  https://registry.example█│  https://registry.example.█│  https://registry.example.t█│  https://registry.example.te█│  https://registry.example.tes█│  https://registry.example.test█│  https://registry.example.test/█◇  Registry URL for package.json
+│  https://registry.example.test/
+│
+▲  Could not write .npmrc: EISDIR: illegal operation on a directory, open '<test-root>/.npmrc'.
+│
+└  Operation failed. Configuration may be partially applied. Review the project files before retrying. Exiting - maybe another time? 👋
+
+"
+`;
+
+exports[`reports an array JSON root with zero writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 1 package.json file.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
+│  package.json
+│
+■  Could not configure package.json: the top-level JSON value must be an object.
 │
 └  No files were changed.
 
@@ -214,7 +415,13 @@ exports[`surfaces a targeted write failure through the persistence spinner 1`] =
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-▲  Could not write package.json: disk is read-only.
+◆  Registry URL for package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://r█│  https://re█│  https://reg█│  https://regi█│  https://regis█│  https://regist█│  https://registr█│  https://registry█│  https://registry.█│  https://registry.e█│  https://registry.ex█│  https://registry.exa█│  https://registry.exam█│  https://registry.examp█│  https://registry.exampl█│  https://registry.example█│  https://registry.example.█│  https://registry.example.t█│  https://registry.example.te█│  https://registry.example.tes█│  https://registry.example.test█│  https://registry.example.test/█◇  Registry URL for package.json
+│  https://registry.example.test/
+│
+▲  Could not write package.json: EISDIR: illegal operation on a directory, open '<test-root>/package.json'.
 │
 └  Operation failed. Configuration may be partially applied. Review the project files before retrying. Exiting - maybe another time? 👋
 

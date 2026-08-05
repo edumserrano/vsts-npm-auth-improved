@@ -1,6 +1,5 @@
 import { symlink } from "node:fs/promises";
 import { afterEach, expect, test, vi } from "vitest";
-import { discoverPackageJsonFilesAsync } from "../src/init-auth/package-files/package-json-discovery";
 import { packageJsonContent } from "@test-utils/configuration-fixtures";
 import { InitAuthCommand } from "@test-utils/init-auth-command";
 import { NpmProject } from "@test-utils/npm-project";
@@ -60,9 +59,7 @@ test("reports that packages were discovered but none were selected", async () =>
   });
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction()
-    .submitText()
-    .acceptMultiselectValues();
+  await new PromptsInteraction().submitText().acceptMultiselectValues();
   await command;
 
   expect(process.exitCode ?? 0).toBe(0);
@@ -106,9 +103,7 @@ test("shows deterministic nested discovery while excluding dependency and hidden
   });
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction()
-    .submitText()
-    .acceptMultiselectValues();
+  await new PromptsInteraction().submitText().acceptMultiselectValues();
   await command;
 
   expect(process.exitCode ?? 0).toBe(0);
@@ -136,14 +131,11 @@ test("shows deterministic nested discovery while excluding dependency and hidden
     "zeta/package.json",
   ]);
   for (const directory of [...includedDirectories, ...excludedDirectories]) {
-    const packagePath =
-      directory === "" ? "package.json" : `${directory}/package.json`;
+    const packagePath = directory === "" ? "package.json" : `${directory}/package.json`;
     expect(await project.readFileAsync(packagePath)).toBe(originalPackageJson);
-    expect(
-      await project.existsAsync(
-        directory === "" ? ".npmrc" : `${directory}/.npmrc`,
-      ),
-    ).toBe(false);
+    expect(await project.existsAsync(directory === "" ? ".npmrc" : `${directory}/.npmrc`)).toBe(
+      false,
+    );
   }
   expect(output.normalizedOutput).toMatchSnapshot();
 });
@@ -176,9 +168,7 @@ test("excludes node_modules case-insensitively", async () => {
 
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction()
-    .submitText()
-    .acceptMultiselectValues();
+  await new PromptsInteraction().submitText().acceptMultiselectValues();
   await command;
 
   expect(process.exitCode ?? 0).toBe(0);
@@ -191,9 +181,7 @@ test("excludes node_modules case-insensitively", async () => {
     "packages/package.json",
   ]);
   for (const directory of ["DiSt", "NODE_MODULES", "packages"]) {
-    expect(await project.readFileAsync(`${directory}/package.json`)).toBe(
-      originalPackageJson,
-    );
+    expect(await project.readFileAsync(`${directory}/package.json`)).toBe(originalPackageJson);
     expect(await project.existsAsync(`${directory}/.npmrc`)).toBe(false);
   }
   expect(output.normalizedOutput).toMatchSnapshot();
@@ -227,21 +215,19 @@ test("respects root, nested, and negated gitignore rules", async () => {
     "ignored/\nreincluded/\n!reincluded/\n!reincluded/package.json\n",
   );
 
-  const discoveryResult = await discoverPackageJsonFilesAsync(project.root);
+  const output = mockStdoutWrite({ temporaryRoots: [project.root] });
+  process.chdir(project.root);
+  const command = InitAuthCommand.invokeAsync();
+  await new PromptsInteraction().submitText().acceptMultiselectValues();
+  await command;
 
-  expect(discoveryResult.status).toBe("found");
-  if (discoveryResult.status !== "found") {
-    throw discoveryResult.failure.cause;
-  }
-  expect(
-    discoveryResult.packageJsonPaths.map(filePath =>
-      project.normalizePath(filePath),
-    ),
-  ).toEqual([
-    "<test-root>/package.json",
-    "<test-root>/packages/kept/package.json",
-    "<test-root>/packages/reincluded/package.json",
-  ]);
+  expect(process.exitCode ?? 0).toBe(0);
+  expect(output.normalizedOutput).toContain("◻ package.json");
+  expect(output.normalizedOutput).toContain("packages/kept/package.json");
+  expect(output.normalizedOutput).toContain("packages/reincluded/package.json");
+  expect(output.normalizedOutput).not.toContain("ignored-root/package.json");
+  expect(output.normalizedOutput).not.toContain("packages/ignored/package.json");
+  expect(output.normalizedOutput).toMatchSnapshot();
 });
 
 /**
@@ -262,19 +248,16 @@ test("respects parent gitignore rules up to the repository root", async () => {
     packageJson: originalPackageJson,
   });
 
-  const discoveryResult = await discoverPackageJsonFilesAsync(
-    project.path("workspace"),
-  );
+  const output = mockStdoutWrite({ temporaryRoots: [project.root] });
+  process.chdir(project.root);
+  const command = InitAuthCommand.invokeAsync();
+  await new PromptsInteraction().replaceText("workspace").submitText().acceptMultiselectValues();
+  await command;
 
-  expect(discoveryResult.status).toBe("found");
-  if (discoveryResult.status !== "found") {
-    throw discoveryResult.failure.cause;
-  }
-  expect(
-    discoveryResult.packageJsonPaths.map(filePath =>
-      project.normalizePath(filePath),
-    ),
-  ).toEqual(["<test-root>/workspace/kept/package.json"]);
+  expect(process.exitCode ?? 0).toBe(0);
+  expect(output.normalizedOutput).toContain("◻ kept/package.json");
+  expect(output.normalizedOutput).not.toContain("ignored/package.json");
+  expect(output.normalizedOutput).toMatchSnapshot();
 });
 
 /**
@@ -300,25 +283,15 @@ test("does not follow a symbolic-link directory during discovery", async () => {
 
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction()
-    .submitText()
-    .acceptMultiselectValues();
+  await new PromptsInteraction().submitText().acceptMultiselectValues();
   await command;
 
   expect(process.exitCode ?? 0).toBe(0);
-  expect(await project.readTreeAsync()).toEqual([
-    "actual",
-    "actual/package.json",
-    "linked",
-  ]);
-  expect(await project.readFileAsync("actual/package.json")).toBe(
-    originalPackageJson,
-  );
+  expect(await project.readTreeAsync()).toEqual(["actual", "actual/package.json", "linked"]);
+  expect(await project.readFileAsync("actual/package.json")).toBe(originalPackageJson);
   expect(await project.existsAsync("actual/.npmrc")).toBe(false);
   expect(await linkedProject.readTreeAsync()).toEqual(["package.json"]);
-  expect(await linkedProject.readFileAsync("package.json")).toBe(
-    originalPackageJson,
-  );
+  expect(await linkedProject.readFileAsync("package.json")).toBe(originalPackageJson);
   expect(await linkedProject.existsAsync(".npmrc")).toBe(false);
   expect(output.normalizedOutput).toMatchSnapshot();
 });
