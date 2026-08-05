@@ -20,7 +20,8 @@ Artifacts registries.
 
 `vsts-npm-auth-improved` runs `vsts-npm-auth` to acquire credentials for the registry configured
 in the selected project `.npmrc`. The credentials are written to the user's npm configuration at
-`~/.npmrc`.
+`~/.npmrc`. It does not pass an expiration time (`-E`) to `vsts-npm-auth`, so newly acquired tokens
+use the `vsts-npm-auth` default of 129,600 minutes (90 days).
 
 ### macOS and Linux
 
