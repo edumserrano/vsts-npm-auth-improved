@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { buildAuthSetupPlan, writeAuthSetupPlan } from "./auth-setup/auth-setup-plan";
 import { formatAuthSetupSummary, summarizeAuthSetupPlan } from "./auth-setup/auth-setup-summary";
 import { checkChangedNpmrcFilesForGitignore } from "./auth-setup/npmrc-gitignore-check";
+import { formatNpmrcGitignoreWarning } from "./auth-setup/npmrc-gitignore-warning";
 import { discoverPackageJsonFiles } from "./package-files/package-json-discovery";
 import { formatInitAuthFailure, InitAuthFailure } from "./init-auth-failure";
 import { PromptMessages, prompts } from "./prompts-utils";
@@ -134,13 +135,11 @@ async function handleInitAuthCommandAsync(): Promise<void> {
     spinnerPrompt.stop("Configuration files are ready.");
     spinnerPrompt = null;
     prompts.log.success(formatAuthSetupSummary(summary));
-    if (gitignoreCheck.status === "checked" && gitignoreCheck.ignoredDisplayPaths.length > 0) {
-      prompts.log.warn(formatIgnoredNpmrcWarning(gitignoreCheck.ignoredDisplayPaths));
-    } else if (gitignoreCheck.status === "failed") {
-      prompts.log.warn(
-        "The configuration files were written, but their Git ignore status could not be checked.",
-      );
+    const gitignoreWarning = formatNpmrcGitignoreWarning(gitignoreCheck);
+    if (gitignoreWarning !== undefined) {
+      prompts.log.warn(gitignoreWarning);
     }
+
     prompts.outro("Authentication configuration complete. 😊");
     process.exitCode = 0;
   } catch (error) {
@@ -150,17 +149,6 @@ async function handleInitAuthCommandAsync(): Promise<void> {
     prompts.cancel(PromptMessages.CancelMayBePartial);
     process.exitCode = 1;
   }
-}
-
-function formatIgnoredNpmrcWarning(displayPaths: readonly string[]): string {
-  const files = displayPaths.map(displayPath => `- ${displayPath}`).join("\n");
-  return [
-    "The following .npmrc files were created or updated but are ignored by Git. They likely belong in source control so the registry configuration is available to other contributors.",
-    "",
-    "Review them for credentials or other secrets, then remove the relevant .gitignore rules and commit and push the safe files:",
-    "",
-    files,
-  ].join("\n");
 }
 
 function getErrorMessage(error: unknown): string {
