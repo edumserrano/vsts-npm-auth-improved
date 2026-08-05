@@ -8,7 +8,8 @@ import {
 type TestDependencies = Parameters<typeof loadNpmPackageJsonFileWithDependencies>[1];
 
 const managedScripts = {
-  "registry-auth": "vsts-npm-auth-improved -c ./.npmrc --read",
+  "registry-auth":
+    "npm exec --yes --registry=https://registry.npmjs.org/ -- vsts-npm-auth-improved@alpha -- -c ./.npmrc --read",
   "preinstall-packages": "npm run registry-auth",
   "install-packages": "npm i",
 } as const;
