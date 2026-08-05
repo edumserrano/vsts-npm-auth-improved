@@ -4,10 +4,10 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 1`]
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -38,10 +38,10 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 2`]
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -66,10 +66,10 @@ exports[`configures ALL mixed with an individual package through a complete CLI 
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 3 package.json files.
 │
@@ -96,10 +96,10 @@ exports[`configures ALL through a complete CLI selection 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 3 package.json files.
 │
@@ -126,10 +126,10 @@ exports[`configures a subset through a complete CLI selection 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 3 package.json files.
 │
@@ -156,10 +156,10 @@ exports[`configures multiple individual packages through a complete CLI selectio
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 3 package.json files.
 │
@@ -186,10 +186,10 @@ exports[`configures one package through a complete CLI selection 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 3 package.json files.
 │
@@ -216,10 +216,10 @@ exports[`reports mixed created updated and unchanged outcomes in persistence ord
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 3 package.json files.
 │

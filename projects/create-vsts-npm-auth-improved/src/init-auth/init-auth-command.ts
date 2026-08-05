@@ -25,7 +25,7 @@ async function handleInitAuthCommandAsync(): Promise<void> {
     const rootAnswer = await prompts.text({
       message: "Where should package.json files be searched for?",
       placeholder: "./",
-      defaultValue: "./",
+      initialValue: "./",
       validate: value => validateRootDirectory(value, cwd),
     });
 

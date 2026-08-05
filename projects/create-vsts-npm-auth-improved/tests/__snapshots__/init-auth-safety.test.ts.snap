@@ -4,9 +4,9 @@ exports[`maps a targeted EACCES root access failure to prompt-safe text 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  b█│  bl█│  blo█│  bloc█│  block█│  blocke█│  blocked█▲  Where should package.json files be searched for?
+│  ./│  b█│  bl█│  blo█│  bloc█│  block█│  blocke█│  blocked█▲  Where should package.json files be searched for?
 │  blocked█
 └  Directory "blocked" is not accessible.
 ◆  Where should package.json files be searched for?
@@ -28,9 +28,9 @@ exports[`maps a targeted EIO root access failure to prompt-safe text 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  b█│  bl█│  blo█│  bloc█│  block█│  blocke█│  blocked█▲  Where should package.json files be searched for?
+│  ./│  b█│  bl█│  blo█│  bloc█│  block█│  blocke█│  blocked█▲  Where should package.json files be searched for?
 │  blocked█
 └  Cannot access directory "blocked".
 ◆  Where should package.json files be searched for?
@@ -52,10 +52,10 @@ exports[`plans every selected package before the first registry prompt 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 2 package.json files.
 │
@@ -79,10 +79,10 @@ exports[`reports a discovery failure before package reads or writes 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ▲  Could not search <test-root>: directory read failed.
 │
@@ -95,10 +95,10 @@ exports[`reports a non-object JSON value with zero writes 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -121,10 +121,10 @@ exports[`reports a package.json read failure with relative context and zero writ
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -147,10 +147,10 @@ exports[`reports an .npmrc read failure with relative context and zero writes 1`
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -173,10 +173,10 @@ exports[`reports malformed JSON with zero writes 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -199,10 +199,10 @@ exports[`surfaces a targeted write failure through the persistence spinner 1`] =
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │

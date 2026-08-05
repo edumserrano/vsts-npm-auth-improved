@@ -52,7 +52,7 @@ test("all prompts successful", async () => {
     force: { from: "prompt" },
   });
   await new PromptsInteraction()
-    .enterText(inMemoryNpmrcFile.path)
+    .replaceText(inMemoryNpmrcFile.path)
     .submitText()
     .acceptSelectOption()
     .acceptSelectOption();
@@ -81,7 +81,7 @@ test("default command", async () => {
 
   const result = VstsNpmAuthImprovedCli.invokeAsync();
   await new PromptsInteraction()
-    .enterText(inMemoryNpmrcFile.path)
+    .replaceText(inMemoryNpmrcFile.path)
     .submitText()
     .acceptSelectOption()
     .acceptSelectOption();
@@ -113,7 +113,7 @@ test("npm configuration path - prompt validation - file does not exist", async (
     force: { from: "prompt" },
   });
   await new PromptsInteraction()
-    .enterText("./this-dir-does-not-exist-in-memfs/.npmrc")
+    .replaceText("./this-dir-does-not-exist-in-memfs/.npmrc")
     .submitText();
 
   // Cancel the prompt to complete the auth command Promise and prevent output leaking into subsequent tests.
@@ -155,7 +155,7 @@ test.each([
       read: { from: "prompt" },
       force: { from: "prompt" },
     });
-    await new PromptsInteraction().enterText(inMemoryNpmrcFile.path).submitText();
+    await new PromptsInteraction().replaceText(inMemoryNpmrcFile.path).submitText();
 
     // Cancel the prompt to complete the auth command Promise and prevent output leaking into subsequent tests.
     // Without this, the auth command Promise stays running, receiving input from process.stdin from other tests
@@ -170,16 +170,19 @@ test.each([
 );
 
 /**
- * Tests that the auth command handles the default value for the npm configuration path prompt.
- * When the user submits without entering a value, the default path should be used.
+ * Tests that the auth command handles the initial value for the npm configuration path prompt.
+ * When the user submits without editing the value, the initial path should be used.
  * Verifies that:
- * - The default value is accepted and used without errors. We don't need to test the full
- * auth command behavior here, just that the prompt default value shows up in the prompt output.
+ * - The initial value is accepted, validated, and used without errors
  *
  * CLI command:
  * - vsts-npm-auth-improved auth
  */
-test("npm configuration path - default value", async () => {
+test("npm configuration path - initial value", async () => {
+  const inMemoryNpmrcFile = createInMemoryNpmrcFile({
+    vol,
+    path: "./.npmrc",
+  });
   const stdoutWriteFunctionMock = mockStdoutWrite();
   const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
   const result = AuthCommand.invokeAsync({
@@ -188,16 +191,19 @@ test("npm configuration path - default value", async () => {
     read: { from: "prompt" },
     force: { from: "prompt" },
   });
-  await new PromptsInteraction().submitText(); // submit default value
-
-  // Cancel the prompt to complete the auth command Promise and prevent output leaking into subsequent tests.
-  // Without this, the auth command Promise stays running, receiving input from process.stdin from other tests
-  // and producing output to process.stdout that pollutes other tests' output.
-  await new PromptsInteraction().cancel();
+  await new PromptsInteraction()
+    .submitText()
+    .acceptSelectOption()
+    .acceptSelectOption();
   await result;
 
-  expect(vstsNpmAuthMock.callCount).toBe(0);
-  expect(process.exitCode).toBe(1);
+  expect(vstsNpmAuthMock.callCount).toBe(1);
+  expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
+    "-C",
+    inMemoryNpmrcFile.path,
+    "-R",
+  ]);
+  expect(process.exitCode).toBe(0);
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
@@ -247,7 +253,7 @@ test("token scope select prompt cancelled", async () => {
     read: { from: "prompt" },
     force: { from: "prompt" },
   });
-  await new PromptsInteraction().enterText(inMemoryNpmrcFile.path).submitText().cancel();
+  await new PromptsInteraction().replaceText(inMemoryNpmrcFile.path).submitText().cancel();
   await result;
 
   expect(vstsNpmAuthMock.callCount).toBe(0);
@@ -276,7 +282,7 @@ test("force token acquisition select prompt cancelled", async () => {
     force: { from: "prompt" },
   });
   await new PromptsInteraction()
-    .enterText(inMemoryNpmrcFile.path)
+    .replaceText(inMemoryNpmrcFile.path)
     .submitText()
     .acceptSelectOption()
     .cancel();
@@ -300,7 +306,7 @@ test("invalid configuration path can be corrected before successful completion",
     force: { from: "prompt" },
   });
   await new PromptsInteraction()
-    .enterText(invalidConfigPath)
+    .replaceText(invalidConfigPath)
     .submitText()
     .replaceText(inMemoryNpmrcFile.path)
     .submitText()
@@ -337,7 +343,7 @@ test("configuration without a registry can be corrected before successful comple
     force: { from: "prompt" },
   });
   await new PromptsInteraction()
-    .enterText(invalidConfigPath)
+    .replaceText(invalidConfigPath)
     .submitText()
     .replaceText(validConfigPath)
     .submitText()
@@ -364,7 +370,7 @@ test("Packaging (Read & Write) can be selected from the prompt", async () => {
     force: { from: "prompt" },
   });
   await new PromptsInteraction()
-    .enterText(inMemoryNpmrcFile.path)
+    .replaceText(inMemoryNpmrcFile.path)
     .submitText()
     .down()
     .acceptSelectOption()
@@ -390,7 +396,7 @@ test("forced acquisition can be selected from the prompt", async () => {
     force: { from: "prompt" },
   });
   await new PromptsInteraction()
-    .enterText(inMemoryNpmrcFile.path)
+    .replaceText(inMemoryNpmrcFile.path)
     .submitText()
     .acceptSelectOption()
     .down()
@@ -421,7 +427,7 @@ test("complete non-default prompt flow selects read-write scope and forced acqui
     force: { from: "prompt" },
   });
   await new PromptsInteraction()
-    .enterText(inMemoryNpmrcFile.path)
+    .replaceText(inMemoryNpmrcFile.path)
     .submitText()
     .down()
     .acceptSelectOption()

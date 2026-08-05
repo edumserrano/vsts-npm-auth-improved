@@ -5,8 +5,9 @@ exports[`Packaging (Read & Write) can be selected from the prompt 1`] = `
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█
@@ -86,8 +87,9 @@ exports[`all prompts successful 1`] = `
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█
@@ -163,8 +165,9 @@ exports[`complete non-default prompt flow selects read-write scope and forced ac
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█
@@ -249,8 +252,9 @@ exports[`configuration without a registry can be corrected before successful com
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./c█
@@ -347,8 +351,9 @@ exports[`default command 1`] = `
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█
@@ -424,8 +429,9 @@ exports[`force token acquisition select prompt cancelled 1`] = `
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█
@@ -491,8 +497,9 @@ exports[`forced acquisition can be selected from the prompt 1`] = `
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█
@@ -573,8 +580,9 @@ exports[`invalid configuration path can be corrected before successful completio
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█
@@ -692,12 +700,12 @@ exports[`invalid configuration path can be corrected before successful completio
 └  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
 `;
 
-exports[`npm configuration path - default value 1`] = `
+exports[`npm configuration path - initial value 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
 ◇  Where is the NPM configuration file?
 │  ./.npmrc
@@ -707,10 +715,28 @@ exports[`npm configuration path - default value 1`] = `
 │  ○ Packaging (Read & Write)
 │  ↑/↓ to navigate • Enter: confirm
 └
-■  What kind scope should be used for the auth token?
+◇  What kind scope should be used for the auth token?
 │  Packaging (Read)
 │
-└  Operation failed. Exiting - maybe another time? 👋"
+◆  Force token acquisition?
+│  ● no
+│  ○ yes
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  Force token acquisition?
+│  no
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the user's NPM configuration file
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
 `;
 
 exports[`npm configuration path - prompt validation - file does not exist 1`] = `
@@ -718,8 +744,9 @@ exports[`npm configuration path - prompt validation - file does not exist 1`] = 
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█
@@ -775,8 +802,9 @@ exports[`npm configuration path - prompt validation - no registry found ('empty 
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█
@@ -829,8 +857,9 @@ exports[`npm configuration path - prompt validation - no registry found ('no reg
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█
@@ -883,7 +912,7 @@ exports[`npm configuration path prompt cancelled 1`] = `
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
 ■  Where is the NPM configuration file?
 │  ./.npmrc
@@ -896,8 +925,9 @@ exports[`token scope select prompt cancelled 1`] = `
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ◆  Where is the NPM configuration file?
-│  ./.npmrc
+│  ./.npmrc█
 └
+│  ./.npmrc
 │  .█
 │  ./█
 │  ./t█

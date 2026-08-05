@@ -36,7 +36,7 @@ test("reports that no packages were discovered", async () => {
   });
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync({ invocation: "explicit" });
-  await new PromptsInteraction().enterText("./").submitText();
+  await new PromptsInteraction().submitText();
   await command;
 
   expect(process.exitCode ?? 0).toBe(0);
@@ -61,7 +61,6 @@ test("reports that packages were discovered but none were selected", async () =>
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .acceptMultiselectValues();
   await command;
@@ -108,7 +107,6 @@ test("shows deterministic nested discovery while excluding dependency and hidden
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .acceptMultiselectValues();
   await command;
@@ -179,7 +177,6 @@ test("excludes node_modules case-insensitively", async () => {
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .acceptMultiselectValues();
   await command;
@@ -304,7 +301,6 @@ test("does not follow a symbolic-link directory during discovery", async () => {
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .acceptMultiselectValues();
   await command;

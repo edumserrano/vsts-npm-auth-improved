@@ -64,7 +64,7 @@ test.each([
     });
     process.chdir(project.root);
     const command = InitAuthCommand.invokeAsync();
-    const interaction = new PromptsInteraction().enterText(".").submitText();
+    const interaction = new PromptsInteraction().submitText();
     selectChoices(interaction, choicePositions);
     await interaction;
     await command;
@@ -132,7 +132,6 @@ test("reports mixed created updated and unchanged outcomes in persistence order"
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
@@ -196,7 +195,6 @@ test("a second complete CLI run is idempotent for package.json and .npmrc", asyn
   process.chdir(project.root);
   const firstCommand = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .down()
     .toggleMultiselectItem()
@@ -224,7 +222,6 @@ test("a second complete CLI run is idempotent for package.json and .npmrc", asyn
   });
   const secondCommand = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .down()
     .toggleMultiselectItem()

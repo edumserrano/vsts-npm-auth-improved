@@ -66,7 +66,7 @@ test("cancels at package selection without changing the filesystem", async () =>
 
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction().enterText(".").submitText().cancel();
+  await new PromptsInteraction().submitText().cancel();
   await command;
 
   expect(process.exitCode).toBe(1);
@@ -94,7 +94,6 @@ test("cancels at the registry prompt without changing the filesystem", async () 
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .down()
     .toggleMultiselectItem()
@@ -133,7 +132,6 @@ test("cancels at a later registry prompt after planning with zero writes", async
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .toggleMultiselectItem()
     .acceptMultiselectValues()

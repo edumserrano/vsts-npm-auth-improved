@@ -92,7 +92,7 @@ test("reports a discovery failure before package reads or writes", async () => {
 
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction().enterText(".").submitText();
+  await new PromptsInteraction().submitText();
   await command;
 
   expect(process.exitCode).toBe(1);
@@ -127,7 +127,6 @@ test.each([
     process.chdir(project.root);
     const command = InitAuthCommand.invokeAsync();
     await new PromptsInteraction()
-      .enterText(".")
       .submitText()
       .down()
       .toggleMultiselectItem()
@@ -164,7 +163,6 @@ test("reports a package.json read failure with relative context and zero writes"
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .down()
     .toggleMultiselectItem()
@@ -204,7 +202,6 @@ test("reports an .npmrc read failure with relative context and zero writes", asy
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .down()
     .toggleMultiselectItem()
@@ -242,7 +239,6 @@ test("plans every selected package before the first registry prompt", async () =
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .toggleMultiselectItem()
     .acceptMultiselectValues();
@@ -314,7 +310,6 @@ test("surfaces a targeted write failure through the persistence spinner", async 
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
   await new PromptsInteraction()
-    .enterText(".")
     .submitText()
     .down()
     .toggleMultiselectItem()

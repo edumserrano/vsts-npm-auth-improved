@@ -4,10 +4,10 @@ exports[`accepts a valid HTTPS registry through the real registry prompt 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -38,10 +38,10 @@ exports[`accepts a valid custom-scheme registry through the real registry prompt
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -72,9 +72,9 @@ exports[`accepts an absolute root through the real directory prompt 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  <test-root>█◇  Where should package.json files be searched for?
+│  ./│  <test-root>█◇  Where should package.json files be searched for?
 │  <test-root>
 │
 ◇  Found 0 package.json files.
@@ -90,10 +90,10 @@ exports[`reuses an existing global registry without showing a registry prompt 1`
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -118,10 +118,10 @@ exports[`shows empty registry feedback before accepting a valid correction 1`] =
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -158,9 +158,9 @@ exports[`shows empty-root feedback before accepting a valid correction 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-▲  Where should package.json files be searched for?
+│  ./▲  Where should package.json files be searched for?
 │  ./
 └  Enter a directory path.
 ◆  Where should package.json files be searched for?
@@ -182,9 +182,9 @@ exports[`shows file-root feedback before accepting a valid correction 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  f█│  fi█│  fil█│  file█│  file.█│  file.t█│  file.tx█│  file.txt█▲  Where should package.json files be searched for?
+│  ./│  f█│  fi█│  fil█│  file█│  file.█│  file.t█│  file.tx█│  file.txt█▲  Where should package.json files be searched for?
 │  file.txt█
 └  "file.txt" is not a directory.
 ◆  Where should package.json files be searched for?
@@ -206,9 +206,9 @@ exports[`shows invalid root feedback before accepting a valid correction 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  m█│  mi█│  mis█│  miss█│  missi█│  missin█│  missing█│  missing-█│  missing-d█│  missing-di█│  missing-dir█│  missing-dire█│  missing-direc█│  missing-direct█│  missing-directo█│  missing-director█│  missing-directory█▲  Where should package.json files be searched for?
+│  ./│  m█│  mi█│  mis█│  miss█│  missi█│  missin█│  missing█│  missing-█│  missing-d█│  missing-di█│  missing-dir█│  missing-dire█│  missing-direc█│  missing-direct█│  missing-directo█│  missing-director█│  missing-directory█▲  Where should package.json files be searched for?
 │  missing-directory█
 └  Directory "missing-directory" does not exist.
 ◆  Where should package.json files be searched for?
@@ -230,10 +230,10 @@ exports[`shows missing-scheme registry feedback before accepting a valid correct
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -270,10 +270,10 @@ exports[`shows relative registry feedback before accepting a valid correction 1`
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
@@ -310,10 +310,10 @@ exports[`shows whitespace registry feedback before accepting a valid correction 
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
-│  ./
+│  ./█
 └
-│  .█◇  Where should package.json files be searched for?
-│  .
+◇  Where should package.json files be searched for?
+│  ./
 │
 ◇  Found 1 package.json file.
 │
