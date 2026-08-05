@@ -1,18 +1,16 @@
 /**
- * Drives the real Clack terminal listeners with queued text and keypress events,
- * waiting for attachment and complete rendering around each interaction. Cleanup
- * removes only Clack listeners created after the test process was initialized.
+ * Drives real terminal prompts with queued text and keypress events, waiting
+ * for a prompt to accept input and for rendering to settle around each
+ * interaction. Cleanup removes only prompt listeners observed by this helper.
  */
 
 type PromptOperation = () => void | Promise<void>;
+type KeypressListener = (...args: any[]) => void;
 
-const trackedStdinEvents = ["data", "keypress"] as const;
-const initialListeners = new Map(
-  trackedStdinEvents.map(eventName => [
-    eventName,
-    process.stdin.rawListeners(eventName),
-  ]),
-);
+const initialKeypressListeners = new Set(currentKeypressListeners());
+// Node installs its terminal-data bridge before the prompt's input listener.
+const promptListenerOffset = initialKeypressListeners.size === 0 ? 1 : 0;
+const observedPromptListeners = new Set<KeypressListener>();
 
 export class PromptsInteraction implements PromiseLike<void> {
   private readonly operations: PromptOperation[] = [];
@@ -26,7 +24,7 @@ export class PromptsInteraction implements PromiseLike<void> {
 
   public clearText(): this {
     this.operations.push(() => {
-      process.stdin.emit("keypress", "", { name: "u", ctrl: true });
+      emitKeypress("", "u", { ctrl: true });
     });
     return this;
   }
@@ -42,13 +40,6 @@ export class PromptsInteraction implements PromiseLike<void> {
     return this;
   }
 
-  public up(): this {
-    this.operations.push(() => {
-      emitKeypress("", "up");
-    });
-    return this;
-  }
-
   public down(): this {
     this.operations.push(() => {
       emitKeypress("", "down");
@@ -59,13 +50,6 @@ export class PromptsInteraction implements PromiseLike<void> {
   public toggleMultiselectItem(): this {
     this.operations.push(() => {
       emitKeypress(" ", "space");
-    });
-    return this;
-  }
-
-  public acceptSelectOption(): this {
-    this.operations.push(() => {
-      emitKeypress("\r", "return");
     });
     return this;
   }
@@ -119,40 +103,42 @@ export class PromptsInteraction implements PromiseLike<void> {
   }
 
   public static resetPromptListeners(): void {
-    for (const eventName of trackedStdinEvents) {
-      const expectedListeners = initialListeners.get(eventName) ?? [];
-      for (const listener of process.stdin.rawListeners(eventName)) {
-        if (
-          !expectedListeners.includes(listener) &&
-          isClackPromptListener(eventName, listener)
-        ) {
-          process.stdin.removeListener(
-            eventName,
-            listener as (...args: any[]) => void,
-          );
-        }
-      }
+    for (const listener of observedPromptListeners) {
+      process.stdin.removeListener("keypress", listener);
     }
+    observedPromptListeners.clear();
   }
 }
 
-function emitKeypress(sequence: string, name: string): void {
-  process.stdin.emit("keypress", sequence, { name, sequence });
+function emitKeypress(
+  sequence: string,
+  name: string,
+  additionalProperties: Record<string, unknown> = {},
+): void {
+  process.stdin.emit("keypress", sequence, {
+    name,
+    sequence,
+    ...additionalProperties,
+  });
 }
 
 async function waitForPromptListenerAsync(): Promise<void> {
   const deadline = Date.now() + 2_000;
   while (Date.now() < deadline) {
-    const promptListenerAttached = process.stdin
-      .rawListeners("keypress")
-      .some(listener => isClackPromptListener("keypress", listener));
-    if (promptListenerAttached) {
+    const addedListeners = currentKeypressListeners().filter(
+      listener => !initialKeypressListeners.has(listener),
+    );
+    const promptListeners = addedListeners.slice(promptListenerOffset);
+    if (promptListeners.length > 0) {
+      for (const listener of promptListeners) {
+        observedPromptListeners.add(listener);
+      }
       return;
     }
     await new Promise<void>(resolve => setTimeout(resolve, 1));
   }
 
-  throw new Error("Timed out waiting for the Clack prompt to accept input.");
+  throw new Error("Timed out waiting for a terminal prompt to accept input.");
 }
 
 async function waitForCompleteRenderAsync(): Promise<void> {
@@ -161,9 +147,6 @@ async function waitForCompleteRenderAsync(): Promise<void> {
   await new Promise<void>(resolve => setTimeout(resolve, 10));
 }
 
-function isClackPromptListener(
-  eventName: (typeof trackedStdinEvents)[number],
-  listener: Function,
-): boolean {
-  return eventName === "keypress" && listener.name === "bound onKeypress";
+function currentKeypressListeners(): KeypressListener[] {
+  return process.stdin.rawListeners("keypress") as KeypressListener[];
 }

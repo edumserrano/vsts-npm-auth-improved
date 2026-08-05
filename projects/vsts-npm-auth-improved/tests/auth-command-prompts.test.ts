@@ -37,6 +37,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  PromptsInteraction.resetPromptListeners();
   vi.resetAllMocks(); // clears history on module mocks like execa
   vi.restoreAllMocks(); // restores original implementations of spied functions
   vol.reset();

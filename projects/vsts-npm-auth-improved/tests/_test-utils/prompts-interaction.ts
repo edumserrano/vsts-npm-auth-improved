@@ -1,77 +1,127 @@
 /**
- * Drives the real Clack prompts by queuing terminal input and keypress events.
- * The helper is awaitable and pauses for prompt redraws between operations so
- * interactive tests reproduce a user's input sequence reliably.
+ * Drives real terminal prompts with only the text, selection, and cancellation
+ * interactions used by this project's tests. It waits for a prompt to accept
+ * input, lets rendering settle, and tracks listeners for safe cleanup.
  */
 
-type PromptOperation = () => unknown | Promise<unknown>;
+type PromptOperation = () => void;
+type KeypressListener = (...args: any[]) => void;
 
-export class PromptsInteraction {
-  private operations: PromptOperation[] = [];
+const initialKeypressListeners = new Set(currentKeypressListeners());
+// Node installs its terminal-data bridge before the prompt's input listener.
+const promptListenerOffset = initialKeypressListeners.size === 0 ? 1 : 0;
+const observedPromptListeners = new Set<KeypressListener>();
 
-  public cancel(): this {
-    this.operations.push(() => process.stdin.emit("keypress", "escape", { name: "escape" }));
-    return this;
-  }
-
-  public clearText(): this {
-    this.operations.push(() => process.stdin.emit("keypress", "", { name: "u", ctrl: true }));
-    // Alternatively clear by sending backspaces
-    //
-    // for (let i = 0; i < <amount of backspaces>; i++) {
-    //   this.operations.push(() => process.stdin.emit("keypress", "", { name: "backspace" }));
-    // }
-    return this;
-  }
-
-  public enterText(text: string): this {
-    this.operations.push(() => process.stdin.emit("data", text));
-    return this;
-  }
+export class PromptsInteraction implements PromiseLike<void> {
+  private readonly operations: PromptOperation[] = [];
 
   public replaceText(text: string): this {
-    return this.clearText().enterText(text);
+    this.operations.push(
+      () => emitKeypress("", "u", { ctrl: true }),
+      () => {
+        process.stdin.emit("data", text);
+      },
+    );
+    return this;
   }
 
   public submitText(): this {
-    this.operations.push(() => process.stdin.emit("keypress", "\r", { name: "return" }));
-    return this;
-  }
-
-  public up(): this {
-    this.operations.push(() => process.stdin.emit("keypress", "", { name: "up" }));
+    this.operations.push(() => {
+      emitKeypress("\r", "return");
+    });
     return this;
   }
 
   public down(): this {
-    this.operations.push(() => process.stdin.emit("keypress", "", { name: "down" }));
+    this.operations.push(() => {
+      emitKeypress("", "down");
+    });
     return this;
   }
 
   public acceptSelectOption(): this {
-    this.operations.push(() => process.stdin.emit("keypress", "\r", { name: "return" }));
+    this.operations.push(() => {
+      emitKeypress("\r", "return");
+    });
     return this;
   }
 
-  // Make it awaitable - executes all queued operations sequentially
-  // This is what allows to do await new PromptsInteraction().operation1().operation2();
-  public async then<TResult = void>(
-    onfulfilled?: ((value: void) => TResult | PromiseLike<TResult>) | null,
-  ): Promise<TResult> {
-    for (const operation of this.operations) {
-      await operation();
-      await PromptsInteraction.waitForNextRenderAsync(); // doesn't always need to happen, at least after submit it does but it's safer to always wait
-    }
-    return onfulfilled?.(undefined) as TResult;
+  public cancel(): this {
+    this.operations.push(() => {
+      emitKeypress("\u001b", "escape");
+    });
+    return this;
   }
 
-  private static async waitForNextRenderAsync(): Promise<typeof PromptsInteraction> {
-    // you can use setImmediate or process.nextTick to trigger the next event loop cycle immediately. For promises, you can use:
-    await new Promise(resolve => setImmediate(resolve));
-    // // or
-    // await Promise.resolve();
-    // // or for multiple microtask cycles
-    // await new Promise(resolve => process.nextTick(resolve));
-    return PromptsInteraction;
+  public async then<TResult1 = void, TResult2 = never>(
+    onfulfilled?:
+      | ((value: void) => TResult1 | PromiseLike<TResult1>)
+      | null,
+    onrejected?:
+      | ((reason: unknown) => TResult2 | PromiseLike<TResult2>)
+      | null,
+  ): Promise<TResult1 | TResult2> {
+    try {
+      for (const operation of this.operations) {
+        await waitForPromptListenerAsync();
+        operation();
+        await waitForCompleteRenderAsync();
+      }
+
+      return onfulfilled?.(undefined) as TResult1;
+    } catch (error) {
+      if (onrejected !== undefined && onrejected !== null) {
+        return onrejected(error);
+      }
+      throw error;
+    }
   }
+
+  public static resetPromptListeners(): void {
+    for (const listener of observedPromptListeners) {
+      process.stdin.removeListener("keypress", listener);
+    }
+    observedPromptListeners.clear();
+  }
+}
+
+function emitKeypress(
+  sequence: string,
+  name: string,
+  additionalProperties: Record<string, unknown> = {},
+): void {
+  process.stdin.emit("keypress", sequence, {
+    name,
+    sequence,
+    ...additionalProperties,
+  });
+}
+
+async function waitForPromptListenerAsync(): Promise<void> {
+  const deadline = Date.now() + 2_000;
+  while (Date.now() < deadline) {
+    const addedListeners = currentKeypressListeners().filter(
+      listener => !initialKeypressListeners.has(listener),
+    );
+    const promptListeners = addedListeners.slice(promptListenerOffset);
+    if (promptListeners.length > 0) {
+      for (const listener of promptListeners) {
+        observedPromptListeners.add(listener);
+      }
+      return;
+    }
+    await new Promise<void>(resolve => setTimeout(resolve, 1));
+  }
+
+  throw new Error("Timed out waiting for a terminal prompt to accept input.");
+}
+
+async function waitForCompleteRenderAsync(): Promise<void> {
+  await new Promise<void>(resolve => setImmediate(resolve));
+  await new Promise<void>(resolve => setImmediate(resolve));
+  await new Promise<void>(resolve => setTimeout(resolve, 10));
+}
+
+function currentKeypressListeners(): KeypressListener[] {
+  return process.stdin.rawListeners("keypress") as KeypressListener[];
 }
