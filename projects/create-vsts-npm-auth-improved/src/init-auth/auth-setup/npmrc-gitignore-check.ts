@@ -18,13 +18,11 @@ export async function checkChangedNpmrcFilesForGitignore(
   const changedNpmrcFiles = plan.packages
     .map(packageChange => packageChange.npmrc)
     .filter(isChangedNpmrcFile);
-
   if (changedNpmrcFiles.length === 0) {
     return { status: "checked", ignoredDisplayPaths: [] };
   }
 
   const resolvedRoot = path.resolve(rootDirectory);
-
   try {
     // Globby is ESM-only while this package emits CommonJS, so it must remain a
     // dynamic import in the compiled output.
@@ -32,21 +30,17 @@ export async function checkChangedNpmrcFilesForGitignore(
     const candidatePatterns = changedNpmrcFiles.map(fileChange =>
       convertPathToPattern(path.relative(resolvedRoot, fileChange.filePath)),
     );
-    const unignoredPaths = await globby(
-      candidatePatterns,
-      {
-        cwd: resolvedRoot,
-        absolute: true,
-        onlyFiles: true,
-        dot: true,
-        followSymbolicLinks: false,
-        gitignore: true,
-        globalGitignore: false,
-        suppressErrors: false,
-      },
-    );
+    const unignoredPaths = await globby(candidatePatterns, {
+      cwd: resolvedRoot,
+      absolute: true,
+      onlyFiles: true,
+      dot: true,
+      followSymbolicLinks: false,
+      gitignore: true,
+      globalGitignore: false,
+      suppressErrors: false,
+    });
     const unignoredPathSet = new Set(unignoredPaths.map(filePath => path.resolve(filePath)));
-
     return {
       status: "checked",
       ignoredDisplayPaths: changedNpmrcFiles
