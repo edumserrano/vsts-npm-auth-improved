@@ -1,4 +1,3 @@
-import { Command } from "commander";
 import { afterEach, expect, test, vi } from "vitest";
 import {
   CreateVstsNpmAuthImprovedCli,
@@ -162,23 +161,24 @@ test("reports an unexpected non-Error value from the terminal boundary", async (
 });
 
 /**
- * Tests the outer CLI fallback for failures that occur outside the init-auth
- * command handler.
+ * Tests the outer CLI fallback through the terminal boundary before Commander
+ * begins parsing.
  */
-test("reports a top-level non-Commander CLI failure", async () => {
+test("reports a top-level terminal failure", async () => {
   const project = await NpmProject.createAsync("top-level-cli-failure");
-  const output = mockStdoutWrite({
-    temporaryRoots: [project.root],
+  const unexpectedValue = "Unexpected top-level terminal failure";
+  const consoleLog = vi.spyOn(console, "log").mockImplementationOnce(() => {
+    throw unexpectedValue;
   });
-  const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
-  const unexpectedValue = "Unexpected top-level non-Commander failure";
-  vi.spyOn(Command.prototype, "parseAsync").mockRejectedValueOnce(unexpectedValue);
 
   await CreateVstsNpmAuthImprovedCli.invokeAsync([]);
 
   expect(process.exitCode).toBe(1);
   expect(await project.readTreeAsync()).toEqual([]);
   expect(consoleLog).toHaveBeenNthCalledWith(1);
-  expect(consoleLog).toHaveBeenNthCalledWith(2, "🚨 Unexpected error:", unexpectedValue);
-  expect(output.normalizedOutput).toMatchSnapshot();
+  expect(consoleLog).toHaveBeenNthCalledWith(
+    2,
+    "🚨 Unexpected error:",
+    unexpectedValue,
+  );
 });

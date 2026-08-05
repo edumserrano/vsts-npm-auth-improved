@@ -1,8 +1,9 @@
 /**
  * Enforces the test architecture for one project: tests may reach application
- * code only through the public CLI test helper. It scans quoted module paths in
- * test files and rejects references that resolve into src, preventing tests
- * from becoming coupled to implementation details that may change freely.
+ * code only through the public CLI test helper. It scans module references in
+ * test files and rejects paths into src or production dependencies that are not
+ * approved external boundaries, preventing implementation coupling from
+ * returning unnoticed.
  */
 const fs = require("node:fs");
 const path = require("node:path");
@@ -12,6 +13,10 @@ const testsRoot = path.join(projectRoot, "tests");
 const sourceRoot = path.join(projectRoot, "src");
 const packageJson = JSON.parse(fs.readFileSync(path.join(projectRoot, "package.json"), "utf8"));
 const publicAlias = `@${packageJson.name}`;
+const productionDependencies = new Set(Object.keys(packageJson.dependencies ?? {}));
+const allowedProductionDependencies = new Set(
+  packageJson.name === "vsts-npm-auth-improved" ? ["execa"] : [],
+);
 const allowedPublicApiHelper = path.join(
   testsRoot,
   "_test-utils",
@@ -21,8 +26,7 @@ const violations = [];
 
 for (const filePath of findTypeScriptFiles(testsRoot)) {
   const source = fs.readFileSync(filePath, "utf8");
-  for (const match of source.matchAll(/["'`]([^"'`\r\n]+)["'`]/g)) {
-    const specifier = match[1];
+  for (const specifier of findModuleSpecifiers(source)) {
     if (specifier === publicAlias) {
       if (filePath !== allowedPublicApiHelper) {
         violations.push(
@@ -41,6 +45,15 @@ for (const filePath of findTypeScriptFiles(testsRoot)) {
     }
 
     if (!specifier.startsWith(".")) {
+      const dependencyName = packageNameFromSpecifier(specifier);
+      if (
+        productionDependencies.has(dependencyName) &&
+        !allowedProductionDependencies.has(dependencyName)
+      ) {
+        violations.push(
+          `${relative(filePath)} references production implementation dependency ${dependencyName}`,
+        );
+      }
       continue;
     }
     const resolved = path.resolve(path.dirname(filePath), specifier);
@@ -48,6 +61,23 @@ for (const filePath of findTypeScriptFiles(testsRoot)) {
       violations.push(`${relative(filePath)} references internal application module ${specifier}`);
     }
   }
+}
+
+function findModuleSpecifiers(source) {
+  const specifiers = new Set();
+  const moduleReferencePattern =
+    /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bvi\.(?:mock|doMock|unmock|doUnmock|importActual|importMock)\s*\(\s*|\bimport\s*)["'`]([^"'`\r\n]+)["'`]/g;
+  for (const match of source.matchAll(moduleReferencePattern)) {
+    specifiers.add(match[1]);
+  }
+  return specifiers;
+}
+
+function packageNameFromSpecifier(specifier) {
+  if (!specifier.startsWith("@")) {
+    return specifier.split("/", 1)[0];
+  }
+  return specifier.split("/", 2).join("/");
 }
 
 if (violations.length > 0) {

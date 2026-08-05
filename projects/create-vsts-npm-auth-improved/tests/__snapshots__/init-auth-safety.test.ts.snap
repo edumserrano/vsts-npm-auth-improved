@@ -107,10 +107,10 @@ exports[`reports a discovery failure before package reads or writes 1`] = `
 ◆  Where should package.json files be searched for?
 │  ./█
 └
-◇  Where should package.json files be searched for?
-│  ./
+│  ./│  w█│  wo█│  wor█│  work█│  works█│  worksp█│  workspa█│  workspac█│  workspace█◇  Where should package.json files be searched for?
+│  workspace
 │
-▲  Could not search <test-root>: directory read failed.
+▲  Could not search <test-root>/workspace: The \`cwd\` option must be a path to a directory, got: <test-root>/workspace.
 │
 └  No files were changed.
 

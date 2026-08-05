@@ -1,4 +1,4 @@
-import { test, expect, afterEach, vi, beforeEach } from "vitest";
+import { test, expect, afterAll, afterEach, vi, beforeEach } from "vitest";
 import { AuthCommand, VstsNpmAuthImprovedCli } from "@test-utils/auth-command";
 import { vol } from "memfs";
 import { createInMemoryNpmrcFile } from "@test-utils/npm-configuration-file";
@@ -12,11 +12,24 @@ import { PromptsInteraction } from "@test-utils/prompts-interaction";
  * behavior is tested in auth-command-cli.test.ts.
  */
 
+const { originalCiEnvironment } = vi.hoisted(() => {
+  const originalCiEnvironment = process.env.CI;
+  process.env.CI = "false";
+  return { originalCiEnvironment };
+});
+
 vi.mock("execa");
-vi.mock("ci-info", () => ({ isCI: false }));
 vi.mock("node:fs", async () => {
   const { fs } = await import("memfs");
   return fs;
+});
+
+afterAll(() => {
+  if (originalCiEnvironment === undefined) {
+    delete process.env.CI;
+  } else {
+    process.env.CI = originalCiEnvironment;
+  }
 });
 
 beforeEach(() => {

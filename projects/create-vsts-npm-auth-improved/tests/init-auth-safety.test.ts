@@ -1,6 +1,5 @@
-import { accessSync } from "node:fs";
+import { accessSync, renameSync, writeFileSync } from "node:fs";
 import { mkdir, rename } from "node:fs/promises";
-import { globby } from "globby";
 import { afterEach, expect, test, vi } from "vitest";
 import {
   configuredPackageJsonContent,
@@ -16,14 +15,6 @@ import { mockStdoutWrite } from "@test-utils/process-output";
  * The tests below verify that init-auth handles discovery, parsing, reading,
  * planning, and persistence failures without leaving partial project changes.
  */
-
-vi.mock("globby", async importOriginal => {
-  const actual = await importOriginal<typeof import("globby")>();
-  return {
-    ...actual,
-    globby: vi.fn(actual.globby),
-  };
-});
 
 vi.mock("node:fs", async importOriginal => {
   const actual = await importOriginal<typeof import("node:fs")>();
@@ -55,21 +46,43 @@ afterEach(async () => {
  */
 test("reports a discovery failure before package reads or writes", async () => {
   const project = await NpmProject.createAsync("discovery-failure");
-  await project.createPackageAsync({ packageJson: originalPackageJson });
+  await project.createPackageAsync({
+    directory: "workspace",
+    packageJson: originalPackageJson,
+  });
   const output = mockStdoutWrite({
     temporaryRoots: [project.root],
   });
-  vi.mocked(globby).mockRejectedValueOnce(nodeError("directory read failed", "EIO"));
+  let replacedValidatedRoot = false;
+  output.write.mockImplementation(chunk => {
+    if (
+      !replacedValidatedRoot &&
+      String(chunk).includes("◇") &&
+      String(chunk).includes("workspace")
+    ) {
+      renameSync(project.path("workspace"), project.path("workspace.original"));
+      writeFileSync(project.path("workspace"), "not a directory");
+      replacedValidatedRoot = true;
+    }
+    return true;
+  });
 
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction().submitText();
+  await new PromptsInteraction().replaceText("workspace").submitText();
   await command;
 
   expect(process.exitCode).toBe(1);
-  expect(await project.readTreeAsync()).toEqual(["package.json"]);
-  expect(await project.readFileAsync("package.json")).toBe(originalPackageJson);
-  expect(await project.existsAsync(".npmrc")).toBe(false);
+  expect(replacedValidatedRoot).toBe(true);
+  expect(await project.readTreeAsync()).toEqual([
+    "workspace",
+    "workspace.original",
+    "workspace.original/package.json",
+  ]);
+  expect(await project.readFileAsync("workspace.original/package.json")).toBe(
+    originalPackageJson,
+  );
+  expect(await project.existsAsync("workspace.original/.npmrc")).toBe(false);
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
