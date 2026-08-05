@@ -247,3 +247,47 @@ exports[`reports mixed created updated and unchanged outcomes in persistence ord
 
 "
 `;
+
+exports[`warns only for created or updated npmrc files ignored by Git 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 4 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ packages/created/package.json
+│  ◻ packages/kept/package.json
+│  ◻ packages/unchanged/package.json
+│  ◻ packages/updated/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◼ ALL (Configure every package)◇  Which packages should be configured?
+│  ALL
+│
+◆  Registry URL for packages/created/package.json
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages/created/package.json
+│  https://prompted.test/
+│
+◇  Configuration files are ready.
+│
+◆  Packages: 4 configured (3 changed, 1 unchanged); files: 1 created, 5 updated, 2 unchanged.
+│
+▲  The following .npmrc files were created or updated but are ignored by Git. They likely belong in source control so the registry configuration is available to other contributors.
+│
+│  Review them for credentials or other secrets, then remove the relevant .gitignore rules and commit and push the safe files:
+│
+│  - packages/created/.npmrc
+│  - packages/updated/.npmrc
+│
+└  Authentication configuration complete. 😊
+
+"
+`;

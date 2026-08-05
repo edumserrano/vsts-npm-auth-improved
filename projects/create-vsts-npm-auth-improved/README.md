@@ -65,6 +65,10 @@ npx create-vsts-npm-auth-improved --version
 5. After every selected package has been read, parsed, and planned—and all
    required registry prompts have completed—the CLI writes only changed files
    and reports created, updated, and unchanged counts.
+6. If an `.npmrc` created or updated by the command is ignored by Git, the CLI
+   lists it in a warning. Unchanged `.npmrc` files are not reported. Review a
+   reported file for credentials or other secrets before removing the relevant
+   `.gitignore` rule and committing it.
 
 Cancelling any prompt during planning exits before any file is written. Invalid
 or unreadable input also stops planning before persistence begins.
