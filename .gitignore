@@ -15,3 +15,5 @@ out-tsc
 # Test Outputs
 test-reporters
 projects/create-vsts-npm-auth-improved/tests/temp/
+
+.resources
