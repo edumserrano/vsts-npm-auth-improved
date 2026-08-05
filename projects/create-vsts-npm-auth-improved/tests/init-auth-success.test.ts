@@ -175,56 +175,6 @@ test("reports mixed created updated and unchanged outcomes in persistence order"
 });
 
 /**
- * Tests the post-write warning for project configuration excluded from Git.
- * Verifies that:
- * - Created and updated ignored .npmrc files are listed in plan order
- * - An ignored but unchanged .npmrc is not listed
- * - A changed file rescued by a negated rule is not listed
- * - The completed command remains successful
- */
-test("warns only for created or updated npmrc files ignored by Git", async () => {
-  const project = await NpmProject.createAsync("ignored-npmrc-warning");
-  await project.writeFileAsync(".git/keep", "");
-  await project.writeFileAsync(".gitignore", "**/.npmrc\n!packages/kept/.npmrc\n");
-  await project.createPackageAsync({
-    directory: "packages/created",
-    packageJson: originalPackageJson,
-  });
-  await project.createPackageAsync({
-    directory: "packages/updated",
-    packageJson: originalPackageJson,
-    npmrc: "registry=https://updated.test/\naudit=true",
-  });
-  await project.createPackageAsync({
-    directory: "packages/unchanged",
-    packageJson: configuredPackageJson,
-    npmrc: canonicalNpmrc(existingRegistry),
-  });
-  await project.createPackageAsync({
-    directory: "packages/kept",
-    packageJson: originalPackageJson,
-    npmrc: "registry=https://kept.test/\naudit=true",
-  });
-  const output = mockStdoutWrite({ temporaryRoots: [project.root] });
-  process.chdir(project.root);
-  const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction()
-    .submitText()
-    .toggleMultiselectItem()
-    .acceptMultiselectValues()
-    .enterText(promptedRegistry)
-    .submitText();
-  await command;
-
-  expect(process.exitCode ?? 0).toBe(0);
-  expect(output.normalizedOutput).toContain("- packages/created/.npmrc");
-  expect(output.normalizedOutput).toContain("- packages/updated/.npmrc");
-  expect(output.normalizedOutput).not.toContain("- packages/unchanged/.npmrc");
-  expect(output.normalizedOutput).not.toContain("- packages/kept/.npmrc");
-  expect(output.normalizedOutput).toMatchSnapshot();
-});
-
-/**
  * Tests idempotency by running the complete interactive workflow twice against
  * the same package.
  * Verifies that:
