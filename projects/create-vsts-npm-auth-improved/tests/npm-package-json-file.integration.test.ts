@@ -7,7 +7,8 @@ import {
 import { NpmProject } from "@test-utils/npm-project";
 
 const managedScripts = {
-  "registry-auth": "vsts-npm-auth-improved -c ./.npmrc --read",
+  "registry-auth":
+    "npm exec --yes --registry=https://registry.npmjs.org/ --package=vsts-npm-auth-improved@alpha -- vsts-npm-auth-improved -c ./.npmrc --read",
   "preinstall-packages": "npm run registry-auth",
   "install-packages": "npm i",
 } as const;
