@@ -65,8 +65,9 @@ npx create-vsts-npm-auth-improved --version
    values are reused, so those packages do not prompt. A scoped registry alone
    does not replace the required global registry.
 5. After every selected package has been read, parsed, and planned—and all
-   required registry prompts have completed—the CLI writes only changed files
-   and reports created, updated, and unchanged counts.
+   required registry prompts have completed—the CLI writes only changed files.
+   It groups the result by package directory and labels each managed file as
+   created, updated, or unchanged.
 6. If an `.npmrc` created or updated by the command is ignored by Git, the CLI
    lists it in a warning. See [Git-ignore checking](#git-ignore-checking).
 
