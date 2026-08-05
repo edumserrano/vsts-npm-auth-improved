@@ -1,3 +1,9 @@
+/**
+ * Enforces the test architecture for one project: tests may reach application
+ * code only through the public CLI test helper. It scans quoted module paths in
+ * test files and rejects references that resolve into src, preventing tests
+ * from becoming coupled to implementation details that may change freely.
+ */
 const fs = require("node:fs");
 const path = require("node:path");
 
