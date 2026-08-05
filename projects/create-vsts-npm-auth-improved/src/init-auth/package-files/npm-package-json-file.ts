@@ -68,14 +68,14 @@ export class NpmPackageJsonFileError extends Error {
 export type NpmPackageJsonFile = {
   readonly disposition: NpmPackageJsonFileDisposition;
   readonly filePath: string;
-  save(): Promise<void>;
+  saveAsync(): Promise<void>;
 };
 
 export type LoadNpmPackageJsonFileOptions = {
   readonly packageDirectory: string;
 };
 
-export async function loadNpmPackageJsonFile(
+export async function loadNpmPackageJsonFileAsync(
   options: LoadNpmPackageJsonFileOptions,
 ): Promise<NpmPackageJsonFile> {
   const packageDirectory = path.resolve(options.packageDirectory);
@@ -88,11 +88,10 @@ export async function loadNpmPackageJsonFile(
     throw new NpmPackageJsonFileError("read", filePath, { cause });
   }
 
-  return loadNpmPackageJsonFileWithDependencies(options, dependencies);
+  return loadNpmPackageJsonFileWithDependenciesAsync(options, dependencies);
 }
 
-/** @internal Exported only so unit tests can isolate the third-party boundary. */
-export async function loadNpmPackageJsonFileWithDependencies(
+async function loadNpmPackageJsonFileWithDependenciesAsync(
   options: LoadNpmPackageJsonFileOptions,
   dependencies: NpmPackageJsonFileDependencies,
 ): Promise<NpmPackageJsonFile> {
@@ -154,7 +153,7 @@ export async function loadNpmPackageJsonFileWithDependencies(
   return {
     disposition,
     filePath,
-    async save() {
+    async saveAsync() {
       if (disposition === "unchanged") {
         return;
       }

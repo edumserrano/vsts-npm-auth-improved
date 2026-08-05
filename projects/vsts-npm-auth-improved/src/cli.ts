@@ -1,6 +1,5 @@
 import { Command, CommanderError } from "commander";
 import { addAuthCommand } from "./auth/auth-command";
-import { prompts } from "./auth/prompts-utils";
 import { packageVersion } from "./package-json-utils";
 
 export async function cliAsync(argv: string[]): Promise<void> {

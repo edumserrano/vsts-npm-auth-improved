@@ -74,7 +74,7 @@ export type NpmConfigFile = {
   readonly filePath: string;
   readonly localPrefix: string;
   readonly projectRegistry: string | undefined;
-  save(): Promise<void>;
+  saveAsync(): Promise<void>;
   setPromptedRegistry(registry: string): void;
 };
 
@@ -91,10 +91,10 @@ export type LoadNpmConfigFileOptions = {
 type NpmConfigFileDependencies = {
   readonly Config: NpmConfigConstructor;
   readonly definitions: NpmConfigDefinitionsModule;
-  fileExists(filePath: string): Promise<boolean>;
+  fileExistsAsync(filePath: string): Promise<boolean>;
 };
 
-export async function loadNpmConfigFile(
+export async function loadNpmConfigFileAsync(
   options: LoadNpmConfigFileOptions,
 ): Promise<NpmConfigFile> {
   const packageDirectory = path.resolve(options.packageDirectory);
@@ -107,11 +107,10 @@ export async function loadNpmConfigFile(
     throw new NpmConfigFileError("read", filePath, { cause });
   }
 
-  return loadNpmConfigFileWithDependencies(options, dependencies);
+  return loadNpmConfigFileWithDependenciesAsync(options, dependencies);
 }
 
-/** @internal Exported only so unit tests can isolate the third-party boundary. */
-export async function loadNpmConfigFileWithDependencies(
+async function loadNpmConfigFileWithDependenciesAsync(
   options: LoadNpmConfigFileOptions,
   dependencies: NpmConfigFileDependencies,
 ): Promise<NpmConfigFile> {
@@ -119,7 +118,7 @@ export async function loadNpmConfigFileWithDependencies(
   const filePath = path.join(packageDirectory, ".npmrc");
 
   try {
-    const existed = await dependencies.fileExists(filePath);
+    const existed = await dependencies.fileExistsAsync(filePath);
     const controlledArgv = [
       "node",
       "create-vsts-npm-auth-improved",
@@ -171,7 +170,7 @@ export async function loadNpmConfigFileWithDependencies(
       get projectRegistry() {
         return currentProjectRegistry;
       },
-      async save() {
+      async saveAsync() {
         try {
           await config.save("project");
         } catch (cause) {
@@ -233,7 +232,7 @@ function loadDependencies(): NpmConfigFileDependencies {
   return {
     Config: loadConfigConstructor(),
     definitions: loadDefinitionsModule(),
-    fileExists,
+    fileExistsAsync,
   };
 }
 
@@ -271,7 +270,7 @@ function resolveInstalledConfigRoot(): string {
   return path.dirname(require.resolve("@npmcli/config/package.json"));
 }
 
-async function fileExists(filePath: string): Promise<boolean> {
+async function fileExistsAsync(filePath: string): Promise<boolean> {
   try {
     const fileStat = await stat(filePath);
     if (!fileStat.isFile()) {

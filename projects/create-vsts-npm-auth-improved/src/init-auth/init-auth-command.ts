@@ -1,9 +1,13 @@
 import path from "node:path";
 import { accessSync, constants, statSync } from "node:fs";
 import { Command } from "commander";
-import { buildAuthSetupPlan, writeAuthSetupPlan } from "./auth-setup/auth-setup-plan";
+import {
+  buildAuthSetupPlanAsync,
+  writeAuthSetupPlanAsync,
+} from "./auth-setup/auth-setup-plan";
 import { formatAuthSetupSummary, summarizeAuthSetupPlan } from "./auth-setup/auth-setup-summary";
-import { discoverPackageJsonFiles } from "./package-files/package-json-discovery";
+import { checkChangedNpmrcFilesForGitignoreAsync } from "./auth-setup/npmrc-gitignore-check";
+import { discoverPackageJsonFilesAsync } from "./package-files/package-json-discovery";
 import { formatInitAuthFailure, InitAuthFailure } from "./init-auth-failure";
 import { PromptMessages, prompts } from "./prompts-utils";
 
@@ -38,7 +42,7 @@ async function handleInitAuthCommandAsync(): Promise<void> {
     const rootDirectory = path.resolve(cwd, rootAnswer.trim());
     spinnerPrompt = prompts.spinner();
     spinnerPrompt.start("Searching for package.json files");
-    const discoveryResult = await discoverPackageJsonFiles(rootDirectory);
+    const discoveryResult = await discoverPackageJsonFilesAsync(rootDirectory);
     if (discoveryResult.status === "failed") {
       reportInitAuthFailure(discoveryResult.failure, spinnerPrompt);
       process.exitCode = 1;
@@ -87,7 +91,7 @@ async function handleInitAuthCommandAsync(): Promise<void> {
       return;
     }
 
-    const planResult = await buildAuthSetupPlan(
+    const planResult = await buildAuthSetupPlanAsync(
       rootDirectory,
       selectedPackagePaths,
       async packageDisplayPath => {
@@ -121,17 +125,23 @@ async function handleInitAuthCommandAsync(): Promise<void> {
     const { plan } = planResult;
     spinnerPrompt = prompts.spinner();
     spinnerPrompt.start("Writing configuration files");
-    const writeResult = await writeAuthSetupPlan(plan);
+    const writeResult = await writeAuthSetupPlanAsync(plan);
     if (writeResult.status === "failed") {
       reportInitAuthFailure(writeResult.failure, spinnerPrompt);
       process.exitCode = 1;
       return;
     }
 
+    const gitignoreCheck = await checkChangedNpmrcFilesForGitignoreAsync(rootDirectory, plan);
     const summary = summarizeAuthSetupPlan(plan);
     spinnerPrompt.stop("Configuration files are ready.");
     spinnerPrompt = null;
     prompts.log.success(formatAuthSetupSummary(summary));
+    if (gitignoreCheck.status === "checked" && gitignoreCheck.ignoredDisplayPaths.length > 0) {
+      const npmrcGitIgnoredWarningMessage = formatNpmrcGitignoreWarning(gitignoreCheck.ignoredDisplayPaths);
+      prompts.log.warn(npmrcGitIgnoredWarningMessage);
+    }
+
     prompts.outro("Authentication configuration complete. 😊");
     process.exitCode = 0;
   } catch (error) {
@@ -251,4 +261,15 @@ function validateRegistryUrl(value: string | undefined): string | undefined {
   }
 
   return undefined;
+}
+
+function formatNpmrcGitignoreWarning(ignoredDisplayPaths: readonly string[]): string {
+  const files = ignoredDisplayPaths.map(displayPath => `- ${displayPath}`).join("\n");
+  return [
+    "The following .npmrc files were created or updated but are ignored by Git.",
+    "Project-level .npmrc files are often committed so npm settings are shared with other contributors.",
+    "Review each file for credentials or other secrets, then remove the relevant .gitignore rules and commit and push any files that are safe to share:",
+    "",
+    files,
+  ].join("\n");
 }

@@ -5,12 +5,12 @@ import {
   InvalidPackageJsonFailure,
 } from "../init-auth-failure";
 import {
-  loadNpmConfigFile,
+  loadNpmConfigFileAsync,
   NpmConfigFile,
   NpmConfigFileError,
 } from "../package-files/npm-config-file";
 import {
-  loadNpmPackageJsonFile,
+  loadNpmPackageJsonFileAsync,
   NpmPackageJsonFile,
   NpmPackageJsonFileError,
 } from "../package-files/npm-package-json-file";
@@ -21,7 +21,7 @@ export type PlannedFileChange = {
   readonly displayPath: string;
   readonly disposition: FileChangeKind;
   readonly filePath: string;
-  readonly save: () => Promise<void>;
+  readonly saveAsync: () => Promise<void>;
 };
 
 export type PlannedPackageJsonChange = PlannedFileChange & {
@@ -83,7 +83,7 @@ type RegistryRequestCancelled = {
 
 type RegistryResolutionResult = RegistryProvided | RegistryRequestCancelled;
 
-export type RequestRegistry = (
+export type RequestRegistryAsync = (
   packageDisplayPath: string,
 ) => Promise<RegistryResolutionResult>;
 
@@ -94,22 +94,22 @@ type LoadedPackageFiles = {
   readonly packageJson: NpmPackageJsonFile;
 };
 
-export async function buildAuthSetupPlan(
+export async function buildAuthSetupPlanAsync(
   rootDirectory: string,
   packageJsonPaths: readonly string[],
-  requestRegistry: RequestRegistry,
+  requestRegistryAsync: RequestRegistryAsync,
 ): Promise<AuthSetupPlanResult> {
   // Load all package adapters before any adjacent npm configuration. Adapter
   // loading both validates package data and prepares its changes in memory.
   const packageJsonResults = await Promise.allSettled(
     packageJsonPaths.map((packageJsonPath) =>
-      loadNpmPackageJsonFile({ packageDirectory: path.dirname(packageJsonPath) }),
+      loadNpmPackageJsonFileAsync({ packageDirectory: path.dirname(packageJsonPath) }),
     ),
   );
 
   const npmrcResults = await Promise.allSettled(
     packageJsonPaths.map((packageJsonPath) =>
-      loadNpmConfigFile({ packageDirectory: path.dirname(packageJsonPath) }),
+      loadNpmConfigFileAsync({ packageDirectory: path.dirname(packageJsonPath) }),
     ),
   );
 
@@ -145,7 +145,7 @@ export async function buildAuthSetupPlan(
   // environment, and CLI values must not suppress creation of a project value.
   for (const loadedPackage of loadedPackages) {
     if (loadedPackage.npmrc.projectRegistry === undefined) {
-      const registryResult = await requestRegistry(loadedPackage.displayPath);
+      const registryResult = await requestRegistryAsync(loadedPackage.displayPath);
       if (registryResult.status === "cancelled") {
         return { status: "cancelled" };
       }
@@ -161,7 +161,7 @@ export async function buildAuthSetupPlan(
   };
 }
 
-export async function writeAuthSetupPlan(
+export async function writeAuthSetupPlanAsync(
   plan: AuthSetupPlan,
 ): Promise<WriteAuthSetupPlanResult> {
   for (const packageChange of plan.packages) {
@@ -172,7 +172,7 @@ export async function writeAuthSetupPlan(
       }
 
       try {
-        await fileChange.save();
+        await fileChange.saveAsync();
       } catch (cause) {
         return {
           status: "failed",
@@ -249,13 +249,13 @@ function buildPlannedPackageChange(
       displayPath: loadedPackage.displayPath,
       disposition: loadedPackage.packageJson.disposition,
       filePath: loadedPackage.packageJson.filePath,
-      save: () => loadedPackage.packageJson.save(),
+      saveAsync: () => loadedPackage.packageJson.saveAsync(),
     },
     npmrc: {
       displayPath: loadedPackage.npmrcDisplayPath,
       disposition: loadedPackage.npmrc.disposition,
       filePath: loadedPackage.npmrc.filePath,
-      save: () => loadedPackage.npmrc.save(),
+      saveAsync: () => loadedPackage.npmrc.saveAsync(),
     },
   };
 }
