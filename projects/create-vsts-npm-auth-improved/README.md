@@ -108,7 +108,7 @@ this order:
 ```json
 {
   "scripts": {
-    "registry-auth": "npm exec --yes --registry=https://registry.npmjs.org/ --package=vsts-npm-auth-improved@alpha -- vsts-npm-auth-improved -c ./.npmrc --read",
+    "registry-auth": "npm exec --yes --registry=https://registry.npmjs.org/ -- vsts-npm-auth-improved@alpha -- -c ./.npmrc --read",
     "preinstall-packages": "npm run registry-auth",
     "install-packages": "npm i"
   }
@@ -120,7 +120,8 @@ the project's dependencies have been installed. The explicit package spec and
 command-line registry select the current `alpha` release from the public npm
 registry, overriding the project-level global registry for this bootstrap
 request. npm caches the fetched package and reuses its package data while the
-same alpha release remains current.
+same alpha release remains current. The second `--` passes the remaining
+options to `vsts-npm-auth-improved` instead of letting npm parse them.
 
 Run the managed installation command immediately after configuration:
 

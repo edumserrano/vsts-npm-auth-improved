@@ -4,7 +4,7 @@ const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "alpha";
 
 const REQUIRED_SCRIPTS = {
   "registry-auth":
-    `npm exec --yes --registry=https://registry.npmjs.org/ --package=vsts-npm-auth-improved@${VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC} -- vsts-npm-auth-improved -c ./.npmrc --read`,
+    `npm exec --yes --registry=https://registry.npmjs.org/ -- vsts-npm-auth-improved@${VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC} -- -c ./.npmrc --read`,
   "preinstall-packages": "npm run registry-auth",
   "install-packages": "npm i",
 } as const;
