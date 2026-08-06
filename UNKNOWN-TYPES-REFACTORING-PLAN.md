@@ -80,7 +80,7 @@ Target: `projects/create-vsts-npm-auth-improved/src/init-auth/package-files/npm-
   - `NpmConfigFileError` causes
   - results of dynamic `require()` calls before validation
   - `isRecord` and `isNodeError` inputs
-- Continue validating the CommonJS constructor and definitions module before casting them to the local adapter contracts.
+- Validate the CommonJS constructor and definitions module with typed predicates that narrow them to the local adapter contracts without `as` casts.
 
 Acceptance criteria:
 
