@@ -8,7 +8,7 @@ import type { Key } from "node:readline";
 
 type PromptOperation = () => void;
 type KeypressListener = (...args: any[]) => void;
-type KeypressProperties = Pick<Key, "ctrl" | "meta" | "shift">;
+type KeypressModifiers = Pick<Key, "ctrl" | "meta" | "shift">;
 
 const initialKeypressListeners = new Set(currentKeypressListeners());
 // Node installs its terminal-data bridge before the prompt's input listener.
@@ -91,12 +91,12 @@ export class PromptsInteraction implements PromiseLike<void> {
 function emitKeypress(
   sequence: string,
   name: string,
-  additionalProperties: KeypressProperties = {},
+  modifiers: KeypressModifiers = {},
 ): void {
   process.stdin.emit("keypress", sequence, {
     name,
     sequence,
-    ...additionalProperties,
+    ...modifiers,
   });
 }
 
