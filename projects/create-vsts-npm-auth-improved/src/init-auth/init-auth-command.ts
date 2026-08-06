@@ -102,12 +102,12 @@ async function handleInitAuthCommandAsync(): Promise<void> {
         {
           value: "standard-npm-install" satisfies PackageInstallationStrategy,
           label: "Standard npm install",
-          hint: "Requires npm 12 or later",
+          hint: "npm i — requires npm 12 or later",
         },
         {
           value: "custom-install-packages" satisfies PackageInstallationStrategy,
-          label: "Custom npm run install-packages",
-          hint: "Supports npm 11 and earlier",
+          label: "Custom npm script",
+          hint: "npm run install-packages — supports npm 11 and earlier",
         },
       ],
     });

@@ -20,8 +20,8 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 1`]
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -76,8 +76,8 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 2`]
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -128,8 +128,8 @@ exports[`configures ALL mixed with an individual package through a complete CLI 
 │  ALL, beta/package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -188,8 +188,8 @@ exports[`configures ALL through a complete CLI selection 1`] = `
 │  ALL
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -248,8 +248,8 @@ exports[`configures a subset through a complete CLI selection 1`] = `
 │  alpha/package.json, gamma/package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -304,8 +304,8 @@ exports[`configures multiple individual packages through a complete CLI selectio
 │  alpha/package.json, beta/package.json, gamma/package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -364,8 +364,8 @@ exports[`configures one package through a complete CLI selection 1`] = `
 │  beta/package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -416,8 +416,8 @@ exports[`reports mixed created updated and unchanged outcomes in persistence ord
 │  ALL
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?

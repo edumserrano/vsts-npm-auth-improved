@@ -69,8 +69,8 @@ exports[`rejects a later invalid package before prompting or writing 1`] = `
 │  ALL
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -103,8 +103,8 @@ exports[`reports a boolean JSON root with zero writes 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -154,8 +154,8 @@ exports[`reports a later write failure after preserving earlier completed writes
 │  ALL
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -200,8 +200,8 @@ exports[`reports a missing package.json after discovery with zero writes 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -234,8 +234,8 @@ exports[`reports a null JSON root with zero writes 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -268,8 +268,8 @@ exports[`reports a number JSON root with zero writes 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -302,8 +302,8 @@ exports[`reports a string JSON root with zero writes 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -336,8 +336,8 @@ exports[`reports a unreadable package.json after discovery with zero writes 1`] 
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -370,8 +370,8 @@ exports[`reports an .npmrc read failure with relative context and zero writes 1`
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -404,8 +404,8 @@ exports[`reports an .npmrc write failure after package.json is persisted 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -444,8 +444,8 @@ exports[`reports an array JSON root with zero writes 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -478,8 +478,8 @@ exports[`reports malformed JSON with zero writes 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -512,8 +512,8 @@ exports[`surfaces a targeted write failure through the persistence spinner 1`] =
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?

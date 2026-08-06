@@ -21,8 +21,8 @@ exports[`cancels at a later registry prompt after planning with zero writes 1`] 
 │  ALL
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -64,8 +64,8 @@ exports[`cancels at installation strategy selection without changing the filesys
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ■  How should users install packages with automatic authentication?
@@ -119,8 +119,8 @@ exports[`cancels at the registry prompt without changing the filesystem 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?

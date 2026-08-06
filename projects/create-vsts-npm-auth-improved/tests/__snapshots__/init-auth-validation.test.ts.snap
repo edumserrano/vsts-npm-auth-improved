@@ -20,8 +20,8 @@ exports[`accepts a valid HTTPS registry through the real registry prompt 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -76,8 +76,8 @@ exports[`accepts a valid custom-scheme registry through the real registry prompt
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -150,8 +150,8 @@ exports[`reuses an existing global registry without showing a registry prompt 1`
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -200,8 +200,8 @@ exports[`shows empty registry feedback before accepting a valid correction 1`] =
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -334,8 +334,8 @@ exports[`shows missing-scheme registry feedback before accepting a valid correct
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -396,8 +396,8 @@ exports[`shows relative registry feedback before accepting a valid correction 1`
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -458,8 +458,8 @@ exports[`shows whitespace registry feedback before accepting a valid correction 
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?

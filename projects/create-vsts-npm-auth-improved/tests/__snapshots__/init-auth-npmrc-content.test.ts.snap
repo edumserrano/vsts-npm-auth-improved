@@ -20,8 +20,8 @@ exports[`configures .npmrc content: 'corrects managed values and preserves…' 1
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -70,8 +70,8 @@ exports[`configures .npmrc content: 'creates a missing project configurati…' 1
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -126,8 +126,8 @@ exports[`configures .npmrc content: 'replaces a whitespace-only project re…' 1
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -182,8 +182,8 @@ exports[`configures .npmrc content: 'treats a scoped registry as distinct …' 1
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -238,8 +238,8 @@ exports[`configures .npmrc content: 'updates an empty project configuration' 1`]
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -294,8 +294,8 @@ exports[`configures .npmrc content: 'uses npm\\'s effective final duplicate…' 
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -344,8 +344,8 @@ exports[`prompts for a project registry despite an inherited 'environment regist
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -400,8 +400,8 @@ exports[`prompts for a project registry despite an inherited 'global registry' 1
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -456,8 +456,8 @@ exports[`prompts for a project registry despite an inherited 'user registry' 1`]
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -513,8 +513,8 @@ exports[`updates only the 'nested package' adjacent .npmrc 1`] = `
 │  packages/nested/package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -563,8 +563,8 @@ exports[`updates only the 'standalone package' adjacent .npmrc 1`] = `
 │  package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
@@ -614,8 +614,8 @@ exports[`updates only the 'workspace member' adjacent .npmrc 1`] = `
 │  packages/member/package.json
 │
 ◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (Requires npm 12 or later)
-│  ○ Custom npm run install-packages
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  How should users install packages with automatic authentication?
