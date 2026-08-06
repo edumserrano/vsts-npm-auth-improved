@@ -1,4 +1,5 @@
 import path from "node:path";
+import type { JsonObject, JsonValue } from "type-fest";
 import { PackageInstallationStrategy } from "../package-installation-strategy";
 
 const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "alpha";
@@ -19,14 +20,22 @@ const DEPENDENCY_TYPES = [
   "peerDependencies",
 ] as const;
 
-type JsonObject = Record<string, unknown>;
+type PackageJsonFieldValue = JsonValue | undefined;
 type PackageScripts = Readonly<Record<string, string>>;
 type PackageDependencies = Readonly<Record<string, string>>;
 
+type PackageJsonUpdate = {
+  scripts: PackageScripts;
+  devDependencies: PackageDependencies;
+  dependencies?: PackageDependencies;
+  optionalDependencies?: PackageDependencies;
+  peerDependencies?: PackageDependencies;
+};
+
 type NpmPackageJson = {
-  readonly content: unknown;
+  readonly content: JsonValue;
   save(): Promise<void>;
-  update(content: Readonly<Record<string, unknown>>): NpmPackageJson;
+  update(content: PackageJsonUpdate): NpmPackageJson;
 };
 
 type NpmPackageJsonConstructor = {
@@ -36,6 +45,10 @@ type NpmPackageJsonConstructor = {
 type NpmPackageJsonFileDependencies = {
   readonly PackageJson: NpmPackageJsonConstructor;
 };
+
+type JsonParseError =
+  | { readonly code: "EJSONPARSE" }
+  | { readonly name: "JSONParseError" };
 
 export type NpmPackageJsonFileDisposition = "updated" | "unchanged";
 
@@ -138,7 +151,7 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
     : "updated";
 
   if (disposition === "updated") {
-    const update: Record<string, unknown> = {
+    const update: PackageJsonUpdate = {
       scripts,
       devDependencies,
     };
@@ -260,7 +273,7 @@ function hasRequiredSemanticState(
 }
 
 function isOrderedPackageScriptsEqual(
-  value: unknown,
+  value: PackageJsonFieldValue,
   expected: PackageScripts,
 ): boolean {
   const current = readValidPackageScripts(value);
@@ -280,7 +293,7 @@ function isOrderedPackageScriptsEqual(
 }
 
 function isPackageDependenciesEqual(
-  value: unknown,
+  value: PackageJsonFieldValue,
   expected: PackageDependencies,
 ): boolean {
   const current = readValidPackageDependencies(value);
@@ -295,15 +308,19 @@ function isPackageDependenciesEqual(
   );
 }
 
-function readPackageScripts(value: unknown): PackageScripts {
+function readPackageScripts(value: PackageJsonFieldValue): PackageScripts {
   return readStringRecord(value);
 }
 
-function readPackageDependencies(value: unknown): PackageDependencies {
+function readPackageDependencies(
+  value: PackageJsonFieldValue,
+): PackageDependencies {
   return readStringRecord(value);
 }
 
-function readStringRecord(value: unknown): Readonly<Record<string, string>> {
+function readStringRecord(
+  value: PackageJsonFieldValue,
+): Readonly<Record<string, string>> {
   if (!isJsonObject(value)) {
     return {};
   }
@@ -315,18 +332,20 @@ function readStringRecord(value: unknown): Readonly<Record<string, string>> {
   );
 }
 
-function readValidPackageScripts(value: unknown): PackageScripts | undefined {
+function readValidPackageScripts(
+  value: PackageJsonFieldValue,
+): PackageScripts | undefined {
   return readValidStringRecord(value);
 }
 
 function readValidPackageDependencies(
-  value: unknown,
+  value: PackageJsonFieldValue,
 ): PackageDependencies | undefined {
   return readValidStringRecord(value);
 }
 
 function readValidStringRecord(
-  value: unknown,
+  value: PackageJsonFieldValue,
 ): Readonly<Record<string, string>> | undefined {
   if (!isJsonObject(value)) {
     return undefined;
@@ -339,22 +358,28 @@ function readValidStringRecord(
 
 function loadPackageJsonConstructor(): NpmPackageJsonConstructor {
   const loaded: unknown = require("@npmcli/package-json");
-  if (
-    (typeof loaded !== "function" && !isJsonObject(loaded)) ||
-    typeof Reflect.get(loaded, "load") !== "function"
-  ) {
+  if (!isNpmPackageJsonConstructor(loaded)) {
     throw new TypeError(
       "@npmcli/package-json did not expose its CommonJS load function.",
     );
   }
-  return loaded as NpmPackageJsonConstructor;
+  return loaded;
+}
+
+function isNpmPackageJsonConstructor(
+  value: unknown,
+): value is NpmPackageJsonConstructor {
+  return (
+    (typeof value === "function" || isJsonObject(value)) &&
+    typeof Reflect.get(value, "load") === "function"
+  );
 }
 
 function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isJsonParseError(error: unknown): boolean {
+function isJsonParseError(error: unknown): error is JsonParseError {
   return (
     isJsonObject(error) &&
     (error["code"] === "EJSONPARSE" || error["name"] === "JSONParseError")

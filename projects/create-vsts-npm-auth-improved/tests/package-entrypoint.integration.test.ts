@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
 import { access, readFile, rm } from "node:fs/promises";
 import path from "node:path";
+import type { JsonObject, JsonValue, PackageJson } from "type-fest";
 import { afterEach, expect, test } from "vitest";
 import { NpmProject } from "@test-utils/npm-project";
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
@@ -13,6 +14,8 @@ import { mockStdoutWrite } from "@test-utils/process-output";
  */
 
 type EmittedCliAsync = (argv: readonly string[]) => Promise<void>;
+type EmittedPublicApi = { readonly cliAsync: EmittedCliAsync };
+type PackageBin = NonNullable<PackageJson["bin"]>;
 
 type EmittedCreatePackage = {
   readonly invokeAsync: (args?: readonly string[]) => Promise<void>;
@@ -43,13 +46,16 @@ afterEach(async () => {
  */
 test("runs the no-packages flow through the emitted package entrypoint", async () => {
   const emittedPackage = await buildAndLoadEmittedCreatePackageAsync();
-  const sourcePackageJson = JSON.parse(
+  const sourcePackageJson: unknown = JSON.parse(
     await readFile(
       path.join(emittedPackage.packageRoot, "package.json"),
       "utf8",
     ),
-  ) as { readonly bin?: unknown };
-  const binTarget = resolveBinTarget(sourcePackageJson.bin);
+  );
+  if (!isJsonObject(sourcePackageJson)) {
+    throw new TypeError("Expected the emitted package.json root to be an object.");
+  }
+  const binTarget = resolveBinTarget(sourcePackageJson["bin"]);
   await expect(
     access(path.resolve(emittedPackage.outputRoot, binTarget)),
   ).resolves.toBeUndefined();
@@ -110,16 +116,16 @@ async function buildAndLoadEmittedCreatePackageAsync(): Promise<EmittedCreatePac
     },
   );
 
-  const emittedPublicApi = createRequire(__filename)(
+  const emittedPublicApi: unknown = createRequire(__filename)(
     path.join(outputRoot, "cjs", "public-api.js"),
-  ) as { readonly cliAsync?: unknown };
-  if (typeof emittedPublicApi.cliAsync !== "function") {
+  );
+  if (!isEmittedPublicApi(emittedPublicApi)) {
     throw new TypeError(
       "The emitted create package does not export a cliAsync function.",
     );
   }
 
-  const cliAsync = emittedPublicApi.cliAsync as EmittedCliAsync;
+  const { cliAsync } = emittedPublicApi;
   return {
     invokeAsync(args = []) {
       return cliAsync(["node", "main.js", ...args]);
@@ -129,15 +135,38 @@ async function buildAndLoadEmittedCreatePackageAsync(): Promise<EmittedCreatePac
   };
 }
 
-function resolveBinTarget(bin: unknown): string {
+function resolveBinTarget(bin: JsonValue | undefined): string {
+  if (!isPackageBin(bin)) {
+    throw new TypeError("Expected package.json to declare exactly one npm bin target.");
+  }
   if (typeof bin === "string") {
     return bin;
   }
-  if (typeof bin === "object" && bin !== null) {
-    const targets = Object.values(bin);
-    if (targets.length === 1 && typeof targets[0] === "string") {
-      return targets[0];
-    }
+  const targets = Object.values(bin);
+  if (targets.length === 1 && typeof targets[0] === "string") {
+    return targets[0];
   }
   throw new TypeError("Expected package.json to declare exactly one npm bin target.");
+}
+
+function isPackageBin(
+  bin: JsonValue | undefined,
+): bin is PackageBin & JsonValue {
+  return (
+    typeof bin === "string" ||
+    (isJsonObject(bin) &&
+      Object.values(bin).every(target => typeof target === "string"))
+  );
+}
+
+function isEmittedPublicApi(value: unknown): value is EmittedPublicApi {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof Reflect.get(value, "cliAsync") === "function"
+  );
+}
+
+function isJsonObject(value: unknown): value is JsonObject {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
