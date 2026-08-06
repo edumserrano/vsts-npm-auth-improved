@@ -32,12 +32,12 @@ See the package-specific [core testing strategy](../../projects/vsts-npm-auth-im
 
 Run these commands from either package directory:
 
-| Command                         | What it does                                                                  | Why it is useful                                                                                      |
-| ------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `npm test`                      | Runs the public-boundary checks and the full Vitest suite once with coverage. | Use it before committing or opening a pull request to validate the package.                           |
-| `npm run test:watch`            | Reruns affected tests as files change and serves the updated coverage report. | Use it while developing for fast feedback without repeatedly starting the test suite.                 |
-| `npm run test:ui`               | Opens the Vitest UI and serves the coverage report.                           | Use it to explore test results, filter tests, and investigate failures interactively.                 |
-| `npm run test:update-snapshots` | Runs the test suite and replaces stored snapshots with the current output.    | Use it only when an output change is intentional, then review the snapshot diff before committing it. |
+| Command                         | What it does                                                                  | Why it is useful                                                                                                                                                          |
+| ------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`                      | Runs the public-boundary checks and the full Vitest suite once with coverage. | Quick way to run all the tests.                                                                                                                                           |
+| `npm run test:watch`            | Reruns affected tests as files change and serves the updated coverage report. | Use it while developing for fast feedback without repeatedly starting the test suite.                                                                                     |
+| `npm run test:ui`               | Opens the Vitest UI and serves the coverage report.                           | Best dev experience to get test feedback without repeatedly starting the test suite. Use it to explore test results, filter tests, and investigate failures interactively |
+| `npm run test:update-snapshots` | Runs the test suite and replaces stored snapshots with the current output.    | Use it only when an output change is intentional, then review the snapshot diff before committing it.                                                                     |
 
 ## Package module formats
 
