@@ -23,11 +23,10 @@ From the directory containing one or more npm projects, run:
 npm init vsts-npm-auth-improved
 ```
 
-`npm init` resolves the initializer to `create-vsts-npm-auth-improved` and runs its default
-`init-auth` command. The interactive command discovers `package.json` files, lets you select the
-projects to configure, and asks for an Azure DevOps registry when a project `.npmrc` does not
-already contain one. It then adds the registry configuration and an authentication script that
-runs before dependency installation.
+Follow the prompts to choose the projects and Azure DevOps Artifacts registry you want to use. The
+setup prepares each project to authenticate before installing private packages, so developers can
+keep using familiar npm install commands without manually wiring up authentication scripts. The
+same project setup remains safe to use across Windows, macOS, Linux, and CI.
 
 After setup, use the installation command selected during the prompts:
 
