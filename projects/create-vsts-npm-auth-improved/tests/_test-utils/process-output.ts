@@ -107,20 +107,15 @@ function normalizeOutput(
     .map(([chunk]) => toText(chunk))
     .join("");
 
-  let normalized = normalizeColorDrivenMultiselectRedraws(
-    stripNondeterministicSpinnerFrames(
-      stripTerminalControlSequences(output).replace(
-        /\r\n?|\u2028|\u2029/g,
-        "\n",
-      ),
-    ),
-  );
+  let normalized = output.replace(/\r\n?|\u2028|\u2029/g, "\n");
+  normalized = stripTerminalControlSequences(normalized);
+  normalized = stripNondeterministicSpinnerFrames(normalized);
+  normalized = normalizeColorDrivenMultiselectRedraws(normalized);
   normalized = joinSoftWrappedPromptLines(normalized.split("\n")).join("\n");
 
   const temporaryRoots = [...(options.temporaryRoots ?? [])]
     .map(root => root.replaceAll("\\", "/"))
     .sort((left, right) => right.length - left.length);
-
   normalized = normalized.replaceAll("\\", "/");
   normalized = normalizeProgressivelyTypedTemporaryRoots(
     normalized,
