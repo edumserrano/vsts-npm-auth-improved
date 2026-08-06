@@ -11,7 +11,7 @@ DevOps Artifacts registries on Windows. It adds:
 
 - ✅ An improved interactive experience.
 - ✅ Clearer authentication results.
-- ✅ An automatic one-time forced retry after failed token acquisition, which can resolve issues
+- ✅ An automatic one-time forced retry after failed token acquisition, which resolves issues
   caused by stale or expired tokens.
 - ✅ Safe no-op behavior on macOS, Linux, and CI.
 
