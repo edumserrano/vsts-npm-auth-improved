@@ -300,12 +300,16 @@ function isNpmConfigConstructor(
 }
 
 function isNpmConfigDefinitionsModule(
-  value: object,
+  value: unknown,
 ): value is NpmConfigDefinitionsModule {
   return (
-    isNpmConfigDefinitions(Reflect.get(value, "definitions")) &&
-    isNpmConfigFlatten(Reflect.get(value, "flatten")) &&
-    isNpmConfigShorthands(Reflect.get(value, "shorthands"))
+    isRecord(value) &&
+    "definitions" in value &&
+    "flatten" in value &&
+    "shorthands" in value &&
+    isNpmConfigDefinitions(value.definitions) &&
+    isNpmConfigFlatten(value.flatten) &&
+    isNpmConfigShorthands(value.shorthands)
   );
 }
 
