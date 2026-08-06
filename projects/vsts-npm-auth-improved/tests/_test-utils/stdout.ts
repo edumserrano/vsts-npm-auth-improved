@@ -82,16 +82,42 @@ function normalizeOutput(
     return "";
   }
 
-  const normalizedOutput = outputs
+  const normalizedLines = outputs
     .map(outputEntry =>
       stripTerminalControlSequences(
         outputEntry.replace(/\r\n?|\u2028|\u2029/g, "\n"),
       ),
     )
-    .flatMap(outputEntry => outputEntry.split("\n"))
+    .flatMap(outputEntry => outputEntry.split("\n"));
+  const normalizedOutput = joinSoftWrappedPromptLines(normalizedLines)
     .filter(outputEntry => outputEntry.trim() !== "")
     .join("\n");
   return normalizePackageVersion(prefix + normalizedOutput);
+}
+
+/**
+ * Rejoins lines that Clack soft-wraps to the active terminal width. Its wrapper
+ * preserves the break-space at the end of the preceding guide line, which
+ * distinguishes a visual continuation from intentional prompt output lines.
+ */
+function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
+  const joinedLines: string[] = [];
+  for (const line of lines) {
+    const previousLineIndex = joinedLines.length - 1;
+    const previousLine = joinedLines[previousLineIndex];
+    const guidePrefix = line.match(/^[│|] {2}/)?.[0];
+    if (
+      previousLine !== undefined &&
+      guidePrefix !== undefined &&
+      previousLine.startsWith(guidePrefix) &&
+      previousLine.endsWith(" ")
+    ) {
+      joinedLines[previousLineIndex] = previousLine + line.slice(guidePrefix.length);
+    } else {
+      joinedLines.push(line);
+    }
+  }
+  return joinedLines;
 }
 
 /**

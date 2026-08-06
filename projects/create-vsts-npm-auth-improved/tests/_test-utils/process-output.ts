@@ -107,12 +107,15 @@ function normalizeOutput(
     .map(([chunk]) => toText(chunk))
     .join("");
 
-  let normalized = stripNondeterministicSpinnerFrames(
-    stripTerminalControlSequences(output).replace(
-      /\r\n?|\u2028|\u2029/g,
-      "\n",
+  let normalized = normalizeColorDrivenMultiselectRedraws(
+    stripNondeterministicSpinnerFrames(
+      stripTerminalControlSequences(output).replace(
+        /\r\n?|\u2028|\u2029/g,
+        "\n",
+      ),
     ),
   );
+  normalized = joinSoftWrappedPromptLines(normalized.split("\n")).join("\n");
 
   const temporaryRoots = [...(options.temporaryRoots ?? [])]
     .map(root => root.replaceAll("\\", "/"))
@@ -216,6 +219,63 @@ function stripNondeterministicSpinnerFrames(value: string): string {
     /^(?:◒|◐|◓|◑|•|o|O|0) {2}(?:Searching for package\.json files|Writing configuration files)\.\.\.\n?/gm,
     "",
   );
+}
+
+/**
+ * Clack compares ANSI-styled frames when deciding how much of a multiselect to
+ * redraw. A color-enabled terminal therefore emits unchanged option blocks as
+ * focus moves, while a non-color terminal emits only lines whose visible text
+ * changed. Collapse the color-only blocks to those same visible updates so
+ * snapshots do not depend on the parent terminal's styling.
+ */
+function normalizeColorDrivenMultiselectRedraws(value: string): string {
+  const navigationHint = "│  ↑/↓ to navigate • Space: select • Enter: confirm\n└\n";
+  const firstFocusMove = new RegExp(
+    `^│  ◻ ALL\\n(?:│  [◻◼] [^│\\n]+\\n)+${escapeForRegExp(navigationHint)}`,
+    "gm",
+  );
+  const laterFocusMoves = new RegExp(
+    `(?<=│  ◻ ALL)(?:(?:│  ◻ (?!ALL)[^│\\n]+\\n)+${escapeForRegExp(navigationHint)})+(?=│  ◼)`,
+    "g",
+  );
+  const selectedFocusMoves = new RegExp(
+    `(│  ◼ [^│\\n]+)(?:(?:│  [◻◼] [^│\\n]+\\n)+${escapeForRegExp(navigationHint)})+(?=│  ◼)`,
+    "g",
+  );
+
+  return value
+    .replace(firstFocusMove, "│  ◻ ALL")
+    .replace(laterFocusMoves, "")
+    .replace(selectedFocusMoves, "$1");
+}
+
+/**
+ * Rejoins lines that Clack soft-wraps to the active terminal width. Depending
+ * on the wrapper path, a continuation is marked by either a trailing break
+ * space or one extra indentation column after the prompt guide.
+ */
+function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
+  const joinedLines: string[] = [];
+  for (const line of lines) {
+    const previousLineIndex = joinedLines.length - 1;
+    const previousLine = joinedLines[previousLineIndex];
+    const guidePrefix = line.match(/^[│|] {2}/)?.[0];
+    if (
+      previousLine !== undefined &&
+      guidePrefix !== undefined &&
+      previousLine.startsWith(guidePrefix) &&
+      (previousLine.endsWith(" ") || /^[│|] {3}\S/.test(line))
+    ) {
+      joinedLines[previousLineIndex] = previousLine + line.slice(guidePrefix.length);
+    } else {
+      joinedLines.push(line);
+    }
+  }
+  return joinedLines;
+}
+
+function escapeForRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
