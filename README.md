@@ -20,19 +20,14 @@ installing packages. The repository provides two command-line packages:
 From the directory containing one or more npm projects, run:
 
 ```shell
-npx --yes create-vsts-npm-auth-improved init-auth
+npm init vsts-npm-auth-improved
 ```
 
-The interactive command discovers `package.json` files, lets you select the projects to configure,
-and asks for an Azure DevOps registry when a project `.npmrc` does not already contain one. It then
-adds the registry configuration and an authentication script that runs before dependency
-installation.
-
-The `init-auth` command is the default, so this is equivalent:
-
-```shell
-npx --yes create-vsts-npm-auth-improved
-```
+`npm init` resolves the initializer to `create-vsts-npm-auth-improved` and runs its default
+`init-auth` command. The interactive command discovers `package.json` files, lets you select the
+projects to configure, and asks for an Azure DevOps registry when a project `.npmrc` does not
+already contain one. It then adds the registry configuration and an authentication script that
+runs before dependency installation.
 
 After setup, use the installation command selected during the prompts:
 
