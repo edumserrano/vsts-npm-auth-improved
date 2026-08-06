@@ -14,7 +14,7 @@ DevOps Artifacts registries on Windows. It adds:
 - ✅ A one-time automatic retry that can recover from stale or expired tokens.
 - ✅ The same npm scripts remain safe to use on macOS, Linux, and CI.
 
-## Configure a project
+## Configure a project for automatic npm authentication
 
 From the directory containing one or more npm projects, run:
 
@@ -23,14 +23,21 @@ npm init vsts-npm-auth-improved
 ```
 
 Follow the prompts to choose the projects and Azure DevOps Artifacts registry you want to use. The
-setup prepares each project to authenticate before installing private packages, so developers can
-keep using familiar npm install commands without manually wiring up authentication scripts. The
-same project setup remains safe to use across Windows, macOS, Linux, and CI.
+selected projects are updated so authentication runs automatically with either `npm install`
+(supported on npm 12 and later) or `npm run install-packages` (supported on npm 11 and earlier).
 
-After setup, install packages as usual:
+After setup, install packages using the command selected during setup.
+
+For npm 12 and later:
 
 ```shell
 npm install
+```
+
+For npm 11 and earlier:
+
+```shell
+npm run install-packages
 ```
 
 On Windows, authentication happens automatically before npm installs private packages. On macOS,
