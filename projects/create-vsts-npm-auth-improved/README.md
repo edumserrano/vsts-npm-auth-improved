@@ -10,7 +10,7 @@ checks whether `.npmrc` files changed during setup are excluded by applicable
 ## Requirements
 
 - Node.js 24.18.1 or later
-- npm with `npx`/`npm exec`
+- npm 12.0.2 or later with `npx`/`npm exec`
 
 The setup CLI uses Node's cross-platform filesystem APIs and can be run on
 Windows, macOS, or Linux. Authentication performed later by
@@ -62,8 +62,10 @@ npx create-vsts-npm-auth-improved --version
    empty selection exits without changing files.
 4. Choose how package installation should trigger authentication. Standard
    `npm install` is selected by default and requires npm 12 or later. The
-   custom `npm run install-packages` compatibility command supports npm 11 and
-   earlier. The choice applies to every selected package.
+   custom `npm run install-packages` compatibility command configures selected
+   projects that must later install with npm 11 or earlier. The setup CLI itself
+   still requires npm 12.0.2 or later. The choice applies to every selected
+   package.
 5. For each selected package whose adjacent `.npmrc` has no non-empty global
    `registry` setting, enter an absolute registry URL. Existing global registry
    values are reused, so those packages do not prompt. A scoped registry alone
@@ -214,59 +216,8 @@ guaranteed after a semantic update. npm may also reorder dependency entries in
 Files whose managed configuration is already semantically correct are not
 rewritten, so their existing bytes remain unchanged.
 
-## Version policy
+## Development
 
-During the prerelease phase, the CLI writes the npm `alpha` dist-tag for
-`vsts-npm-auth-improved` instead of a fixed version range. Generated projects
-therefore resolve the version that npm assigns to `alpha` when dependencies are
-installed. Publishing another core alpha does not require a corresponding source
-or documentation update in `create-vsts-npm-auth-improved`. When the stable
-release is ready, change this managed spec to `latest` and publish a new create
-package version.
-
-## Local development
-
-From `vsts-npm-auth-improved/projects/create-vsts-npm-auth-improved`:
-
-```shell
-npm ci
-npm run build
-npm test
-```
-
-The published CLI is ESM-only. This matches its Node.js 24 minimum, keeps the
-emitted package aligned with modern Node.js module conventions, and reduces
-interop work when adopting ESM-only dependencies. The package does not expose a
-supported programmatic entry point; invoke it through its npm executable.
-
-Additional test workflows:
-
-```shell
-npm run test:watch
-npm run test:ui
-npm run test:update-snapshots
-```
-
-`build` cleans `dist` before compiling the library and test TypeScript. `test`
-cleans `test-reporters` before running Vitest with coverage. Generated build,
-test-report, and tarball output is ignored by Git.
-
-Build the release tarball with:
-
-```shell
-npm run pack
-```
-
-The package is written to:
-
-```text
-dist/create-vsts-npm-auth-improved-package/create-vsts-npm-auth-improved-<version>.tgz
-```
-
-Smoke-test that tarball with npm's package runner (PowerShell example):
-
-```powershell
-$tarball = (Resolve-Path .\dist\create-vsts-npm-auth-improved-package\create-vsts-npm-auth-improved-*.tgz).Path
-npx --yes --package="$tarball" create-vsts-npm-auth-improved --help
-npx --yes --package="$tarball" create-vsts-npm-auth-improved --version
-```
+Build, test, packaging, version-policy, and release instructions are maintained
+in the repository's
+[developer documentation](https://github.com/edumserrano/vsts-npm-auth-improved/tree/main/docs/dev-docs).
