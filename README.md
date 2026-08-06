@@ -11,8 +11,8 @@ installing packages. The repository provides two command-line packages:
 - [`create-vsts-npm-auth-improved`](projects/create-vsts-npm-auth-improved/README.md) discovers npm
   projects and configures their `.npmrc`, development dependency, and authentication scripts.
 - [`vsts-npm-auth-improved`](projects/vsts-npm-auth-improved/README.md) runs the Windows-only
-  `vsts-npm-auth` credential flow while allowing the same npm scripts to run safely on macOS,
-  Linux, and CI.
+  [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) credential flow while allowing the
+  same npm scripts to run safely on macOS, Linux, and CI.
 
 ## Configure a project
 

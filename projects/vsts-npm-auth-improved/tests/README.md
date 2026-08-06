@@ -20,7 +20,7 @@ See:
 
 ## Public CLI Testing with Commander
 
-The tests in this folder invoke the imported `cliAsync` function in-process to validate the public CLI boundary. Execa is mocked as the boundary to the external `npx vsts-npm-auth` process, and `node:fs` is replaced by memfs as the filesystem boundary. Environment and platform state may also be controlled directly. These are full-layer source tests rather than tests of the emitted executable, host filesystem, real authentication process, or Azure registry. This approach provides several benefits:
+The tests in this folder invoke the imported `cliAsync` function in-process to validate the public CLI boundary. Execa is mocked as the boundary to the external `npx` process for [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth), and `node:fs` is replaced by memfs as the filesystem boundary. Environment and platform state may also be controlled directly. These are full-layer source tests rather than tests of the emitted executable, host filesystem, real authentication process, or Azure registry. This approach provides several benefits:
 
 Application modules beneath `src` are implementation details: tests must not
 import, dynamically load, mock, or assert calls to them. Production libraries
