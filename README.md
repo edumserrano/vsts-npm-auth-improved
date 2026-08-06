@@ -5,15 +5,11 @@
 [![vsts-npm-auth-improved on npm](https://img.shields.io/npm/v/vsts-npm-auth-improved?logo=npm&label=vsts-npm-auth-improved)](https://www.npmjs.com/package/vsts-npm-auth-improved)
 [![create-vsts-npm-auth-improved on npm](https://img.shields.io/npm/v/create-vsts-npm-auth-improved?logo=npm&label=create-vsts-npm-auth-improved)](https://www.npmjs.com/package/create-vsts-npm-auth-improved)
 
-Configure npm projects to authenticate with private Azure DevOps Artifacts registries before
-installing packages. The repository provides two command-line packages:
-
-- [`create-vsts-npm-auth-improved`](projects/create-vsts-npm-auth-improved/README.md) discovers npm
-  projects and configures their `.npmrc`, development dependency, and authentication scripts.
-- [`vsts-npm-auth-improved`](projects/vsts-npm-auth-improved/README.md) runs
-  [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) with an improved interactive
-  experience, clearer results, automatic forced retry after failed token acquisition, and safe
-  no-op behavior on macOS, Linux, and CI.
+`vsts-npm-auth-improved` wraps and invokes
+[`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) to authenticate npm with private Azure
+DevOps Artifacts registries on Windows. It adds an improved interactive experience, clearer results,
+an automatic one-time forced retry after failed token acquisition—which can resolve issues caused
+by stale or expired tokens—and safe no-op behavior on macOS, Linux, and CI.
 
 ## Configure a project
 
