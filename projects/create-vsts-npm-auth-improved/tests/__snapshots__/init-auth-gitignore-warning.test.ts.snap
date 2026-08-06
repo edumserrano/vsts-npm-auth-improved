@@ -39,6 +39,16 @@ exports[`displays the Git ignore warning when changed npmrc files are ignored 1`
 │
 │  - .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -76,6 +86,16 @@ exports[`does not display the Git ignore warning when no changed npmrc files are
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 

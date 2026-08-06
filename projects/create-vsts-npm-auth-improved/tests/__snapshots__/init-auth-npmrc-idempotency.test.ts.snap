@@ -27,6 +27,16 @@ exports[`keeps .npmrc semantically idempotent after normalization 1`] = `
 │    UNCHANGED  package.json
 │    UPDATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -58,6 +68,16 @@ exports[`keeps .npmrc semantically idempotent after normalization 2`] = `
 │  ./
 │    UNCHANGED  package.json
 │    UNCHANGED  .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 

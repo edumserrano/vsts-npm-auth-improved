@@ -33,6 +33,16 @@ exports[`accepts a valid HTTPS registry through the real registry prompt 1`] = `
 │    UPDATED    package.json
 │    CREATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -70,6 +80,16 @@ exports[`accepts a valid custom-scheme registry through the real registry prompt
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -121,6 +141,16 @@ exports[`reuses an existing global registry without showing a registry prompt 1`
 │    UPDATED    package.json
 │    UNCHANGED  .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -164,6 +194,16 @@ exports[`shows empty registry feedback before accepting a valid correction 1`] =
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -281,6 +321,16 @@ exports[`shows missing-scheme registry feedback before accepting a valid correct
 │    UPDATED    package.json
 │    CREATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -325,6 +375,16 @@ exports[`shows relative registry feedback before accepting a valid correction 1`
 │    UPDATED    package.json
 │    CREATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -368,6 +428,16 @@ exports[`shows whitespace registry feedback before accepting a valid correction 
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 

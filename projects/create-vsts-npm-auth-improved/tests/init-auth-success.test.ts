@@ -213,6 +213,11 @@ test("a second complete CLI run is idempotent for package.json and .npmrc", asyn
     ...EXPECTED_MANAGED_NPM_CONFIG,
   });
   const firstTranscript = firstOutput.normalizedOutput;
+  expect(firstTranscript).toContain(
+    "Install packages with authentication handled automatically:",
+  );
+  expect(firstTranscript).toContain("npm run install-packages");
+  expect(firstTranscript).toContain("Use this command instead of npm install.");
   expect(firstTranscript).toMatchSnapshot();
   restoreOutput(firstOutput);
 
