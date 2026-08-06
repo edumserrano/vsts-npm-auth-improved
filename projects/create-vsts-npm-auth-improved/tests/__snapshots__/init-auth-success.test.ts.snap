@@ -33,6 +33,16 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 1`]
 │    UPDATED    package.json
 │    CREATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -64,6 +74,16 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 2`]
 │  ./
 │    UNCHANGED  package.json
 │    UNCHANGED  .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -107,6 +127,16 @@ exports[`configures ALL mixed with an individual package through a complete CLI 
 │    UPDATED    package.json
 │    UNCHANGED  .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -149,6 +179,16 @@ exports[`configures ALL through a complete CLI selection 1`] = `
 │    UPDATED    package.json
 │    UNCHANGED  .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -186,6 +226,16 @@ exports[`configures a subset through a complete CLI selection 1`] = `
 │  gamma/
 │    UPDATED    package.json
 │    UNCHANGED  .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -229,6 +279,16 @@ exports[`configures multiple individual packages through a complete CLI selectio
 │    UPDATED    package.json
 │    UNCHANGED  .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -262,6 +322,16 @@ exports[`configures one package through a complete CLI selection 1`] = `
 │  beta/
 │    UPDATED    package.json
 │    UNCHANGED  .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -310,6 +380,16 @@ exports[`reports mixed created updated and unchanged outcomes in persistence ord
 │  gamma/
 │    UNCHANGED  package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 

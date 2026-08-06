@@ -27,6 +27,16 @@ exports[`configures .npmrc content: 'corrects managed values and preserves…' 1
 │    UNCHANGED  package.json
 │    UPDATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -64,6 +74,16 @@ exports[`configures .npmrc content: 'creates a missing project configurati…' 1
 │  ./
 │    UNCHANGED  package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -103,6 +123,16 @@ exports[`configures .npmrc content: 'replaces a whitespace-only project re…' 1
 │    UNCHANGED  package.json
 │    UPDATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -140,6 +170,16 @@ exports[`configures .npmrc content: 'treats a scoped registry as distinct …' 1
 │  ./
 │    UNCHANGED  package.json
 │    UPDATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -179,6 +219,16 @@ exports[`configures .npmrc content: 'updates an empty project configuration' 1`]
 │    UNCHANGED  package.json
 │    UPDATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -210,6 +260,16 @@ exports[`configures .npmrc content: 'uses npm\\'s effective final duplicate…' 
 │  ./
 │    UNCHANGED  package.json
 │    UPDATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -249,6 +309,16 @@ exports[`prompts for a project registry despite an inherited 'environment regist
 │    UNCHANGED  package.json
 │    CREATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -286,6 +356,16 @@ exports[`prompts for a project registry despite an inherited 'global registry' 1
 │  ./
 │    UNCHANGED  package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -325,6 +405,16 @@ exports[`prompts for a project registry despite an inherited 'user registry' 1`]
 │    UNCHANGED  package.json
 │    CREATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -358,6 +448,16 @@ exports[`updates only the 'nested package' adjacent .npmrc 1`] = `
 │    UNCHANGED  package.json
 │    UPDATED    .npmrc
 │
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
 └  Authentication configuration complete. 😊
 
 "
@@ -389,6 +489,16 @@ exports[`updates only the 'standalone package' adjacent .npmrc 1`] = `
 │  ./
 │    UPDATED    package.json
 │    UPDATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -422,6 +532,16 @@ exports[`updates only the 'workspace member' adjacent .npmrc 1`] = `
 │  packages/member/
 │    UNCHANGED  package.json
 │    UPDATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 

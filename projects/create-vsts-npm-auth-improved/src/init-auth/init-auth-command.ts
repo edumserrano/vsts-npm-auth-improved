@@ -142,6 +142,16 @@ async function handleInitAuthCommandAsync(): Promise<void> {
       prompts.log.warn(npmrcGitIgnoredWarningMessage);
     }
 
+    prompts.note(
+      [
+        "Install packages with authentication handled automatically:",
+        "",
+        "npm run install-packages",
+        "",
+        "Use this command instead of npm install.",
+      ].join("\n"),
+      "Next step",
+    );
     prompts.outro("Authentication configuration complete. 😊");
     process.exitCode = 0;
   } catch (error) {
