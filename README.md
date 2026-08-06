@@ -9,11 +9,10 @@
 [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) to authenticate npm with private Azure
 DevOps Artifacts registries on Windows. It adds:
 
-- ✅ An improved interactive experience.
-- ✅ Clearer authentication results.
-- ✅ An automatic one-time forced retry after failed token acquisition, which resolves issues
-  caused by stale or expired tokens.
-- ✅ Safe no-op behavior on macOS, Linux, and CI.
+- ✅ A friendlier guided authentication experience.
+- ✅ Clearer success and error messages.
+- ✅ A one-time automatic retry that can recover from stale or expired tokens.
+- ✅ The same npm scripts remain safe to use on macOS, Linux, and CI.
 
 ## Configure a project
 
@@ -28,52 +27,46 @@ setup prepares each project to authenticate before installing private packages, 
 keep using familiar npm install commands without manually wiring up authentication scripts. The
 same project setup remains safe to use across Windows, macOS, Linux, and CI.
 
-After setup, use the installation command selected during the prompts:
+After setup, install packages as usual:
 
 ```shell
 npm install
 ```
 
-or, for the npm 11-and-earlier compatibility strategy:
-
-```shell
-npm run install-packages
-```
-
-On Windows, the generated script obtains Azure DevOps registry credentials and writes them to the
-user npm configuration before installation continues. On macOS, Linux, and CI, automatic
-authentication is skipped with a warning so authentication can be supplied by the environment.
+On Windows, authentication happens automatically before npm installs private packages. On macOS,
+Linux, and CI, the authentication step safely stands aside so you can use the credentials provided
+by your environment.
 
 See the
 [`create-vsts-npm-auth-improved` package documentation](projects/create-vsts-npm-auth-improved/README.md)
-for the complete setup flow and resulting files.
+for detailed setup options and guidance.
 
 ## Run authentication directly
 
-Projects that are already configured can invoke the core command directly:
+Need to authenticate an already-configured project manually? Run:
 
 ```shell
 npx vsts-npm-auth-improved auth --config-path ./.npmrc --read --no-force
 ```
 
 See the
-[`vsts-npm-auth-improved` package documentation](projects/vsts-npm-auth-improved/README.md) for all
-supported flags, upstream mappings, and platform behavior.
+[`vsts-npm-auth-improved` package documentation](projects/vsts-npm-auth-improved/README.md) for
+interactive and scripted usage options, troubleshooting, and platform support.
 
 ## Requirements
 
 - Node.js 24.18.1 or later
-- npm 12.0.2 or later for the standard installation strategy
+- npm 12.0.2 or later
 - Windows for automatic authentication
 
-The setup CLI itself runs on Windows, macOS, and Linux. No PAT-based authentication is currently
-performed on non-Windows platforms.
+Project setup runs on Windows, macOS, and Linux. On non-Windows systems and in CI, provide registry
+credentials using your environment's normal authentication method.
 
 ## Development and releases
 
-Contributor documentation is collected under [`docs/dev-docs`](docs/dev-docs/README.md), including:
+Maintaining the repository? See the [`developer documentation`](docs/dev-docs/README.md), including:
 
 - [development, testing, and package inspection](docs/dev-docs/development.md);
-- [how to create releases and how Dependabot updates release automatically](docs/dev-docs/releases.md);
+- [the release process, including automatic releases for Dependabot updates](docs/dev-docs/releases.md);
 - [testing strategies](docs/dev-docs/README.md#developer-documentation); and
 - [architecture decisions](docs/dev-docs/adr/0001-use-a-github-app-for-release-preparation.md).
