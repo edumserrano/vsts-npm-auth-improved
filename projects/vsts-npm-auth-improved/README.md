@@ -31,6 +31,8 @@ For an npm script, provide the project `.npmrc` and authentication choices expli
 }
 ```
 
+This command uses `npx` to resolve and run `vsts-npm-auth-improved` before the project's dependencies have been installed. The explicit `--registry=https://registry.npmjs.org/` option fetches the publicly available package from the public npm registry, which does not require authentication. This avoids the chicken-and-egg problem of needing working private-registry credentials before the tool that obtains those credentials can run.
+
 The companion setup package can create this configuration interactively:
 
 ```shell
