@@ -2,45 +2,29 @@
 
 `create-vsts-npm-auth-improved` is an interactive setup CLI for [`vsts-npm-auth-improved`](https://www.npmjs.com/package/vsts-npm-auth-improved).
 
-- ✅ Configures one or more projects in a single interactive setup.
-- ✅ Updates npm registry settings and package scripts to use `vsts-npm-auth-improved`.
-- ✅ Keeps setup separate from authentication; it does not authenticate with a registry itself.
-- ✅ Checks whether `.npmrc` files changed during setup are excluded by applicable `.gitignore` rules.
+- ✅ Configures one or more npm projects in a single interactive setup.
+- ✅ Updates/creates `.npmrc` files and package scripts to use `vsts-npm-auth-improved` for automatic npm registry authentication.
 - ✅ Warns when changed `.npmrc` files may not be shared through source control.
+- ✅ Keeps setup separate from authentication; it does not authenticate with a registry itself.
 
-## Requirements
+## How to run
 
-- Node.js 24.18.1 or later
-- npm 12.0.2 or later with `npx`/`npm exec`
-
-The setup CLI uses Node's cross-platform filesystem APIs and can be run on Windows, macOS, or Linux. Authentication performed later by `vsts-npm-auth-improved` has its own platform-specific behavior and requirements.
-
-## Install and run
-
-Install the CLI in a project:
+The intended way to run the interactive setup is with `npm init`:
 
 ```shell
-npm install --save-dev create-vsts-npm-auth-improved
-npx create-vsts-npm-auth-improved init-auth
+npm init vsts-npm-auth-improved
 ```
 
-The single `init-auth` command is also the default command, so this is equivalent:
+It can also be executed directly with `npx`:
 
 ```shell
 npx create-vsts-npm-auth-improved
-```
-
-It can also be run without first adding it to the project:
-
-```shell
-npx --yes create-vsts-npm-auth-improved init-auth
 ```
 
 Use `--help` or `-h` for help and `--version` or `-v` for the package version:
 
 ```shell
 npx create-vsts-npm-auth-improved --help
-npx create-vsts-npm-auth-improved init-auth --help
 npx create-vsts-npm-auth-improved --version
 ```
 
