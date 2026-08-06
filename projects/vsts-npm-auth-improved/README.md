@@ -1,33 +1,24 @@
 # vsts-npm-auth-improved
 
-Authenticate npm with private Azure DevOps Artifacts registries on Windows while keeping the same npm scripts safe to run on macOS, Linux, and CI.
+`vsts-npm-auth-improved` wraps and invokes [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) to authenticate npm with private Azure DevOps Artifacts registries on Windows. It adds:
 
-The CLI validates the project `.npmrc`, runs the public [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) package, presents its result clearly, and retries a failed non-forced token request once with forced acquisition.
-
-## Requirements
-
-- Node.js 24.18.1 or later
-- npm 12.0.2 or later
-- Windows for automatic registry authentication
+- ✅ A friendlier guided authentication experience.
+- ✅ Clearer success and error messages.
+- ✅ A one-time automatic retry that can recover from stale or expired tokens.
+- ✅ The same npm scripts remain safe to use on macOS, Linux, and CI.
 
 ## Install and run
 
 Install the CLI as a development dependency:
 
 ```shell
-npm install --save-dev vsts-npm-auth-improved
+npm i -g vsts-npm-auth-improved
 ```
 
 Run the interactive authentication flow:
 
 ```shell
-npx vsts-npm-auth-improved auth
-```
-
-The `auth` command is the default:
-
-```shell
-npx vsts-npm-auth-improved
+vsts-npm-auth-improved
 ```
 
 For an npm script, provide the project `.npmrc` and authentication choices explicitly:
@@ -35,7 +26,7 @@ For an npm script, provide the project `.npmrc` and authentication choices expli
 ```json
 {
   "scripts": {
-    "registry-auth": "vsts-npm-auth-improved -c ./.npmrc --read --no-force"
+    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force"
   }
 }
 ```
