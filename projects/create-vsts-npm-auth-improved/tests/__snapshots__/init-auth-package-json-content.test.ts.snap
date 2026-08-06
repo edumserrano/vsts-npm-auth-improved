@@ -295,7 +295,7 @@ exports[`creates the custom install-packages compatibility scripts when selected
 │                                                               │
 │  npm run install-packages                                     │
 │                                                               │
-│  Use this compatibility command instead of npm install.       │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -399,7 +399,7 @@ exports[`switches to custom install scripts and restores chained preinstall work
 │                                                               │
 │  npm run install-packages                                     │
 │                                                               │
-│  Use this compatibility command instead of npm install.       │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │

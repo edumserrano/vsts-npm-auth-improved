@@ -198,7 +198,7 @@ function formatNextStep(packageInstallationStrategy: PackageInstallationStrategy
     "",
     "npm run install-packages",
     "",
-    "Use this compatibility command instead of npm install.",
+    "Use this command instead of npm install.",
   ].join("\n");
 }
 
