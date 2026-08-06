@@ -4,8 +4,7 @@
 
 - Node.js 24.18.1 or later
 - npm 12.0.2 or later
-
-Each package owns its dependencies, lockfile, build, tests, and release tarball. Run commands from the package directory you are changing.
+- Windows for automatic npm registry authentication
 
 ## Build and test
 
@@ -13,7 +12,7 @@ For `vsts-npm-auth-improved`:
 
 ```shell
 cd projects/vsts-npm-auth-improved
-npm ci
+npm i
 npm run build
 npm test
 ```
@@ -22,20 +21,22 @@ For `create-vsts-npm-auth-improved`:
 
 ```shell
 cd projects/create-vsts-npm-auth-improved
-npm ci
+npm i
 npm run build
 npm test
 ```
 
-Both packages also provide these test workflows:
-
-```shell
-npm run test:watch
-npm run test:ui
-npm run test:update-snapshots
-```
-
 `build` cleans `dist` before compiling the library and test TypeScript. `test` cleans `test-reporters` before running Vitest with coverage. See the package-specific [core testing strategy](../../projects/vsts-npm-auth-improved/tests/README.md) and [setup testing strategy](../../projects/create-vsts-npm-auth-improved/tests/README.md) for the public-boundary rules.
+
+## Testing workflows
+
+Run these commands from either package directory:
+
+| Command | What it does | Why it is useful |
+| --- | --- | --- |
+| `npm run test:watch` | Reruns affected tests as files change and serves the updated coverage report. | Use it while developing for fast feedback without repeatedly starting the test suite. |
+| `npm run test:ui` | Opens the Vitest UI and serves the coverage report. | Use it to explore test results, filter tests, and investigate failures interactively. |
+| `npm run test:update-snapshots` | Runs the test suite and replaces stored snapshots with the current output. | Use it only when an output change is intentional, then review the snapshot diff before committing it. |
 
 ## Package module formats
 
