@@ -20,7 +20,8 @@ const DEPENDENCY_TYPES = [
 ] as const;
 
 type JsonObject = Record<string, unknown>;
-type StringMap = Readonly<Record<string, string>>;
+type PackageScripts = Readonly<Record<string, string>>;
+type PackageDependencies = Readonly<Record<string, string>>;
 
 type NpmPackageJson = {
   readonly content: unknown;
@@ -119,12 +120,13 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
   }
 
   const content = packageJson.content;
+  const existingScripts = readPackageScripts(content["scripts"]);
   const scripts = buildScripts(
-    content["scripts"],
+    existingScripts,
     options.packageInstallationStrategy,
   );
-  const devDependencies = {
-    ...readStringMap(content["devDependencies"]),
+  const devDependencies: PackageDependencies = {
+    ...readPackageDependencies(content["devDependencies"]),
     "vsts-npm-auth-improved": VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC,
   };
   const disposition = hasRequiredSemanticState(
@@ -144,7 +146,7 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
       if (dependencyType === "devDependencies") {
         continue;
       }
-      const dependenciesForType = readValidStringMap(content[dependencyType]);
+      const dependenciesForType = readValidPackageDependencies(content[dependencyType]);
       if (dependenciesForType !== undefined) {
         update[dependencyType] = dependenciesForType;
       }
@@ -175,17 +177,16 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
 }
 
 function buildScripts(
-  value: unknown,
+  existingScripts: PackageScripts,
   packageInstallationStrategy: PackageInstallationStrategy,
-): Readonly<Record<string, string>> {
-  const existingScripts = readStringMap(value);
+): PackageScripts {
   if (packageInstallationStrategy === "standard-npm-install") {
     return buildStandardInstallScripts(existingScripts);
   }
   return buildCustomInstallScripts(existingScripts);
 }
 
-function buildStandardInstallScripts(existingScripts: StringMap): StringMap {
+function buildStandardInstallScripts(existingScripts: PackageScripts): PackageScripts {
   const existingPreinstall = existingScripts["preinstall"];
   const preinstall =
     existingPreinstall === undefined
@@ -209,7 +210,7 @@ function buildStandardInstallScripts(existingScripts: StringMap): StringMap {
   };
 }
 
-function buildCustomInstallScripts(existingScripts: StringMap): StringMap {
+function buildCustomInstallScripts(existingScripts: PackageScripts): PackageScripts {
   const existingPreinstall = existingScripts["preinstall"];
   const restoredPreinstall = restorePreinstallWithoutManagedAuth(existingPreinstall);
   const unrelatedScripts = Object.fromEntries(
@@ -249,17 +250,20 @@ function isGeneratedCustomInstallScript(name: string, script: string): boolean {
 
 function hasRequiredSemanticState(
   content: JsonObject,
-  scripts: StringMap,
-  devDependencies: StringMap,
+  scripts: PackageScripts,
+  devDependencies: PackageDependencies,
 ): boolean {
   return (
-    isOrderedStringMapEqual(content["scripts"], scripts) &&
-    isStringMapEqual(content["devDependencies"], devDependencies)
+    isOrderedPackageScriptsEqual(content["scripts"], scripts) &&
+    isPackageDependenciesEqual(content["devDependencies"], devDependencies)
   );
 }
 
-function isOrderedStringMapEqual(value: unknown, expected: StringMap): boolean {
-  const current = readValidStringMap(value);
+function isOrderedPackageScriptsEqual(
+  value: unknown,
+  expected: PackageScripts,
+): boolean {
+  const current = readValidPackageScripts(value);
   if (current === undefined) {
     return false;
   }
@@ -275,8 +279,11 @@ function isOrderedStringMapEqual(value: unknown, expected: StringMap): boolean {
   );
 }
 
-function isStringMapEqual(value: unknown, expected: StringMap): boolean {
-  const current = readValidStringMap(value);
+function isPackageDependenciesEqual(
+  value: unknown,
+  expected: PackageDependencies,
+): boolean {
+  const current = readValidPackageDependencies(value);
   if (current === undefined) {
     return false;
   }
@@ -288,7 +295,15 @@ function isStringMapEqual(value: unknown, expected: StringMap): boolean {
   );
 }
 
-function readStringMap(value: unknown): StringMap {
+function readPackageScripts(value: unknown): PackageScripts {
+  return readStringRecord(value);
+}
+
+function readPackageDependencies(value: unknown): PackageDependencies {
+  return readStringRecord(value);
+}
+
+function readStringRecord(value: unknown): Readonly<Record<string, string>> {
   if (!isJsonObject(value)) {
     return {};
   }
@@ -300,7 +315,19 @@ function readStringMap(value: unknown): StringMap {
   );
 }
 
-function readValidStringMap(value: unknown): StringMap | undefined {
+function readValidPackageScripts(value: unknown): PackageScripts | undefined {
+  return readValidStringRecord(value);
+}
+
+function readValidPackageDependencies(
+  value: unknown,
+): PackageDependencies | undefined {
+  return readValidStringRecord(value);
+}
+
+function readValidStringRecord(
+  value: unknown,
+): Readonly<Record<string, string>> | undefined {
   if (!isJsonObject(value)) {
     return undefined;
   }
