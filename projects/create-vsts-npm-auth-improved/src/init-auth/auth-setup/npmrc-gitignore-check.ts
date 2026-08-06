@@ -1,5 +1,5 @@
 import path from "node:path";
-import { AuthSetupPlan, PlannedNpmrcChange } from "./auth-setup-plan";
+import { AuthSetupPlan, PlannedNpmrcChange } from "./auth-setup-plan.js";
 
 export type NpmrcGitignoreCheckResult =
   | {

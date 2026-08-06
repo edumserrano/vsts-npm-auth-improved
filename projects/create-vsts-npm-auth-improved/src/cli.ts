@@ -1,6 +1,6 @@
 import { Command, CommanderError } from "commander";
-import { addInitAuthCommand } from "./init-auth/init-auth-command";
-import { packageVersion } from "./package-metadata";
+import { addInitAuthCommand } from "./init-auth/init-auth-command.js";
+import { packageVersion } from "./package-metadata.js";
 
 export async function cliAsync(argv: string[]): Promise<void> {
   try {

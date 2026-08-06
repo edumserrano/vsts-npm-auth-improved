@@ -234,6 +234,11 @@ npm run build
 npm test
 ```
 
+The published CLI is ESM-only. This matches its Node.js 24 minimum, keeps the
+emitted package aligned with modern Node.js module conventions, and reduces
+interop work when adopting ESM-only dependencies. The package does not expose a
+supported programmatic entry point; invoke it through its npm executable.
+
 Additional test workflows:
 
 ```shell

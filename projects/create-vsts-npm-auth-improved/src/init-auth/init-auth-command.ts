@@ -4,16 +4,16 @@ import { Command } from "commander";
 import {
   buildAuthSetupPlanAsync,
   writeAuthSetupPlanAsync,
-} from "./auth-setup/auth-setup-plan";
-import { formatAuthSetupSummary, summarizeAuthSetupPlan } from "./auth-setup/auth-setup-summary";
-import { checkChangedNpmrcFilesForGitignoreAsync } from "./auth-setup/npmrc-gitignore-check";
-import { discoverPackageJsonFilesAsync } from "./package-files/package-json-discovery";
-import { formatInitAuthFailure, InitAuthFailure } from "./init-auth-failure";
+} from "./auth-setup/auth-setup-plan.js";
+import { formatAuthSetupSummary, summarizeAuthSetupPlan } from "./auth-setup/auth-setup-summary.js";
+import { checkChangedNpmrcFilesForGitignoreAsync } from "./auth-setup/npmrc-gitignore-check.js";
+import { discoverPackageJsonFilesAsync } from "./package-files/package-json-discovery.js";
+import { formatInitAuthFailure, InitAuthFailure } from "./init-auth-failure.js";
 import {
   DEFAULT_PACKAGE_INSTALLATION_STRATEGY,
   PackageInstallationStrategy,
-} from "./package-installation-strategy";
-import { PromptMessages, prompts } from "./prompts-utils";
+} from "./package-installation-strategy.js";
+import { PromptMessages, prompts } from "./prompts-utils.js";
 
 const ALL_PACKAGES_OPTION_VALUE = "__all_packages__";
 

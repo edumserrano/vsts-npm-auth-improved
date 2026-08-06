@@ -1,6 +1,7 @@
 {
   "name": "create-vsts-npm-auth-improved",
   "version": "1.0.0-alpha.9",
+  "type": "module",
   "packageManager": "npm@12.0.2",
   "author": "Eduardo Serrano",
   "license": "MIT",
@@ -21,7 +22,7 @@
     }
   },
   "bin": {
-    "create-vsts-npm-auth-improved": "cjs/main.js"
+    "create-vsts-npm-auth-improved": "esm/main.js"
   },
   "scripts": {
     "check-required-node-version": "node ../scripts/check-required-version.cjs node 24.18.1",

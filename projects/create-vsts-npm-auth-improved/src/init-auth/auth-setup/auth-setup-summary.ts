@@ -1,5 +1,5 @@
 import path from "node:path";
-import { AuthSetupPlan, FileChangeKind } from "./auth-setup-plan";
+import { AuthSetupPlan, FileChangeKind } from "./auth-setup-plan.js";
 
 export type AuthSetupFileSummary = {
   readonly disposition: FileChangeKind;

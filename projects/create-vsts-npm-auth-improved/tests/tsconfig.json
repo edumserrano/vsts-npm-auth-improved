@@ -5,7 +5,7 @@
     "rootDir": "..",
     "paths": {
       "@create-vsts-npm-auth-improved": ["../src/public-api.ts"],
-      "@test-utils/*": ["./_test-utils/*"]
+      "@test-utils/*": ["./_test-utils/*.ts"]
     }
   },
   "include": ["**/*.ts", "**/*.d.ts"]

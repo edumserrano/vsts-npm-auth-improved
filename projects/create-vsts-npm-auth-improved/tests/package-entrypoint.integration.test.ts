@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
-import { createRequire } from "node:module";
 import { access, readFile, rm } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import type { JsonObject, JsonValue, PackageJson } from "type-fest";
 import { afterEach, expect, test } from "vitest";
 import { NpmProject } from "@test-utils/npm-project";
@@ -55,6 +55,7 @@ test("runs the no-packages flow through the emitted package entrypoint", async (
   if (!isJsonObject(sourcePackageJson)) {
     throw new TypeError("Expected the emitted package.json root to be an object.");
   }
+  expect(sourcePackageJson["type"]).toBe("module");
   const binTarget = resolveBinTarget(sourcePackageJson["bin"]);
   await expect(
     access(path.resolve(emittedPackage.outputRoot, binTarget)),
@@ -76,7 +77,7 @@ test("runs the no-packages flow through the emitted package entrypoint", async (
 });
 
 async function buildAndLoadEmittedCreatePackageAsync(): Promise<EmittedCreatePackage> {
-  const packageRoot = path.resolve(__dirname, "..");
+  const packageRoot = path.resolve(import.meta.dirname, "..");
   const outputRoot = path.join(
     packageRoot,
     "dist",
@@ -116,9 +117,10 @@ async function buildAndLoadEmittedCreatePackageAsync(): Promise<EmittedCreatePac
     },
   );
 
-  const emittedPublicApi: unknown = createRequire(__filename)(
-    path.join(outputRoot, "cjs", "public-api.js"),
+  const emittedPublicApiUrl = pathToFileURL(
+    path.join(outputRoot, "esm", "public-api.js"),
   );
+  const emittedPublicApi: unknown = await import(emittedPublicApiUrl.href);
   if (!isEmittedPublicApi(emittedPublicApi)) {
     throw new TypeError(
       "The emitted create package does not export a cliAsync function.",

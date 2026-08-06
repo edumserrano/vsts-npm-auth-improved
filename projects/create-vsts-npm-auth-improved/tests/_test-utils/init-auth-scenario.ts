@@ -1,7 +1,7 @@
-import { InitAuthCommand } from "./init-auth-command";
-import { NpmProject } from "./npm-project";
-import { PromptsInteraction } from "./prompts-interaction";
-import { mockStdoutWrite, OutputChannelCapture } from "./process-output";
+import { InitAuthCommand } from "./init-auth-command.js";
+import { NpmProject } from "./npm-project.js";
+import { PromptsInteraction } from "./prompts-interaction.js";
+import { mockStdoutWrite, OutputChannelCapture } from "./process-output.js";
 
 export type SinglePackageScenarioOptions = {
   readonly name: string;
