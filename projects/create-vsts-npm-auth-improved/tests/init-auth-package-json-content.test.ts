@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { canonicalNpmrc } from "@test-utils/configuration-fixtures";
+import { canonicalNpmrc, packageJsonContent } from "@test-utils/configuration-fixtures";
 import { runSinglePackageScenarioAsync } from "@test-utils/init-auth-scenario";
 import { NpmProject } from "@test-utils/npm-project";
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
@@ -24,6 +24,11 @@ const existingRegistry = "https://existing.test/";
 const managedScripts = {
   "registry-auth":
     "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --no-force",
+  preinstall: "npm run registry-auth",
+} as const;
+
+const customInstallManagedScripts = {
+  "registry-auth": managedScripts["registry-auth"],
   "preinstall-packages": "npm run registry-auth",
   "install-packages": "npm i",
 } as const;
@@ -67,6 +72,7 @@ test.each([
         lint: "eslint .",
         "registry-auth": "wrong auth",
         "preinstall-packages": "wrong preinstall",
+        preinstall: "npm run existing-preinstall",
       },
       dependencies: {
         lodash: "^4.17.21",
@@ -78,7 +84,14 @@ test.each([
     {
       name: "preserved",
       private: true,
-      scripts: { ...managedScripts, test: "vitest", lint: "eslint ." },
+      scripts: {
+        ...managedScripts,
+        preinstall: "npm run registry-auth && npm run existing-preinstall",
+        test: "vitest",
+        "install-packages": "wrong install",
+        lint: "eslint .",
+        "preinstall-packages": "wrong preinstall",
+      },
       dependencies: { lodash: "^4.17.21" },
       custom: { nested: true },
       devDependencies: { "vsts-npm-auth-improved": "alpha" },
@@ -141,3 +154,69 @@ test.each([
     expect(scenario.output.normalizedOutput).toMatchSnapshot();
   },
 );
+
+test("creates the custom install-packages compatibility scripts when selected", async () => {
+  const scenario = await runSinglePackageScenarioAsync({
+    name: "package-json-custom-install-packages",
+    packageJson: packageJsonContent({ scripts: { test: "vitest" } }),
+    npmrc: canonicalNpmrc(existingRegistry),
+    packageInstallationStrategy: "custom-install-packages",
+  });
+
+  expect(process.exitCode ?? 0).toBe(0);
+  expect(JSON.parse(await scenario.project.readFileAsync("package.json"))).toEqual({
+    name: "test-package",
+    scripts: { ...customInstallManagedScripts, test: "vitest" },
+    devDependencies: { "vsts-npm-auth-improved": "alpha" },
+  });
+  expect(scenario.output.normalizedOutput).toMatchSnapshot();
+});
+
+test("switches from custom install scripts to standard npm install without stale hooks", async () => {
+  const scenario = await runSinglePackageScenarioAsync({
+    name: "package-json-custom-to-standard",
+    packageJson: packageJsonContent({
+      scripts: {
+        ...customInstallManagedScripts,
+        preinstall: "npm run existing-preinstall",
+      },
+    }),
+    npmrc: canonicalNpmrc(existingRegistry),
+  });
+
+  expect(process.exitCode ?? 0).toBe(0);
+  expect(JSON.parse(await scenario.project.readFileAsync("package.json"))).toEqual({
+    name: "test-package",
+    scripts: {
+      ...managedScripts,
+      preinstall: "npm run registry-auth && npm run existing-preinstall",
+    },
+    devDependencies: { "vsts-npm-auth-improved": "alpha" },
+  });
+  expect(scenario.output.normalizedOutput).toMatchSnapshot();
+});
+
+test("switches to custom install scripts and restores chained preinstall work", async () => {
+  const scenario = await runSinglePackageScenarioAsync({
+    name: "package-json-standard-to-custom",
+    packageJson: packageJsonContent({
+      scripts: {
+        ...managedScripts,
+        preinstall: "npm run registry-auth && npm run existing-preinstall",
+      },
+    }),
+    npmrc: canonicalNpmrc(existingRegistry),
+    packageInstallationStrategy: "custom-install-packages",
+  });
+
+  expect(process.exitCode ?? 0).toBe(0);
+  expect(JSON.parse(await scenario.project.readFileAsync("package.json"))).toEqual({
+    name: "test-package",
+    scripts: {
+      ...customInstallManagedScripts,
+      preinstall: "npm run existing-preinstall",
+    },
+    devDependencies: { "vsts-npm-auth-improved": "alpha" },
+  });
+  expect(scenario.output.normalizedOutput).toMatchSnapshot();
+});

@@ -82,7 +82,8 @@ test(
       .submitText()
       .down()
       .toggleMultiselectItem()
-      .acceptMultiselectValues();
+      .acceptMultiselectValues()
+      .acceptSelectValue();
     await secondCommand;
 
     expect(process.exitCode ?? 0).toBe(0);

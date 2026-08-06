@@ -9,6 +9,10 @@ import { formatAuthSetupSummary, summarizeAuthSetupPlan } from "./auth-setup/aut
 import { checkChangedNpmrcFilesForGitignoreAsync } from "./auth-setup/npmrc-gitignore-check";
 import { discoverPackageJsonFilesAsync } from "./package-files/package-json-discovery";
 import { formatInitAuthFailure, InitAuthFailure } from "./init-auth-failure";
+import {
+  DEFAULT_PACKAGE_INSTALLATION_STRATEGY,
+  PackageInstallationStrategy,
+} from "./package-installation-strategy";
 import { PromptMessages, prompts } from "./prompts-utils";
 
 const ALL_PACKAGES_OPTION_VALUE = "__all_packages__";
@@ -91,9 +95,33 @@ async function handleInitAuthCommandAsync(): Promise<void> {
       return;
     }
 
+    const packageInstallationStrategy = await prompts.select({
+      message: "How should users install packages with automatic authentication?",
+      initialValue: DEFAULT_PACKAGE_INSTALLATION_STRATEGY,
+      options: [
+        {
+          value: "standard-npm-install" satisfies PackageInstallationStrategy,
+          label: "Standard npm install",
+          hint: "npm i — requires npm 12 or later",
+        },
+        {
+          value: "custom-install-packages" satisfies PackageInstallationStrategy,
+          label: "Custom npm script",
+          hint: "npm run install-packages — supports npm 11 and earlier",
+        },
+      ],
+    });
+
+    if (prompts.isCancel(packageInstallationStrategy)) {
+      prompts.cancel(PromptMessages.Cancel);
+      process.exitCode = 1;
+      return;
+    }
+
     const planResult = await buildAuthSetupPlanAsync(
       rootDirectory,
       selectedPackagePaths,
+      packageInstallationStrategy,
       async packageDisplayPath => {
         const registry = await prompts.text({
           message: `Registry URL for ${packageDisplayPath}`,
@@ -142,16 +170,7 @@ async function handleInitAuthCommandAsync(): Promise<void> {
       prompts.log.warn(npmrcGitIgnoredWarningMessage);
     }
 
-    prompts.note(
-      [
-        "Install packages with authentication handled automatically:",
-        "",
-        "npm run install-packages",
-        "",
-        "Use this command instead of npm install.",
-      ].join("\n"),
-      "Next step",
-    );
+    prompts.note(formatNextStep(packageInstallationStrategy), "Next step");
     prompts.outro("Authentication configuration complete. 😊");
     process.exitCode = 0;
   } catch (error) {
@@ -161,6 +180,26 @@ async function handleInitAuthCommandAsync(): Promise<void> {
     prompts.cancel(PromptMessages.CancelMayBePartial);
     process.exitCode = 1;
   }
+}
+
+function formatNextStep(packageInstallationStrategy: PackageInstallationStrategy): string {
+  if (packageInstallationStrategy === "standard-npm-install") {
+    return [
+      "Install packages with authentication handled automatically:",
+      "",
+      "npm install",
+      "",
+      "This requires npm 12 or later.",
+    ].join("\n");
+  }
+
+  return [
+    "Install packages with authentication handled automatically:",
+    "",
+    "npm run install-packages",
+    "",
+    "Use this compatibility command instead of npm install.",
+  ].join("\n");
 }
 
 function getErrorMessage(error: unknown): string {
