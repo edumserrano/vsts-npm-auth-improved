@@ -1,4 +1,5 @@
 import path from "node:path";
+import type { JsonObject } from "type-fest";
 
 /**
  * Supplies deterministic package.json and .npmrc content plus fixture path
@@ -16,6 +17,8 @@ const EXPECTED_REQUIRED_SCRIPTS = {
 
 const EXPECTED_VSTS_NPM_AUTH_IMPROVED_SPEC = "alpha";
 
+type PackageJsonFixtureOverrides = Readonly<JsonObject>;
+
 export const EXPECTED_MANAGED_NPM_CONFIG = {
   "package-lock": "true",
   audit: "false",
@@ -23,7 +26,7 @@ export const EXPECTED_MANAGED_NPM_CONFIG = {
 } as const;
 
 export function packageJsonContent(
-  overrides: Readonly<Record<string, unknown>> = {},
+  overrides: PackageJsonFixtureOverrides = {},
 ): string {
   return JSON.stringify(
     {
@@ -36,7 +39,7 @@ export function packageJsonContent(
 }
 
 export function configuredPackageJsonContent(
-  overrides: Readonly<Record<string, unknown>> = {},
+  overrides: PackageJsonFixtureOverrides = {},
 ): string {
   return packageJsonContent({
     scripts: EXPECTED_REQUIRED_SCRIPTS,

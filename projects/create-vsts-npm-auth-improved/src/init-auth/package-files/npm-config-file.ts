@@ -9,8 +9,19 @@ const MANAGED_PROJECT_VALUES = {
 
 type ConfigLocation = "project";
 
+type NpmConfigPrimitive = string | number | boolean | null | undefined;
+type NpmConfigValue =
+  | NpmConfigPrimitive
+  | readonly NpmConfigValue[]
+  | NpmConfigRecord;
+type NpmConfigRecord = { readonly [key: string]: NpmConfigValue };
+type MutableNpmConfigRecord = { [key: string]: NpmConfigValue };
+type NpmConfigDefinition = object;
+type NpmConfigDefinitions = Readonly<Record<string, NpmConfigDefinition>>;
+type NpmConfigShorthands = Readonly<Record<string, readonly string[]>>;
+
 type NpmConfigData = {
-  readonly raw: Readonly<Record<string, unknown>>;
+  readonly raw: NpmConfigRecord;
 };
 
 type NpmConfig = {
@@ -20,19 +31,19 @@ type NpmConfig = {
   };
   readonly localPrefix: string;
   delete(key: string, where: ConfigLocation): void;
-  get(key: string, where?: ConfigLocation): unknown;
+  get(key: string, where?: ConfigLocation): NpmConfigValue;
   load(): Promise<void>;
   save(where: ConfigLocation): Promise<void>;
-  set(key: string, value: unknown, where: ConfigLocation): void;
+  set(key: string, value: NpmConfigValue, where: ConfigLocation): void;
 };
 
 type NpmConfigDefinitionsModule = {
-  readonly definitions: Readonly<Record<string, unknown>>;
+  readonly definitions: NpmConfigDefinitions;
   readonly flatten: (
-    source: Readonly<Record<string, unknown>>,
-    target?: Record<string, unknown>,
-  ) => Record<string, unknown>;
-  readonly shorthands: Readonly<Record<string, readonly string[]>>;
+    source: NpmConfigRecord,
+    target?: MutableNpmConfigRecord,
+  ) => MutableNpmConfigRecord;
+  readonly shorthands: NpmConfigShorthands;
 };
 
 type NpmConfigOptions = {
@@ -220,7 +231,7 @@ function isAlwaysAuthKey(key: string): boolean {
   );
 }
 
-function normalizeRegistry(value: unknown): string | undefined {
+function normalizeRegistry(value: NpmConfigValue): string | undefined {
   if (typeof value !== "string") {
     return undefined;
   }
@@ -238,10 +249,10 @@ function loadDependencies(): NpmConfigFileDependencies {
 
 function loadConfigConstructor(): NpmConfigConstructor {
   const loaded: unknown = require("@npmcli/config");
-  if (typeof loaded !== "function") {
+  if (!isNpmConfigConstructor(loaded)) {
     throw new TypeError("@npmcli/config did not expose a CommonJS constructor.");
   }
-  return loaded as NpmConfigConstructor;
+  return loaded;
 }
 
 function loadDefinitionsModule(): NpmConfigDefinitionsModule {
@@ -250,20 +261,13 @@ function loadDefinitionsModule(): NpmConfigDefinitionsModule {
     throw new TypeError("@npmcli/config/lib/definitions was not an object.");
   }
 
-  const definitions = loaded["definitions"];
-  const flatten = loaded["flatten"];
-  const shorthands = loaded["shorthands"];
-  if (!isRecord(definitions) || typeof flatten !== "function" || !isRecord(shorthands)) {
+  if (!isNpmConfigDefinitionsModule(loaded)) {
     throw new TypeError(
       "@npmcli/config/lib/definitions did not expose definitions, shorthands, and flatten.",
     );
   }
 
-  return {
-    definitions,
-    flatten: flatten as NpmConfigDefinitionsModule["flatten"],
-    shorthands: shorthands as NpmConfigDefinitionsModule["shorthands"],
-  };
+  return loaded;
 }
 
 function resolveInstalledConfigRoot(): string {
@@ -285,8 +289,66 @@ async function fileExistsAsync(filePath: string): Promise<boolean> {
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+function isRecord(value: unknown): value is object {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isNpmConfigConstructor(
+  value: unknown,
+): value is NpmConfigConstructor {
+  return typeof value === "function";
+}
+
+function isNpmConfigDefinitionsModule(
+  value: unknown,
+): value is NpmConfigDefinitionsModule {
+  return (
+    isRecord(value) &&
+    "definitions" in value &&
+    "flatten" in value &&
+    "shorthands" in value &&
+    isNpmConfigDefinitions(value.definitions) &&
+    isNpmConfigFlatten(value.flatten) &&
+    isNpmConfigShorthands(value.shorthands)
+  );
+}
+
+function isNpmConfigDefinitions(
+  value: unknown,
+): value is NpmConfigDefinitions {
+  return (
+    isRecord(value) &&
+    Object.keys(value).every(key =>
+      isNpmConfigDefinition(Reflect.get(value, key)),
+    )
+  );
+}
+
+function isNpmConfigDefinition(
+  value: unknown,
+): value is NpmConfigDefinition {
+  return isRecord(value);
+}
+
+function isNpmConfigFlatten(
+  value: unknown,
+): value is NpmConfigDefinitionsModule["flatten"] {
+  return typeof value === "function";
+}
+
+function isNpmConfigShorthands(
+  value: unknown,
+): value is NpmConfigShorthands {
+  return (
+    isRecord(value) &&
+    Object.keys(value).every(key => {
+      const shorthand: unknown = Reflect.get(value, key);
+      return (
+        Array.isArray(shorthand) &&
+        shorthand.every(argument => typeof argument === "string")
+      );
+    })
+  );
 }
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {
