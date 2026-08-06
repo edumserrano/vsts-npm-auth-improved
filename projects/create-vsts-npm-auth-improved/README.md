@@ -2,7 +2,11 @@
 
 `create-vsts-npm-auth-improved` is an interactive setup CLI for [`vsts-npm-auth-improved`](https://www.npmjs.com/package/vsts-npm-auth-improved).
 
-- ✅ It configures one or more projects so their npm registry settings and package scripts can use `vsts-npm-auth-improved`; it does not authenticate with a registry itself. As a post-write safeguard, it also checks whether `.npmrc` files changed during setup are excluded by applicable `.gitignore` rules and warns when they may not be shared through source control.
+- ✅ Configures one or more projects in a single interactive setup.
+- ✅ Updates npm registry settings and package scripts to use `vsts-npm-auth-improved`.
+- ✅ Keeps setup separate from authentication; it does not authenticate with a registry itself.
+- ✅ Checks whether `.npmrc` files changed during setup are excluded by applicable `.gitignore` rules.
+- ✅ Warns when changed `.npmrc` files may not be shared through source control.
 
 ## Requirements
 
