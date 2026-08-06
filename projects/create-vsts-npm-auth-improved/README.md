@@ -28,7 +28,7 @@ npx create-vsts-npm-auth-improved --help
 npx create-vsts-npm-auth-improved --version
 ```
 
-## What setup asks
+## What the setup asks
 
 Follow the prompts to:
 
@@ -39,19 +39,19 @@ Follow the prompts to:
 
 You can cancel before setup completes without changing any files.
 
-## What setup changes
+## What the setup changes
 
-For each selected project, setup:
+For each selected project, the setup:
 
 - creates or updates the project `.npmrc` with the selected registry, enables lockfiles, and disables automatic audit and funding messages;
 - removes obsolete `always-auth` settings;
 - adds the dependency and package scripts needed to run `vsts-npm-auth-improved` before installing packages;
-- preserves unrelated registry settings, dependencies, and package scripts; and
+- preserves unrelated registry settings, dependencies, and package scripts;
 - warns when a changed `.npmrc` is ignored by Git and may not be shared with other contributors.
 
-Setup does not authenticate with the registry or add credentials to the project `.npmrc`. Review any `.npmrc` before changing `.gitignore` rules or committing it.
+The setup does not authenticate with the registry or add credentials to the project `.npmrc`. Review any `.npmrc` before changing `.gitignore` rules or committing it.
 
-You can safely run setup again when you need to update the configuration.
+You can safely run the setup again when you need to update the configuration.
 
 ## Install packages after setup
 
@@ -60,7 +60,7 @@ Use the command selected during setup.
 For npm 12 and later:
 
 ```shell
-npm install
+npm i
 ```
 
 Authentication also runs automatically with `npm ci` on npm 12 and later.
@@ -71,14 +71,4 @@ For npm 11 and earlier:
 npm run install-packages
 ```
 
-On Windows, authentication runs before npm installs packages from the private registry. On macOS, Linux, and CI, automatic authentication is skipped so you can use credentials supplied by your environment.
-
-## If authentication fails
-
-Retry from the project directory with forced token acquisition:
-
-```shell
-npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --force
-```
-
-See the [`vsts-npm-auth-improved` package documentation](https://www.npmjs.com/package/vsts-npm-auth-improved) for authentication options and platform behavior.
+On Windows, authentication runs before npm installs packages from the private registry. On macOS, Linux, and CI, automatic authentication is skipped so your environment must supply the required credentials.

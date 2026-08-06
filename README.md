@@ -36,7 +36,7 @@ For npm 11 and earlier:
 npm run install-packages
 ```
 
-On Windows, authentication happens automatically before npm installs private packages. On macOS, Linux, and CI, the authentication step is skipped and you can use the credentials provided by your environment.
+On Windows, authentication happens automatically before npm installs private packages. On macOS, Linux, and CI, the authentication step is skipped so your environment must supply the required credentials.
 
 See the [`create-vsts-npm-auth-improved` package documentation](projects/create-vsts-npm-auth-improved/README.md) for detailed setup options and guidance.
 

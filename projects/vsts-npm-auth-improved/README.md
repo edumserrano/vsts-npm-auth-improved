@@ -31,15 +31,15 @@ For an npm script, provide the project `.npmrc` and authentication choices expli
 }
 ```
 
-> [!NOTE]
->
-> This command uses `npx` to resolve and run `vsts-npm-auth-improved` before the project's dependencies have been installed. The explicit `--registry=https://registry.npmjs.org/` option fetches the publicly available package from the public npm registry, which does not require authentication. This avoids the chicken-and-egg problem of needing working private-registry credentials before the tool that obtains those credentials can run.
+This command uses `npx` to resolve and run `vsts-npm-auth-improved` before the project's dependencies have been installed. The explicit `--registry=https://registry.npmjs.org/` option fetches the publicly available package from the public npm registry, which does not require authentication. This avoids the chicken-and-egg problem of needing working private-registry credentials before the tool that obtains those credentials can run.
 
 To configure your projects interactively, run:
 
 ```shell
 npm init vsts-npm-auth-improved
 ```
+
+See the [`create-vsts-npm-auth-improved` package documentation](https://www.npmjs.com/package/create-vsts-npm-auth-improved) for detailed setup options and guidance.
 
 ## Options
 
@@ -53,11 +53,11 @@ npm init vsts-npm-auth-improved
 | `-h, --help`               | Displays wrapper command help without running authentication.                                           |
 | `-v, --version`            | Displays the `vsts-npm-auth-improved` package version.                                                  |
 
-When config path, token scope, or force behavior is omitted on Windows, the CLI prompts for that value. The wrapper does not pass an expiration option, so newly acquired tokens use the upstream default of 129,600 minutes (90 days).
+When config path, token scope, or force behavior is omitted on Windows, the CLI prompts for that value. Newly acquired tokens expire in 90 days.
 
 ## Examples
 
-Authenticate with the standard read-only, non-forced choices used by generated projects:
+Authenticate with the standard read-only token and non-forced choices:
 
 ```shell
 vsts-npm-auth-improved -c ./.npmrc --read --no-force
@@ -73,18 +73,14 @@ vsts-npm-auth-improved -c ./.npmrc --read --force
 
 ### CI environments
 
-Immediately after the welcome message, the command detects CI before checking the operating system and skips automatic authentication. It does not resolve `.npmrc` paths, prompt, or invoke [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth). It warns that authentication must be configured in CI and exits successfully so the npm script can continue.
+If invoked in CI, the command detects it's in a CI environment and skips automatic authentication. It warns that authentication must be configured in CI and exits successfully so the npm script can continue.
+
+CI environment detection is done by the [ci-info](https://www.npmjs.com/package/ci-info) package.
 
 ### Windows
 
-The command reads the global registry from the selected `.npmrc`, invokes [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth), and writes credentials to the user npm configuration at `~/.npmrc`. Failed token acquisition is retried once with forced acquisition unless `--force` was supplied. Newly acquired tokens use the upstream 129,600-minute default because the wrapper does not pass an expiration option.
+The command reads the global registry from the selected `.npmrc`, invokes [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth), and writes credentials to the user npm configuration at `~/.npmrc`. Failed token acquisition is retried once with forced acquisition unless `--force` was supplied.
 
 ### macOS and Linux
 
-Automatic authentication is not available. The command warns that registry authentication must be configured manually, does not resolve `.npmrc` paths or prompt, does not invoke [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth), and exits successfully so a cross-platform npm script can continue.
-
-No PAT-based authentication is currently performed by this package.
-
-## Development
-
-Build, test, packaging, and release instructions are maintained in the repository's [developer documentation](https://github.com/edumserrano/vsts-npm-auth-improved/tree/main/docs/dev-docs).
+Automatic authentication is not available. The command warns that registry authentication must be configured manually, [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) is not invoked, and exits successfully so a cross-platform npm script can continue.
