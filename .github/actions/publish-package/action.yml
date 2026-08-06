@@ -137,7 +137,7 @@ runs:
           exit 1
         }
 
-        foreach ($required in @("package/LICENSE", "package/README.md", "package/package.json", "package/cjs/main.js")) {
+        foreach ($required in @("package/LICENSE", "package/README.md", "package/package.json")) {
           if ($entries -notcontains $required) {
             Write-Output "::error::Release tarball is missing $required."
             exit 1
@@ -156,11 +156,19 @@ runs:
           $manifestContent = @(tar -xOzf $env:TARBALL package/package.json)
           if ($LASTEXITCODE -ne 0) { throw "Could not extract package/package.json" }
           $manifest = ($manifestContent -join [Environment]::NewLine) | ConvertFrom-Json
+          $binProperty = $manifest.bin.PSObject.Properties[$env:PACKAGE]
+          $binTarget = if ($null -eq $binProperty) { $null } else { [string]$binProperty.Value }
+          if ([string]::IsNullOrWhiteSpace($binTarget)) {
+            throw "Generated manifest does not declare a CLI binary for $env:PACKAGE."
+          }
+          $binEntry = "package/$($binTarget -replace '\\', '/')"
+          if ($entries -notcontains $binEntry) {
+            throw "Release tarball is missing its declared CLI binary $binEntry."
+          }
           $checks = [ordered]@{
             "package name" = $manifest.name -eq $env:PACKAGE
             "package version" = $manifest.version -eq $env:VERSION
             "MIT license" = $manifest.license -eq "MIT"
-            "CLI binary" = $manifest.bin.PSObject.Properties[$env:PACKAGE].Value -eq "cjs/main.js"
             "repository URL" = $manifest.repository.url -eq "git+https://github.com/edumserrano/vsts-npm-auth-improved.git"
             "repository directory" = $manifest.repository.directory -eq $env:PACKAGE_DIRECTORY
             "public access" = $manifest.publishConfig.access -eq "public"

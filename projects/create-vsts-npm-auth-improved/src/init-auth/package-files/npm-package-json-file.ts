@@ -1,6 +1,7 @@
 import path from "node:path";
 import type { JsonObject, JsonValue } from "type-fest";
-import { PackageInstallationStrategy } from "../package-installation-strategy";
+import { commonJsRequire } from "../../commonjs-require.js";
+import { PackageInstallationStrategy } from "../package-installation-strategy.js";
 
 const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "alpha";
 
@@ -357,7 +358,7 @@ function readValidStringRecord(
 }
 
 function loadPackageJsonConstructor(): NpmPackageJsonConstructor {
-  const loaded: unknown = require("@npmcli/package-json");
+  const loaded: unknown = commonJsRequire("@npmcli/package-json");
   if (!isNpmPackageJsonConstructor(loaded)) {
     throw new TypeError(
       "@npmcli/package-json did not expose its CommonJS load function.",

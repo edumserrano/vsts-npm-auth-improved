@@ -3,18 +3,18 @@ import {
   FileReadFailure,
   FileWriteFailure,
   InvalidPackageJsonFailure,
-} from "../init-auth-failure";
+} from "../init-auth-failure.js";
 import {
   loadNpmConfigFileAsync,
   NpmConfigFile,
   NpmConfigFileError,
-} from "../package-files/npm-config-file";
+} from "../package-files/npm-config-file.js";
 import {
   loadNpmPackageJsonFileAsync,
   NpmPackageJsonFile,
   NpmPackageJsonFileError,
-} from "../package-files/npm-package-json-file";
-import { PackageInstallationStrategy } from "../package-installation-strategy";
+} from "../package-files/npm-package-json-file.js";
+import { PackageInstallationStrategy } from "../package-installation-strategy.js";
 
 export type FileChangeKind = "created" | "updated" | "unchanged";
 

@@ -1,5 +1,6 @@
 import { stat } from "node:fs/promises";
 import path from "node:path";
+import { commonJsRequire } from "../../commonjs-require.js";
 
 const MANAGED_PROJECT_VALUES = {
   "package-lock": true,
@@ -248,7 +249,7 @@ function loadDependencies(): NpmConfigFileDependencies {
 }
 
 function loadConfigConstructor(): NpmConfigConstructor {
-  const loaded: unknown = require("@npmcli/config");
+  const loaded: unknown = commonJsRequire("@npmcli/config");
   if (!isNpmConfigConstructor(loaded)) {
     throw new TypeError("@npmcli/config did not expose a CommonJS constructor.");
   }
@@ -256,7 +257,7 @@ function loadConfigConstructor(): NpmConfigConstructor {
 }
 
 function loadDefinitionsModule(): NpmConfigDefinitionsModule {
-  const loaded: unknown = require("@npmcli/config/lib/definitions");
+  const loaded: unknown = commonJsRequire("@npmcli/config/lib/definitions");
   if (!isRecord(loaded)) {
     throw new TypeError("@npmcli/config/lib/definitions was not an object.");
   }
@@ -271,7 +272,7 @@ function loadDefinitionsModule(): NpmConfigDefinitionsModule {
 }
 
 function resolveInstalledConfigRoot(): string {
-  return path.dirname(require.resolve("@npmcli/config/package.json"));
+  return path.dirname(commonJsRequire.resolve("@npmcli/config/package.json"));
 }
 
 async function fileExistsAsync(filePath: string): Promise<boolean> {
