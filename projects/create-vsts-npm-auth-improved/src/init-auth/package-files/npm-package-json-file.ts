@@ -1,10 +1,13 @@
 import path from "node:path";
+import { PackageInstallationStrategy } from "../package-installation-strategy";
 
 const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "alpha";
 
-const REQUIRED_SCRIPTS = {
-  "registry-auth":
-    `npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@${VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC} -c ./.npmrc --read --no-force`,
+const REGISTRY_AUTH_SCRIPT =
+  `npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@${VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC} -c ./.npmrc --read --no-force`;
+const PREINSTALL_AUTH_SCRIPT = "npm run registry-auth";
+const PREINSTALL_AUTH_PREFIX = `${PREINSTALL_AUTH_SCRIPT} && `;
+const CUSTOM_INSTALL_SCRIPTS = {
   "preinstall-packages": "npm run registry-auth",
   "install-packages": "npm i",
 } as const;
@@ -73,6 +76,7 @@ export type NpmPackageJsonFile = {
 
 export type LoadNpmPackageJsonFileOptions = {
   readonly packageDirectory: string;
+  readonly packageInstallationStrategy: PackageInstallationStrategy;
 };
 
 export async function loadNpmPackageJsonFileAsync(
@@ -115,7 +119,10 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
   }
 
   const content = packageJson.content;
-  const scripts = buildScripts(content["scripts"]);
+  const scripts = buildScripts(
+    content["scripts"],
+    options.packageInstallationStrategy,
+  );
   const devDependencies = {
     ...readStringMap(content["devDependencies"]),
     "vsts-npm-auth-improved": VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC,
@@ -167,12 +174,77 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
   };
 }
 
-function buildScripts(value: unknown): Readonly<Record<string, string>> {
+function buildScripts(
+  value: unknown,
+  packageInstallationStrategy: PackageInstallationStrategy,
+): Readonly<Record<string, string>> {
   const existingScripts = readStringMap(value);
+  if (packageInstallationStrategy === "standard-npm-install") {
+    return buildStandardInstallScripts(existingScripts);
+  }
+  return buildCustomInstallScripts(existingScripts);
+}
+
+function buildStandardInstallScripts(existingScripts: StringMap): StringMap {
+  const existingPreinstall = existingScripts["preinstall"];
+  const preinstall =
+    existingPreinstall === undefined
+      ? PREINSTALL_AUTH_SCRIPT
+      : hasManagedAuthPrefix(existingPreinstall)
+        ? existingPreinstall
+        : `${PREINSTALL_AUTH_PREFIX}${existingPreinstall}`;
   const unrelatedScripts = Object.fromEntries(
-    Object.entries(existingScripts).filter(([name]) => !(name in REQUIRED_SCRIPTS)),
+    Object.entries(existingScripts).filter(([name, script]) => {
+      if (name === "registry-auth" || name === "preinstall") {
+        return false;
+      }
+      return !isGeneratedCustomInstallScript(name, script);
+    }),
   );
-  return { ...REQUIRED_SCRIPTS, ...unrelatedScripts };
+
+  return {
+    "registry-auth": REGISTRY_AUTH_SCRIPT,
+    preinstall,
+    ...unrelatedScripts,
+  };
+}
+
+function buildCustomInstallScripts(existingScripts: StringMap): StringMap {
+  const existingPreinstall = existingScripts["preinstall"];
+  const restoredPreinstall = restorePreinstallWithoutManagedAuth(existingPreinstall);
+  const unrelatedScripts = Object.fromEntries(
+    Object.entries(existingScripts).filter(
+      ([name]) =>
+        name !== "registry-auth" && name !== "preinstall" && !(name in CUSTOM_INSTALL_SCRIPTS),
+    ),
+  );
+
+  return {
+    "registry-auth": REGISTRY_AUTH_SCRIPT,
+    ...CUSTOM_INSTALL_SCRIPTS,
+    ...(restoredPreinstall === undefined ? {} : { preinstall: restoredPreinstall }),
+    ...unrelatedScripts,
+  };
+}
+
+function hasManagedAuthPrefix(script: string): boolean {
+  return script === PREINSTALL_AUTH_SCRIPT || script.startsWith(PREINSTALL_AUTH_PREFIX);
+}
+
+function restorePreinstallWithoutManagedAuth(script: string | undefined): string | undefined {
+  if (script === undefined || script === PREINSTALL_AUTH_SCRIPT) {
+    return undefined;
+  }
+  return script.startsWith(PREINSTALL_AUTH_PREFIX)
+    ? script.slice(PREINSTALL_AUTH_PREFIX.length)
+    : script;
+}
+
+function isGeneratedCustomInstallScript(name: string, script: string): boolean {
+  return (
+    name in CUSTOM_INSTALL_SCRIPTS &&
+    CUSTOM_INSTALL_SCRIPTS[name as keyof typeof CUSTOM_INSTALL_SCRIPTS] === script
+  );
 }
 
 function hasRequiredSemanticState(

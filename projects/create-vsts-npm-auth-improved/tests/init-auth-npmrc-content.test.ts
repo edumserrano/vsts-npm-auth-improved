@@ -193,6 +193,7 @@ test.each([
       .down()
       .toggleMultiselectItem()
       .acceptMultiselectValues()
+      .acceptSelectValue()
       .enterText(promptedRegistry)
       .submitText();
     await command;
@@ -253,7 +254,7 @@ test.each([
     if (packageDirectory !== "") {
       interaction.down();
     }
-    await interaction.toggleMultiselectItem().acceptMultiselectValues();
+    await interaction.toggleMultiselectItem().acceptMultiselectValues().acceptSelectValue();
     await command;
 
     expect(process.exitCode ?? 0).toBe(0);

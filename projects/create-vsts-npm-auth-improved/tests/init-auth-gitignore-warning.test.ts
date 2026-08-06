@@ -64,6 +64,7 @@ async function invokeInitAuth(
     .down()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
+    .acceptSelectValue()
     .enterText("https://registry.example.test/")
     .submitText();
   await command;

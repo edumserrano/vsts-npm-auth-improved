@@ -163,6 +163,7 @@ test.each([
       .down()
       .toggleMultiselectItem()
       .acceptMultiselectValues()
+      .acceptSelectValue()
       .enterText(invalidRegistry)
       .submitText()
       .replaceText(promptedRegistry)
@@ -208,6 +209,7 @@ test.each([
       .down()
       .toggleMultiselectItem()
       .acceptMultiselectValues()
+      .acceptSelectValue()
       .enterText(registry)
       .submitText();
     await command;
@@ -251,7 +253,8 @@ test("reuses an existing global registry without showing a registry prompt", asy
     .submitText()
     .down()
     .toggleMultiselectItem()
-    .acceptMultiselectValues();
+    .acceptMultiselectValues()
+    .acceptSelectValue();
   await command;
 
   expect(process.exitCode ?? 0).toBe(0);

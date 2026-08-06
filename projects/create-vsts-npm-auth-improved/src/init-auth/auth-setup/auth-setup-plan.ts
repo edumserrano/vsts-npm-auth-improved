@@ -14,6 +14,7 @@ import {
   NpmPackageJsonFile,
   NpmPackageJsonFileError,
 } from "../package-files/npm-package-json-file";
+import { PackageInstallationStrategy } from "../package-installation-strategy";
 
 export type FileChangeKind = "created" | "updated" | "unchanged";
 
@@ -97,13 +98,17 @@ type LoadedPackageFiles = {
 export async function buildAuthSetupPlanAsync(
   rootDirectory: string,
   packageJsonPaths: readonly string[],
+  packageInstallationStrategy: PackageInstallationStrategy,
   requestRegistryAsync: RequestRegistryAsync,
 ): Promise<AuthSetupPlanResult> {
   // Load all package adapters before any adjacent npm configuration. Adapter
   // loading both validates package data and prepares its changes in memory.
   const packageJsonResults = await Promise.allSettled(
     packageJsonPaths.map((packageJsonPath) =>
-      loadNpmPackageJsonFileAsync({ packageDirectory: path.dirname(packageJsonPath) }),
+      loadNpmPackageJsonFileAsync({
+        packageDirectory: path.dirname(packageJsonPath),
+        packageInstallationStrategy,
+      }),
     ),
   );
 

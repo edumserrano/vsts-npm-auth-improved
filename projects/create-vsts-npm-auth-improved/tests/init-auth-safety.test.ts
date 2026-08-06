@@ -114,7 +114,8 @@ test.each([
     .submitText()
     .down()
     .toggleMultiselectItem()
-    .acceptMultiselectValues();
+    .acceptMultiselectValues()
+    .acceptSelectValue();
   await command;
 
   expect(process.exitCode).toBe(1);
@@ -154,7 +155,8 @@ test.each([
           await mkdir(project.path("package.json"));
         }
       })
-      .acceptMultiselectValues();
+      .acceptMultiselectValues()
+      .acceptSelectValue();
     await command;
 
     expect(process.exitCode).toBe(1);
@@ -190,7 +192,8 @@ test("reports an .npmrc read failure with relative context and zero writes", asy
     .submitText()
     .down()
     .toggleMultiselectItem()
-    .acceptMultiselectValues();
+    .acceptMultiselectValues()
+    .acceptSelectValue();
   await command;
 
   expect(process.exitCode).toBe(1);
@@ -222,7 +225,11 @@ test("rejects a later invalid package before prompting or writing", async () => 
   });
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction().submitText().toggleMultiselectItem().acceptMultiselectValues();
+  await new PromptsInteraction()
+    .submitText()
+    .toggleMultiselectItem()
+    .acceptMultiselectValues()
+    .acceptSelectValue();
   await command;
 
   expect(process.exitCode).toBe(1);
@@ -261,6 +268,7 @@ test("surfaces a targeted write failure through the persistence spinner", async 
     .down()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
+    .acceptSelectValue()
     .performAsync(async () => {
       await rename(project.path("package.json"), project.path("package.json.original"));
       await mkdir(project.path("package.json"));
@@ -288,6 +296,7 @@ test("reports an .npmrc write failure after package.json is persisted", async ()
     .down()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
+    .acceptSelectValue()
     .performAsync(async () => {
       await mkdir(project.path(".npmrc"));
     })
@@ -321,6 +330,7 @@ test("reports a later write failure after preserving earlier completed writes", 
     .submitText()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
+    .acceptSelectValue()
     .enterText("https://alpha.example.test/")
     .submitText()
     .performAsync(async () => {

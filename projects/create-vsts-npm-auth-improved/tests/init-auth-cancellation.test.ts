@@ -76,6 +76,31 @@ test("cancels at package selection without changing the filesystem", async () =>
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
+test("cancels at installation strategy selection without changing the filesystem", async () => {
+  const project = await NpmProject.createAsync("installation-strategy-cancelled");
+  const originalPackageJson = packageJsonContent();
+  await project.createPackageAsync({ packageJson: originalPackageJson });
+  const output = mockStdoutWrite({
+    temporaryRoots: [project.root],
+  });
+
+  process.chdir(project.root);
+  const command = InitAuthCommand.invokeAsync();
+  await new PromptsInteraction()
+    .submitText()
+    .down()
+    .toggleMultiselectItem()
+    .acceptMultiselectValues()
+    .cancel();
+  await command;
+
+  expect(process.exitCode).toBe(1);
+  expect(await project.readTreeAsync()).toEqual(["package.json"]);
+  expect(await project.readFileAsync("package.json")).toBe(originalPackageJson);
+  expect(await project.existsAsync(".npmrc")).toBe(false);
+  expect(output.normalizedOutput).toMatchSnapshot();
+});
+
 /**
  * Tests cancellation at the registry prompt for a selected package.
  * Verifies that:
@@ -98,6 +123,7 @@ test("cancels at the registry prompt without changing the filesystem", async () 
     .down()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
+    .acceptSelectValue()
     .cancel();
   await command;
 
@@ -135,6 +161,7 @@ test("cancels at a later registry prompt after planning with zero writes", async
     .submitText()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
+    .acceptSelectValue()
     .enterText(promptedRegistry)
     .submitText()
     .cancel();
@@ -148,9 +175,7 @@ test("cancels at a later registry prompt after planning with zero writes", async
     "beta/package.json",
   ]);
   for (const directory of ["alpha", "beta"]) {
-    expect(await project.readFileAsync(`${directory}/package.json`)).toBe(
-      originalPackageJson,
-    );
+    expect(await project.readFileAsync(`${directory}/package.json`)).toBe(originalPackageJson);
     expect(await project.existsAsync(`${directory}/.npmrc`)).toBe(false);
   }
   expect(output.normalizedOutput).toMatchSnapshot();
