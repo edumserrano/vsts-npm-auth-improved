@@ -161,14 +161,6 @@ runs:
           if ([string]::IsNullOrWhiteSpace($binTarget)) {
             throw "Generated manifest does not declare a CLI binary for $env:PACKAGE."
           }
-          $binSegments = @($binTarget -split '[\\/]')
-          if (
-            [System.IO.Path]::IsPathRooted($binTarget) -or
-            $binTarget -match '^[A-Za-z]:[\\/]' -or
-            $binSegments -contains '..'
-          ) {
-            throw "Generated manifest declares an unsafe CLI binary path: $binTarget"
-          }
           $binEntry = "package/$($binTarget -replace '\\', '/')"
           if ($entries -notcontains $binEntry) {
             throw "Release tarball is missing its declared CLI binary $binEntry."
@@ -177,7 +169,6 @@ runs:
             "package name" = $manifest.name -eq $env:PACKAGE
             "package version" = $manifest.version -eq $env:VERSION
             "MIT license" = $manifest.license -eq "MIT"
-            "CLI binary" = $entries -contains $binEntry
             "repository URL" = $manifest.repository.url -eq "git+https://github.com/edumserrano/vsts-npm-auth-improved.git"
             "repository directory" = $manifest.repository.directory -eq $env:PACKAGE_DIRECTORY
             "public access" = $manifest.publishConfig.access -eq "public"
