@@ -1,8 +1,6 @@
 import { stat } from "node:fs/promises";
-import { createRequire } from "node:module";
 import path from "node:path";
-
-const commonJsRequire = createRequire(import.meta.url);
+import { commonJsRequire } from "../../commonjs-require.js";
 
 const MANAGED_PROJECT_VALUES = {
   "package-lock": true,

@@ -1,9 +1,7 @@
-import { createRequire } from "node:module";
 import path from "node:path";
 import type { JsonObject, JsonValue } from "type-fest";
+import { commonJsRequire } from "../../commonjs-require.js";
 import { PackageInstallationStrategy } from "../package-installation-strategy.js";
-
-const commonJsRequire = createRequire(import.meta.url);
 
 const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "alpha";
 
