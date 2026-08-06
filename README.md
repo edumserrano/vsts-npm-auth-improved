@@ -42,21 +42,8 @@ See the [`create-vsts-npm-auth-improved` package documentation](projects/create-
 
 ## Run authentication manually
 
-If you want to run `vsts-npm-auth-improved` manually to authenticate to an Azure DevOps Artifacts registry, see the [`vsts-npm-auth-improved` package documentation](projects/vsts-npm-auth-improved/README.md) for interactive and scripted usage options, troubleshooting, and platform support.
-
-## Requirements
-
-- Node.js 24.18.1 or later
-- npm 12.0.2 or later
-- Windows for automatic authentication
-
-Project setup runs on Windows, macOS, and Linux. On non-Windows systems and in CI, provide registry credentials using your environment's normal authentication method.
+If you want to run `vsts-npm-auth-improved` manually to authenticate to an Azure DevOps Artifacts registry, see the [`vsts-npm-auth-improved` package documentation](projects/vsts-npm-auth-improved/README.md).
 
 ## Development and releases
 
-Maintaining the repository? See the [`developer documentation`](docs/dev-docs/README.md), including:
-
-- [development, testing, and package inspection](docs/dev-docs/development.md);
-- [the release process, including automatic releases for Dependabot updates](docs/dev-docs/releases.md);
-- [testing strategies](docs/dev-docs/README.md#developer-documentation); and
-- [architecture decisions](docs/dev-docs/adr/0001-use-a-github-app-for-release-preparation.md).
+Maintaining the repository? See the [`developer documentation`](docs/dev-docs/README.md).
