@@ -1,6 +1,6 @@
 import { expect } from "vitest";
 import type { ExpectationResult } from "@vitest/expect";
-import type { VstsNpmAuthMock } from "./vsts-npm-auth";
+import type { VstsNpmAuthMock } from "./vsts-npm-auth.js";
 
 /**
  * Registers the Vitest matcher used to verify the complete vsts-npm-auth
