@@ -60,6 +60,4 @@ Use the generated installation command:
 npm run install-packages
 ```
 
-This command runs authentication in one npm process, then starts `npm install` in a new process that reads the updated credentials. Use it instead of `npm install` when credentials may be missing, expired, or revoked.
-
 On Windows, authentication runs before npm installs packages from the private registry. On macOS, Linux, and CI, automatic authentication is skipped so your environment must supply the required credentials.
