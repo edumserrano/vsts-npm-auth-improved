@@ -3,7 +3,7 @@ import type { JsonObject, JsonValue } from "type-fest";
 import { commonJsRequire } from "../../commonjs-require.js";
 import { PackageInstallationStrategy } from "../package-installation-strategy.js";
 
-const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "alpha";
+const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "latest";
 
 const REGISTRY_AUTH_SCRIPT =
   `npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@${VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC} -c ./.npmrc --read --no-force`;

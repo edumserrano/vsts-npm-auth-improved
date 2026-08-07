@@ -23,7 +23,7 @@ const existingRegistry = "https://existing.test/";
 
 const managedScripts = {
   "registry-auth":
-    "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --no-force",
+    "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@latest -c ./.npmrc --read --no-force",
   preinstall: "npm run registry-auth",
 } as const;
 
@@ -49,7 +49,7 @@ test.each([
     {
       name: "example",
       scripts: managedScripts,
-      devDependencies: { "vsts-npm-auth-improved": "alpha" },
+      devDependencies: { "vsts-npm-auth-improved": "latest" },
     },
   ],
   [
@@ -58,7 +58,7 @@ test.each([
     {
       name: "example",
       scripts: managedScripts,
-      devDependencies: { "vsts-npm-auth-improved": "alpha" },
+      devDependencies: { "vsts-npm-auth-improved": "latest" },
     },
   ],
   [
@@ -94,7 +94,7 @@ test.each([
       },
       dependencies: { lodash: "^4.17.21" },
       custom: { nested: true },
-      devDependencies: { "vsts-npm-auth-improved": "alpha" },
+      devDependencies: { "vsts-npm-auth-improved": "latest" },
     },
   ],
   [
@@ -113,7 +113,7 @@ test.each([
       dependencies: { alpha: "3", zebra: "1" },
       devDependencies: {
         alphaDev: "5",
-        "vsts-npm-auth-improved": "alpha",
+        "vsts-npm-auth-improved": "latest",
         zebraDev: "4",
       },
       optionalDependencies: { alphaOptional: "7", sharedOptional: "6" },
@@ -132,7 +132,7 @@ test.each([
       scripts: { ...managedScripts, test: "vitest" },
       devDependencies: {
         typescript: "7",
-        "vsts-npm-auth-improved": "alpha",
+        "vsts-npm-auth-improved": "latest",
       },
     },
   ],
@@ -171,7 +171,7 @@ test("creates the custom install-packages compatibility scripts when selected", 
   expect(JSON.parse(await scenario.project.readFileAsync("package.json"))).toEqual({
     name: "test-package",
     scripts: { ...customInstallManagedScripts, test: "vitest" },
-    devDependencies: { "vsts-npm-auth-improved": "alpha" },
+    devDependencies: { "vsts-npm-auth-improved": "latest" },
   });
   expect(scenario.output.normalizedOutput).toMatchSnapshot();
 });
@@ -199,7 +199,7 @@ test("switches from custom install scripts to standard npm install without stale
       ...managedScripts,
       preinstall: "npm run registry-auth && npm run existing-preinstall",
     },
-    devDependencies: { "vsts-npm-auth-improved": "alpha" },
+    devDependencies: { "vsts-npm-auth-improved": "latest" },
   });
   expect(scenario.output.normalizedOutput).toMatchSnapshot();
 });
@@ -228,7 +228,7 @@ test("switches to custom install scripts and restores chained preinstall work", 
       ...customInstallManagedScripts,
       preinstall: "npm run existing-preinstall",
     },
-    devDependencies: { "vsts-npm-auth-improved": "alpha" },
+    devDependencies: { "vsts-npm-auth-improved": "latest" },
   });
   expect(scenario.output.normalizedOutput).toMatchSnapshot();
 });
