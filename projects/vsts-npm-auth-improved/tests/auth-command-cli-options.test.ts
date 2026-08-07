@@ -1,0 +1,190 @@
+import { afterAll, afterEach, beforeEach, expect, test, vi } from "vitest";
+import { AuthCommand } from "@test-utils/auth-command";
+import { execa } from "execa";
+import { vol } from "memfs";
+import { createInMemoryNpmrcFile } from "@test-utils/npm-configuration-file";
+import { mockStderrWrite, mockStdoutWrite } from "@test-utils/process-output";
+import { mockVstsNpmAuth } from "@test-utils/vsts-npm-auth";
+
+/**
+ * Tests auth options supplied through the CLI.
+ */
+
+const { originalCiEnvironment } = vi.hoisted(() => {
+  const originalCiEnvironment = process.env.CI;
+  process.env.CI = "false";
+  return { originalCiEnvironment };
+});
+
+vi.mock("execa");
+vi.mock("node:fs", async () => {
+  const { fs } = await import("memfs");
+  return fs;
+});
+
+beforeEach(() => {
+  vi.spyOn(process, "platform", "get").mockReturnValue("win32");
+});
+
+afterEach(() => {
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
+  vol.reset();
+  process.exitCode = undefined;
+});
+
+test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
+  "target and expiration auth options (useOptionAlias: $useOptionAlias)",
+  async ({ useOptionAlias }) => {
+    const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+    const targetConfig = "./credentials/.npmrc";
+    const stdoutWriteFunctionMock = mockStdoutWrite();
+    const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
+
+    await AuthCommand.invokeAsync({
+      type: "auth",
+      configPath: { from: "cli", value: inMemoryNpmrcFile.path },
+      targetConfig: { from: "cli", value: targetConfig, useOptionAlias },
+      expirationMinutes: { from: "cli", value: 60, useOptionAlias },
+      read: { from: "cli", value: false },
+      force: { from: "cli", value: false },
+    });
+
+    expect(vstsNpmAuthMock.callCount).toBe(1);
+    expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
+      "-C",
+      inMemoryNpmrcFile.path,
+      "-T",
+      targetConfig,
+      "-E",
+      "60",
+    ]);
+    expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+    expect(process.exitCode).toBe(0);
+  },
+);
+
+test("the maximum expiration lifetime is forwarded", async () => {
+  const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+  const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: { from: "cli", value: inMemoryNpmrcFile.path },
+    expirationMinutes: { from: "cli", value: 525_600 },
+    read: { from: "cli", value: false },
+    force: { from: "cli", value: false },
+  });
+
+  expect(vstsNpmAuthMock.callCount).toBe(1);
+  expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
+    "-C",
+    inMemoryNpmrcFile.path,
+    "-E",
+    "525600",
+  ]);
+  expect(process.exitCode).toBe(0);
+});
+
+test.each(["0", "-1", "1.5", "abc", "Infinity", "525601", "9007199254740992"])(
+  "invalid expiration minutes are rejected: %s",
+  async expirationMinutes => {
+    const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+    const stderrWriteFunctionMock = mockStderrWrite();
+    const execaFunctionMock = vi.mocked(execa);
+
+    await AuthCommand.invokeAsync({
+      type: "auth",
+      configPath: { from: "cli", value: inMemoryNpmrcFile.path },
+      expirationMinutes: { from: "cli", value: expirationMinutes },
+      read: { from: "cli", value: false },
+      force: { from: "cli", value: false },
+    });
+
+    expect(execaFunctionMock).not.toHaveBeenCalled();
+    expect(stderrWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+    expect(process.exitCode).toBe(1);
+  },
+);
+
+test.each([
+  { read: false, expectedVstsNpmAuthArgs: [] },
+  { read: true, expectedVstsNpmAuthArgs: ["-R"] },
+])("token scope (read: $read)", async ({ read, expectedVstsNpmAuthArgs }) => {
+  const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+  const stdoutWriteFunctionMock = mockStdoutWrite();
+  const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: { from: "cli", value: inMemoryNpmrcFile.path },
+    read: { from: "cli", value: read },
+    force: { from: "cli", value: false },
+  });
+
+  expect(vstsNpmAuthMock.callCount).toBe(1);
+  expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
+    "-C",
+    inMemoryNpmrcFile.path,
+    ...expectedVstsNpmAuthArgs,
+  ]);
+  expect(process.exitCode).toBe(0);
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+});
+
+test.each([
+  { force: false, expectedVstsNpmAuthArgs: [] },
+  { force: true, expectedVstsNpmAuthArgs: ["-F"] },
+])("token acquisition (force: $force)", async ({ force, expectedVstsNpmAuthArgs }) => {
+  const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+  const stdoutWriteFunctionMock = mockStdoutWrite();
+  const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: { from: "cli", value: inMemoryNpmrcFile.path },
+    read: { from: "cli", value: false },
+    force: { from: "cli", value: force },
+  });
+
+  expect(vstsNpmAuthMock.callCount).toBe(1);
+  expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
+    "-C",
+    inMemoryNpmrcFile.path,
+    ...expectedVstsNpmAuthArgs,
+  ]);
+  expect(process.exitCode).toBe(0);
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+});
+
+test("combined read and force options are passed to vsts-npm-auth", async () => {
+  const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+  const stdoutWriteFunctionMock = mockStdoutWrite();
+  const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: { from: "cli", value: inMemoryNpmrcFile.path },
+    read: { from: "cli", value: true },
+    force: { from: "cli", value: true },
+  });
+
+  expect(vstsNpmAuthMock.callCount).toBe(1);
+  expect(vstsNpmAuthMock.mock.calls.slice(1)).toHaveLength(0);
+  expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
+    "-C",
+    inMemoryNpmrcFile.path,
+    "-R",
+    "-F",
+  ]);
+  expect(process.exitCode).toBe(0);
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+});
+
+afterAll(() => {
+  if (originalCiEnvironment === undefined) {
+    delete process.env.CI;
+  } else {
+    process.env.CI = originalCiEnvironment;
+  }
+});

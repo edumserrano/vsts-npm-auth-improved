@@ -4,6 +4,7 @@
 - [Public CLI Testing with Commander](#public-cli-testing-with-commander)
   - [The process.exit challenge](#the-processexit-challenge)
   - [Solution: Using program.exitOverride()](#solution-using-programexitoverride)
+- [Test Suite Organization](#test-suite-organization)
 
 ## Mocking ES Modules with vi.mock
 
@@ -66,3 +67,18 @@ With this approach, the CLI does not call `process.exit`. Commander errors set `
 ```typescript
 expect(process.exitCode).toBe(1);
 ```
+
+## Test Suite Organization
+
+The main auth command tests are grouped by behavior so each file has a focused responsibility:
+
+- `auth-command-cli-entrypoint.test.ts`: help, version, and top-level CLI behavior.
+- `auth-command-cli-config.test.ts`: configuration-path parsing and npm configuration validation.
+- `auth-command-cli-options.test.ts`: authentication options supplied through the CLI.
+- `auth-command-cli-results.test.ts`: authentication results, output, and unexpected failures.
+- `auth-command-cli-retry.test.ts`: forced-acquisition retry behavior.
+- `auth-command-prompts-flow.test.ts`: successful default and non-default prompt flows.
+- `auth-command-prompts-validation.test.ts`: prompt validation and correction flows.
+- `auth-command-prompts-cancellation.test.ts`: cancellation at each prompt stage.
+
+CI- and operating-system-specific behavior remains in the corresponding `-ci` and `-os` suites.
