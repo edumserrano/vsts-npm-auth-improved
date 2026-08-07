@@ -153,9 +153,7 @@ test("comma-separated configuration paths are trimmed and forwarded in order", a
     "-C",
     `${firstConfigPath},${secondConfigPath}`,
   ]);
-  expect(stdoutWriteFunctionMock.normalizedOutput).toContain(
-    "registries at https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/, https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/",
-  );
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
   expect(process.exitCode).toBe(0);
 });
 
@@ -177,9 +175,7 @@ test.each([
   });
 
   expect(execaFunctionMock).not.toHaveBeenCalled();
-  expect(stdoutWriteFunctionMock.normalizedOutput).toContain(
-    "Config paths must be a comma-separated list with no empty paths.",
-  );
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
   expect(process.exitCode).toBe(1);
 });
 
@@ -211,12 +207,7 @@ test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
       "-E",
       "60",
     ]);
-    expect(stdoutWriteFunctionMock.normalizedOutput).toContain(
-      `Credentials will be saved to the NPM configuration file at ${targetConfig}`,
-    );
-    expect(stdoutWriteFunctionMock.normalizedOutput).toContain(
-      `written to the NPM configuration file at ${targetConfig}`,
-    );
+    expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
     expect(process.exitCode).toBe(0);
   },
 );
@@ -237,9 +228,7 @@ test.each(["0", "-1", "1.5", "abc", "Infinity", "9007199254740992"])(
     });
 
     expect(execaFunctionMock).not.toHaveBeenCalled();
-    expect(stderrWriteFunctionMock.normalizedOutput).toContain(
-      "argument '" + expirationMinutes + "' is invalid",
-    );
+    expect(stderrWriteFunctionMock.normalizedOutput).toMatchSnapshot();
     expect(process.exitCode).toBe(1);
   },
 );
@@ -680,10 +669,7 @@ test("every configuration file is validated before authentication starts", async
   });
 
   expect(execaFunctionMock).not.toHaveBeenCalled();
-  expect(stdoutWriteFunctionMock.normalizedOutput).toContain(invalidConfigPath);
-  expect(stdoutWriteFunctionMock.normalizedOutput).toContain(
-    "No registry entry found in the NPM configuration file",
-  );
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
   expect(process.exitCode).toBe(1);
 });
 

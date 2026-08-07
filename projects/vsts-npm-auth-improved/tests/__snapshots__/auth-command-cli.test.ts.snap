@@ -244,6 +244,85 @@ exports[`combined read and force options are passed to vsts-npm-auth 1`] = `
 └  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
 `;
 
+exports[`comma-separated configuration paths are trimmed and forwarded in order 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registries at https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/, https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the user's NPM configuration file
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`empty configuration path entries are rejected: ''   '' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must be a comma-separated list with no empty paths.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`empty configuration path entries are rejected: '''' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must be a comma-separated list with no empty paths.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`empty configuration path entries are rejected: '',./client/.npmrc'' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must be a comma-separated list with no empty paths.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`empty configuration path entries are rejected: ''./client/.npmrc,'' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must be a comma-separated list with no empty paths.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`empty configuration path entries are rejected: ''./client/.npmrc,,./server/.npmrc'' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must be a comma-separated list with no empty paths.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`every configuration file is validated before authentication starts 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+▲  No registry entry found in the NPM configuration file Path: ./server/.npmrc
+│
+■  Authentication with Azure DevOps NPM registry failed. 😞
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`invalid expiration minutes are rejected: -1 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument '-1' is invalid. Expiration minutes must be a positive integer."`;
+
+exports[`invalid expiration minutes are rejected: 0 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument '0' is invalid. Expiration minutes must be a positive integer."`;
+
+exports[`invalid expiration minutes are rejected: 1.5 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument '1.5' is invalid. Expiration minutes must be a positive integer."`;
+
+exports[`invalid expiration minutes are rejected: 9007199254740992 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument '9007199254740992' is invalid. Expiration minutes must be a safe positive integer."`;
+
+exports[`invalid expiration minutes are rejected: Infinity 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument 'Infinity' is invalid. Expiration minutes must be a positive integer."`;
+
+exports[`invalid expiration minutes are rejected: abc 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument 'abc' is invalid. Expiration minutes must be a positive integer."`;
+
 exports[`multiple unknown vsts-npm-auth output lines are displayed in order 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
@@ -448,4 +527,38 @@ exports[`unexpected errors are handled 1`] = `
 │
 ■  Unexpected test error
 └  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`upstream auth options (useOptionAlias: false) 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the NPM configuration file at ./credentials/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the NPM configuration file at ./credentials/.npmrc
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`upstream auth options (useOptionAlias: true) 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the NPM configuration file at ./credentials/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the NPM configuration file at ./credentials/.npmrc
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
 `;
