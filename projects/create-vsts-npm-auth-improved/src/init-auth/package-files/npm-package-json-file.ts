@@ -3,8 +3,6 @@ import type { JsonObject, JsonValue } from "type-fest";
 import { commonJsRequire } from "../../commonjs-require.js";
 import { PackageInstallationStrategy } from "../package-installation-strategy.js";
 
-const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "latest";
-
 const REGISTRY_AUTH_SCRIPT =
   "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force";
 const PREINSTALL_AUTH_SCRIPT = "npm run registry-auth";
@@ -141,7 +139,7 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
   );
   const devDependencies: PackageDependencies = {
     ...readPackageDependencies(content["devDependencies"]),
-    "vsts-npm-auth-improved": VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC,
+    "vsts-npm-auth-improved": "latest",
   };
   const disposition = hasRequiredSemanticState(
     content,

@@ -15,8 +15,6 @@ const EXPECTED_REQUIRED_SCRIPTS = {
   preinstall: "npm run registry-auth",
 } as const;
 
-const EXPECTED_VSTS_NPM_AUTH_IMPROVED_SPEC = "latest";
-
 type PackageJsonFixtureOverrides = Readonly<JsonObject>;
 
 export const EXPECTED_MANAGED_NPM_CONFIG = {
@@ -44,7 +42,7 @@ export function configuredPackageJsonContent(
   return packageJsonContent({
     scripts: EXPECTED_REQUIRED_SCRIPTS,
     devDependencies: {
-      "vsts-npm-auth-improved": EXPECTED_VSTS_NPM_AUTH_IMPROVED_SPEC,
+      "vsts-npm-auth-improved": "latest",
     },
     ...overrides,
   });
