@@ -19,13 +19,13 @@ export function addAuthCommand(program: Command): Command {
     .command("auth", { isDefault: true })
     .description("Authenticate on Windows using vsts-npm-auth NPM package")
     .option("-c, --config-path <paths>", "Comma-separated paths to .npmrc config files")
-    .option("-N, --non-interactive", "Prevent vsts-npm-auth credential prompts")
+    .option("-n, --non-interactive", "Prevent vsts-npm-auth credential prompts")
     .option(
-      "-T, --target-config <path>",
+      "-t, --target-config <path>",
       "Path to the .npmrc that receives credentials (default: ~/.npmrc)",
     )
     .option(
-      "-E, --expiration-minutes <minutes>",
+      "-e, --expiration-minutes <minutes>",
       "Positive integer token lifetime (default: 129600 minutes)",
       parseExpirationMinutes,
     )

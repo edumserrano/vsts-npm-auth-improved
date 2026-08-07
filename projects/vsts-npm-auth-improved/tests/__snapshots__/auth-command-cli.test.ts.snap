@@ -82,10 +82,10 @@ Authenticate on Windows using vsts-npm-auth NPM package
 Options:
   -c, --config-path <paths>           Comma-separated paths to .npmrc config
                                       files
-  -N, --non-interactive               Prevent vsts-npm-auth credential prompts
-  -T, --target-config <path>          Path to the .npmrc that receives
+  -n, --non-interactive               Prevent vsts-npm-auth credential prompts
+  -t, --target-config <path>          Path to the .npmrc that receives
                                       credentials (default: ~/.npmrc)
-  -E, --expiration-minutes <minutes>  Positive integer token lifetime (default:
+  -e, --expiration-minutes <minutes>  Positive integer token lifetime (default:
                                       129600 minutes)
   --read                              Request a token with Packaging (Read)
                                       scope
@@ -104,10 +104,10 @@ Authenticate on Windows using vsts-npm-auth NPM package
 Options:
   -c, --config-path <paths>           Comma-separated paths to .npmrc config
                                       files
-  -N, --non-interactive               Prevent vsts-npm-auth credential prompts
-  -T, --target-config <path>          Path to the .npmrc that receives
+  -n, --non-interactive               Prevent vsts-npm-auth credential prompts
+  -t, --target-config <path>          Path to the .npmrc that receives
                                       credentials (default: ~/.npmrc)
-  -E, --expiration-minutes <minutes>  Positive integer token lifetime (default:
+  -e, --expiration-minutes <minutes>  Positive integer token lifetime (default:
                                       129600 minutes)
   --read                              Request a token with Packaging (Read)
                                       scope
@@ -311,17 +311,17 @@ exports[`every configuration file is validated before authentication starts 1`] 
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`invalid expiration minutes are rejected: -1 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument '-1' is invalid. Expiration minutes must be a positive integer."`;
+exports[`invalid expiration minutes are rejected: -1 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument '-1' is invalid. Expiration minutes must be a positive integer."`;
 
-exports[`invalid expiration minutes are rejected: 0 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument '0' is invalid. Expiration minutes must be a positive integer."`;
+exports[`invalid expiration minutes are rejected: 0 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument '0' is invalid. Expiration minutes must be a positive integer."`;
 
-exports[`invalid expiration minutes are rejected: 1.5 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument '1.5' is invalid. Expiration minutes must be a positive integer."`;
+exports[`invalid expiration minutes are rejected: 1.5 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument '1.5' is invalid. Expiration minutes must be a positive integer."`;
 
-exports[`invalid expiration minutes are rejected: 9007199254740992 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument '9007199254740992' is invalid. Expiration minutes must be a safe positive integer."`;
+exports[`invalid expiration minutes are rejected: 9007199254740992 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument '9007199254740992' is invalid. Expiration minutes must be a safe positive integer."`;
 
-exports[`invalid expiration minutes are rejected: Infinity 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument 'Infinity' is invalid. Expiration minutes must be a positive integer."`;
+exports[`invalid expiration minutes are rejected: Infinity 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument 'Infinity' is invalid. Expiration minutes must be a positive integer."`;
 
-exports[`invalid expiration minutes are rejected: abc 1`] = `"error: option '-E, --expiration-minutes <minutes>' argument 'abc' is invalid. Expiration minutes must be a positive integer."`;
+exports[`invalid expiration minutes are rejected: abc 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument 'abc' is invalid. Expiration minutes must be a positive integer."`;
 
 exports[`multiple unknown vsts-npm-auth output lines are displayed in order 1`] = `
 "

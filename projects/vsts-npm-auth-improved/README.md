@@ -46,9 +46,9 @@ See the [`create-vsts-npm-auth-improved` package documentation](https://www.npmj
 | Option                               | Description and default                                                                                                                                            |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `-c, --config-path <paths>`          | One project `.npmrc`, or a comma-separated list. Each file must contain a global `registry`. When omitted, the CLI prompts for one path, defaulting to `./.npmrc`. |
-| `-N, --non-interactive`              | Prevents `vsts-npm-auth` from prompting for credentials. It does not suppress this wrapper's prompts.                                                              |
-| `-T, --target-config <path>`         | `.npmrc` that receives generated credentials. Defaults to the user npm configuration, normally `~/.npmrc`.                                                         |
-| `-E, --expiration-minutes <minutes>` | Positive integer lifetime for a newly acquired token. Defaults to 129,600 minutes (90 days).                                                                       |
+| `-n, --non-interactive`              | Prevents `vsts-npm-auth` from prompting for credentials. It does not suppress this wrapper's prompts.                                                              |
+| `-t, --target-config <path>`         | `.npmrc` that receives generated credentials. Defaults to the user npm configuration, normally `~/.npmrc`.                                                         |
+| `-e, --expiration-minutes <minutes>` | Positive integer lifetime for a newly acquired token. Defaults to 129,600 minutes (90 days).                                                                       |
 | `--read`                             | Requests a token with Packaging (Read) scope.                                                                                                                      |
 | `--no-read`                          | Requests a token with Packaging (Read & Write) scope.                                                                                                              |
 | `--force`                            | Forces token acquisition even when an existing token is still valid.                                                                                               |

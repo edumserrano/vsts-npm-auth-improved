@@ -58,19 +58,19 @@ export class AuthCommand {
         }
 
         if (options.nonInteractive?.from === "cli" && options.nonInteractive.value) {
-          args.push(options.nonInteractive.useOptionAlias ? "-N" : "--non-interactive");
+          args.push(options.nonInteractive.useOptionAlias ? "-n" : "--non-interactive");
         }
 
         if (options.targetConfig?.from === "cli") {
           args.push(
-            options.targetConfig.useOptionAlias ? "-T" : "--target-config",
+            options.targetConfig.useOptionAlias ? "-t" : "--target-config",
             options.targetConfig.value,
           );
         }
 
         if (options.expirationMinutes?.from === "cli") {
           args.push(
-            options.expirationMinutes.useOptionAlias ? "-E" : "--expiration-minutes",
+            options.expirationMinutes.useOptionAlias ? "-e" : "--expiration-minutes",
             String(options.expirationMinutes.value),
           );
         }
