@@ -25,7 +25,7 @@ export function addAuthCommand(program: Command): Command {
     )
     .option(
       "-e, --expiration-minutes <minutes>",
-      "Positive integer token lifetime up to 525600 (default: 129600 minutes)",
+      "Token lifetime in whole minutes, up to 525600 (365 days); defaults to 129600 (90 days)",
       parseExpirationMinutes,
     )
     .option("--read", "Request a token with Packaging (Read) scope")

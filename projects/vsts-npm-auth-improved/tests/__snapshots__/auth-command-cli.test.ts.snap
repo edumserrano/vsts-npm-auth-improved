@@ -101,8 +101,9 @@ Options:
                                       files
   -t, --target-config <path>          Path to the .npmrc that receives
                                       credentials (default: ~/.npmrc)
-  -e, --expiration-minutes <minutes>  Positive integer token lifetime up to
-                                      525600 (default: 129600 minutes)
+  -e, --expiration-minutes <minutes>  Token lifetime in whole minutes, up to
+                                      525600 (365 days); defaults to 129600 (90
+                                      days)
   --read                              Request a token with Packaging (Read)
                                       scope
   --no-read                           Request a token with Packaging (Read &
@@ -122,8 +123,9 @@ Options:
                                       files
   -t, --target-config <path>          Path to the .npmrc that receives
                                       credentials (default: ~/.npmrc)
-  -e, --expiration-minutes <minutes>  Positive integer token lifetime up to
-                                      525600 (default: 129600 minutes)
+  -e, --expiration-minutes <minutes>  Token lifetime in whole minutes, up to
+                                      525600 (365 days); defaults to 129600 (90
+                                      days)
   --read                              Request a token with Packaging (Read)
                                       scope
   --no-read                           Request a token with Packaging (Read &
