@@ -101,7 +101,25 @@ async function handleAuthCommandAsync(options: AuthCommandOptions, _: Command): 
       `Attempting to authenticate with the Azure DevOps NPM ${registrySummary} (scope: ${tokenScopeResult.asFriendlyText}, force: ${forceOptionResult.asFriendlyText})`,
     );
     const credentialsDestination = getCredentialsDestination(options.targetConfig);
-    prompts.log.info(`Credentials will be saved to ${credentialsDestination.saveLocation}`);
+    let credentialsConfigurationFile: string;
+    let credentialsSaveLocation: string;
+    switch (credentialsDestination.type) {
+      case "user-npm-configuration": {
+        credentialsConfigurationFile = "the user's NPM configuration file";
+        credentialsSaveLocation = `${credentialsConfigurationFile} at ~/.npmrc`;
+        break;
+      }
+      case "target-npm-configuration": {
+        credentialsConfigurationFile = `the NPM configuration file at ${credentialsDestination.path}`;
+        credentialsSaveLocation = credentialsConfigurationFile;
+        break;
+      }
+      default: {
+        const never: never = credentialsDestination;
+        throw new Error(`Unhandled credentials destination: ${JSON.stringify(never)}`);
+      }
+    }
+    prompts.log.info(`Credentials will be saved to ${credentialsSaveLocation}`);
     spinnerPrompt = prompts.spinner();
     spinnerPrompt.start(`Authenticating`);
     const { vstsNpmAuthResult, retriedWithForce } = await runVstsNpmAuthWithRetryAsync(
@@ -120,14 +138,12 @@ async function handleAuthCommandAsync(options: AuthCommandOptions, _: Command): 
       }
       case "already-have-credentials": {
         spinnerPrompt.stop(PromptMessages.AuthAttemptFinished);
-        prompts.log.info(
-          `Valid credentials already exist in ${credentialsDestination.configurationFile}`,
-        );
+        prompts.log.info(`Valid credentials already exist in ${credentialsConfigurationFile}`);
         break;
       }
       case "credentials-obtained": {
         spinnerPrompt.stop(PromptMessages.AuthAttemptFinished);
-        const credentialsObtainedMessage = `New credentials were successfully obtained and written to ${credentialsDestination.configurationFile}`;
+        const credentialsObtainedMessage = `New credentials were successfully obtained and written to ${credentialsConfigurationFile}`;
         const message = retriedWithForce
           ? `${credentialsObtainedMessage} (after retrying with forced token acquisition)`
           : credentialsObtainedMessage;
@@ -209,23 +225,23 @@ function parseExpirationMinutes(value: string): number {
   return expirationMinutes;
 }
 
-type CredentialsDestination = {
-  readonly configurationFile: string;
-  readonly saveLocation: string;
-};
+type CredentialsDestination =
+  | {
+      readonly type: "user-npm-configuration";
+    }
+  | {
+      readonly type: "target-npm-configuration";
+      readonly path: string;
+    };
 
 function getCredentialsDestination(targetConfig: string | undefined): CredentialsDestination {
   if (typeof targetConfig === "undefined") {
-    return {
-      configurationFile: "the user's NPM configuration file",
-      saveLocation: "the user's NPM configuration file at ~/.npmrc",
-    };
+    return { type: "user-npm-configuration" };
   }
 
-  const configurationFile = `the NPM configuration file at ${targetConfig}`;
   return {
-    configurationFile,
-    saveLocation: configurationFile,
+    type: "target-npm-configuration",
+    path: targetConfig,
   };
 }
 
