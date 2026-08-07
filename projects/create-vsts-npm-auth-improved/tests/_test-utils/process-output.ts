@@ -283,18 +283,45 @@ function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
     const previousLineIndex = joinedLines.length - 1;
     const previousLine = joinedLines[previousLineIndex];
     const guidePrefix = line.match(/^[│|] {2}/)?.[0];
-    if (
-      previousLine !== undefined &&
-      guidePrefix !== undefined &&
-      previousLine.startsWith(guidePrefix) &&
-      (previousLine.endsWith(" ") || /^[│|] {3}\S/.test(line))
-    ) {
+    if (previousLine === undefined || guidePrefix === undefined) {
+      joinedLines.push(line);
+      continue;
+    }
+
+    const lineContinuesPreviousPrompt = isSoftWrappedPromptContinuation(
+      line,
+      previousLine,
+      guidePrefix,
+    );
+
+    if (lineContinuesPreviousPrompt) {
       joinedLines[previousLineIndex] = previousLine + line.slice(guidePrefix.length);
     } else {
       joinedLines.push(line);
     }
   }
   return joinedLines;
+}
+
+function isSoftWrappedPromptContinuation(
+  line: string,
+  previousLine: string,
+  guidePrefix: string,
+): boolean {
+  const belongsToSamePrompt = previousLine.startsWith(guidePrefix);
+  if (!belongsToSamePrompt) {
+    return false;
+  }
+
+  const previousLineEndsAtBreakSpace = previousLine.endsWith(" ");
+  const textAfterGuide = line.slice(guidePrefix.length);
+  const firstCharacterAfterExtraIndent = textAfterGuide.at(1);
+  const continuationUsesExtraIndent =
+    textAfterGuide.startsWith(" ") &&
+    firstCharacterAfterExtraIndent !== undefined &&
+    /\S/.test(firstCharacterAfterExtraIndent);
+
+  return previousLineEndsAtBreakSpace || continuationUsesExtraIndent;
 }
 
 function escapeForRegExp(value: string): string {
