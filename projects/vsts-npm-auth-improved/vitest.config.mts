@@ -19,10 +19,6 @@ export default defineConfig({
     exclude: ["node_modules", "dist"],
     coverage: {
       provider: "v8",
-      // pretest:ui already cleans the report directory. Preserve its placeholder on
-      // startup and the previous report while watch/UI reruns regenerate coverage.
-      clean: false,
-      cleanOnRerun: false,
       reporter: [
         "text-summary",
         ["html", { subdir: "html-report" }],
