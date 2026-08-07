@@ -47,7 +47,7 @@ See the [`create-vsts-npm-auth-improved` package documentation](https://www.npmj
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `-c, --config-path <paths>`          | One project `.npmrc`, or a comma-separated list. Each file must contain a global `registry`. When omitted, the CLI prompts for one path, defaulting to `./.npmrc`. |
 | `-t, --target-config <path>`         | `.npmrc` that receives generated credentials. Defaults to the user npm configuration, normally `~/.npmrc`.                                                         |
-| `-e, --expiration-minutes <minutes>` | Positive integer lifetime for a newly acquired token. Defaults to 129,600 minutes (90 days).                                                                       |
+| `-e, --expiration-minutes <minutes>` | Positive integer lifetime for a newly acquired token, up to 525,600 minutes (365 days). Defaults to 129,600 minutes (90 days).                                     |
 | `--read`                             | Requests a token with Packaging (Read) scope.                                                                                                                      |
 | `--no-read`                          | Requests a token with Packaging (Read & Write) scope.                                                                                                              |
 | `--force`                            | Forces token acquisition even when an existing token is still valid.                                                                                               |

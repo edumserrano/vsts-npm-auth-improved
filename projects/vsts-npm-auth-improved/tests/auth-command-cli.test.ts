@@ -210,7 +210,29 @@ test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
   },
 );
 
-test.each(["0", "-1", "1.5", "abc", "Infinity", "9007199254740992"])(
+test("the maximum expiration lifetime is forwarded", async () => {
+  const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+  const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: { from: "cli", value: inMemoryNpmrcFile.path },
+    expirationMinutes: { from: "cli", value: 525_600 },
+    read: { from: "cli", value: false },
+    force: { from: "cli", value: false },
+  });
+
+  expect(vstsNpmAuthMock.callCount).toBe(1);
+  expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
+    "-C",
+    inMemoryNpmrcFile.path,
+    "-E",
+    "525600",
+  ]);
+  expect(process.exitCode).toBe(0);
+});
+
+test.each(["0", "-1", "1.5", "abc", "Infinity", "525601", "9007199254740992"])(
   "invalid expiration minutes are rejected: %s",
   async expirationMinutes => {
     const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
@@ -433,6 +455,70 @@ test("retries once with force token acquisition when vsts-npm-auth returns could
       "vsts-npm-auth@latest",
       "-C",
       inMemoryNpmrcFile.path,
+      "-F",
+    ],
+    {
+      lines: true,
+      all: true,
+      reject: false,
+    },
+  );
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+  expect(process.exitCode).toBe(0);
+});
+
+test("a failed registry takes precedence over existing credentials and is retried", async () => {
+  const firstConfigPath = "./client/.npmrc";
+  const secondConfigPath = "./server/.npmrc";
+  createInMemoryNpmrcFile({
+    vol,
+    path: firstConfigPath,
+    contents: "registry=https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/",
+  });
+  createInMemoryNpmrcFile({
+    vol,
+    path: secondConfigPath,
+    contents: "registry=https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/",
+  });
+  const stdoutWriteFunctionMock = mockStdoutWrite();
+  const vstsNpmAuthMock = mockVstsNpmAuth([
+    "mixed-existing-credentials-and-auth-failure",
+    "credentials-obtained",
+  ]);
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: { from: "cli", value: `${firstConfigPath},${secondConfigPath}` },
+    read: { from: "cli", value: false },
+    force: { from: "cli", value: false },
+  });
+
+  expect(vstsNpmAuthMock.callCount).toBe(2);
+  expect(vstsNpmAuthMock).toHaveBeenNthCalledWith(
+    1,
+    "npx",
+    [
+      "--yes",
+      "--registry=https://registry.npmjs.org/",
+      "vsts-npm-auth@latest",
+      "-C",
+      `${firstConfigPath},${secondConfigPath}`,
+    ],
+    {
+      lines: true,
+      all: true,
+      reject: false,
+    },
+  );
+  expect(vstsNpmAuthMock).toHaveBeenNthCalledWith(
+    2,
+    "npx",
+    [
+      "--yes",
+      "--registry=https://registry.npmjs.org/",
+      "vsts-npm-auth@latest",
+      "-C",
+      `${firstConfigPath},${secondConfigPath}`,
       "-F",
     ],
     {

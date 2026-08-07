@@ -15,11 +15,10 @@ type MockVstsNpmAuthResult =
   | "no-registry-entry-found"
   | "config-file-not-found"
   | "credentials-obtained"
+  | "mixed-existing-credentials-and-auth-failure"
   | "unknown";
 
-export type MockVstsNpmAuthOptions =
-  | MockVstsNpmAuthResult
-  | readonly MockVstsNpmAuthResult[];
+export type MockVstsNpmAuthOptions = MockVstsNpmAuthResult | readonly MockVstsNpmAuthResult[];
 
 export type VstsNpmAuthMock = MockedFunction<ExecaMethod<{}>> & {
   readonly callCount: number;
@@ -70,6 +69,13 @@ function getVstsNpmAuthOutputForResult(result: MockVstsNpmAuthResult): string[] 
     }
     case "credentials-obtained": {
       commandOutputLines.push("Getting new credentials for");
+      break;
+    }
+    case "mixed-existing-credentials-and-auth-failure": {
+      commandOutputLines.push(
+        "Already have credentials for https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/",
+        "Couldn't get an authentication token for https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/",
+      );
       break;
     }
     case "unknown": {

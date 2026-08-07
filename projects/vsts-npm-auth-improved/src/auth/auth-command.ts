@@ -25,7 +25,7 @@ export function addAuthCommand(program: Command): Command {
     )
     .option(
       "-e, --expiration-minutes <minutes>",
-      "Positive integer token lifetime (default: 129600 minutes)",
+      "Positive integer token lifetime up to 525600 (default: 129600 minutes)",
       parseExpirationMinutes,
     )
     .option("--read", "Request a token with Packaging (Read) scope")
@@ -196,14 +196,18 @@ function getErrorMessage(error: unknown): string {
   return "";
 }
 
+const MAX_EXPIRATION_MINUTES = 525_600;
+
 function parseExpirationMinutes(value: string): number {
   if (!/^[1-9]\d*$/.test(value)) {
     throw new InvalidArgumentError("Expiration minutes must be a positive integer.");
   }
 
   const expirationMinutes = Number(value);
-  if (!Number.isSafeInteger(expirationMinutes)) {
-    throw new InvalidArgumentError("Expiration minutes must be a safe positive integer.");
+  if (!Number.isSafeInteger(expirationMinutes) || expirationMinutes > MAX_EXPIRATION_MINUTES) {
+    throw new InvalidArgumentError(
+      `Expiration minutes must be between 1 and ${MAX_EXPIRATION_MINUTES}.`,
+    );
   }
 
   return expirationMinutes;

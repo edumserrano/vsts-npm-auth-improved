@@ -160,8 +160,8 @@ function removeHeadersFromOutput(output: readonly string[]): readonly string[] {
 }
 
 /**
- * Mapping of output patterns to their corresponding result types.
- * Order matters - first match wins.
+ * Maps known output patterns to result types.
+ * A single invocation can match multiple result types.
  */
 type VstsNpmAuthOutputPattern = {
   readonly pattern: string;
@@ -170,13 +170,13 @@ type VstsNpmAuthOutputPattern = {
 
 const OUTPUT_PATTERN_TO_RESULT_TYPE: readonly VstsNpmAuthOutputPattern[] = [
   { pattern: "Already have credentials for", type: "already-have-credentials" },
+  { pattern: "Getting new credentials for", type: "credentials-obtained" },
   { pattern: "Couldn't get an authentication token for", type: "could-not-get-auth-token" },
   {
     pattern: "No registry entries were found in the supplied config files",
     type: "no-registry-entry-found",
   },
   { pattern: "Config file not found", type: "config-file-not-found" },
-  { pattern: "Getting new credentials for", type: "credentials-obtained" },
 ];
 
 function parseResult(outputLines: readonly string[]): VstsNpmAuthResult {
@@ -190,19 +190,34 @@ function parseResult(outputLines: readonly string[]): VstsNpmAuthResult {
     };
   }
 
-  const matchedPattern = OUTPUT_PATTERN_TO_RESULT_TYPE.find(({ pattern }) =>
-    outputText.includes(pattern),
+  const matchedResultTypes = new Set(
+    OUTPUT_PATTERN_TO_RESULT_TYPE.filter(({ pattern }) => outputText.includes(pattern)).map(
+      ({ type }) => type,
+    ),
   );
-
-  if (matchedPattern) {
-    return {
-      type: matchedPattern.type,
-      output: outputLinesWithoutHeaders,
-    };
-  }
-
   return {
-    type: "unknown",
+    type: resolveResultType(matchedResultTypes),
     output: outputLinesWithoutHeaders,
   };
+}
+
+function resolveResultType(
+  matchedResultTypes: ReadonlySet<VstsNpmAuthResult["type"]>,
+): VstsNpmAuthResult["type"] {
+  if (matchedResultTypes.has("could-not-get-auth-token")) {
+    return "could-not-get-auth-token";
+  }
+  if (matchedResultTypes.has("no-registry-entry-found")) {
+    return "no-registry-entry-found";
+  }
+  if (matchedResultTypes.has("config-file-not-found")) {
+    return "config-file-not-found";
+  }
+  if (matchedResultTypes.has("credentials-obtained")) {
+    return "credentials-obtained";
+  }
+  if (matchedResultTypes.has("already-have-credentials")) {
+    return "already-have-credentials";
+  }
+  return "unknown";
 }
