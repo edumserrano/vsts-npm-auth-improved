@@ -81,3 +81,10 @@ available, then:
 - exits successfully so a cross-platform npm script can continue.
 
 No PAT-based authentication is currently performed by this package.
+
+## Package format
+
+The published CLI is ESM-only. This matches its Node.js 24 minimum, keeps the emitted package
+aligned with modern Node.js module conventions, and reduces interop work when adopting ESM-only
+dependencies. The package does not expose a supported programmatic entry point; invoke it through
+its npm executable.

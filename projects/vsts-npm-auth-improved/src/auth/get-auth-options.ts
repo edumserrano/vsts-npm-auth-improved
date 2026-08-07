@@ -1,8 +1,8 @@
-import { prompts } from "./prompts-utils";
+import { prompts } from "./prompts-utils.js";
 import {
   getRegistryErrorMessage,
   getRegistryFromConfigFile,
-} from "./get-registry-from-config-file";
+} from "./get-registry-from-config-file.js";
 
 const TOKEN_SCOPE = {
   READ: "read",
