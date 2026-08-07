@@ -224,7 +224,7 @@ jobs:
           persist-credentials: false
       - name: Publish package
         id: publish-package
-        uses: ./.github/actions/publish-package
+        uses: $/.github/actions/publish-package
         with:
           package-name: ${{ needs.identify-release.outputs.package-name }}
           source-sha: ${{ needs.identify-release.outputs.source-sha }}
