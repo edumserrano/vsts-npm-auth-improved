@@ -20,14 +20,9 @@ See:
 
 ## Public CLI Testing with Commander
 
-The tests in this folder invoke the imported `cliAsync` function in-process to validate the public CLI boundary. Execa is mocked as the boundary to the external `npx vsts-npm-auth` process, and `node:fs` is replaced by memfs as the filesystem boundary. Environment and platform state may also be controlled directly. These are full-layer source tests rather than tests of the emitted executable, host filesystem, real authentication process, or Azure registry. This approach provides several benefits:
+The tests in this folder invoke the imported `cliAsync` function in-process to validate the public CLI boundary. Execa is mocked as the boundary to the external `npx` process for [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth), and `node:fs` is replaced by memfs as the filesystem boundary. Environment and platform state may also be controlled directly. These are full-layer source tests rather than tests of the emitted executable, host filesystem, real authentication process, or Azure registry. This approach provides several benefits:
 
-Application modules beneath `src` are implementation details: tests must not
-import, dynamically load, mock, or assert calls to them. Production libraries
-are implementation choices and must also remain real unless they implement an
-approved external boundary. Execa is the explicit process-boundary exception;
-Commander and CI detection remain real. The `test:boundaries` check enforces
-these restrictions as well as the single `cliAsync` import.
+Application modules beneath `src` are implementation details: tests must not import, dynamically load, mock, or assert calls to them. Production libraries are implementation choices and must also remain real unless they implement an approved external boundary. Execa is the explicit process-boundary exception; Commander and CI detection remain real. The `test:boundaries` check enforces these restrictions as well as the single `cliAsync` import.
 
 - **Testing the CLI interface**: All commands, options, and aliases are tested as users would interact with them.
 - **Testing CLI error handling**: Ensures error scenarios are handled correctly at the CLI level, including Commander's error handling.
@@ -46,11 +41,6 @@ To prevent Commander from calling `process.exit`, we use `program.exitOverride()
 With `exitOverride()` enabled, Commander throws a `CommanderError` instead of calling `process.exit`. In the catch block after calling `program.parseAsync` in the `cliAsync` function, we check if it's a `CommanderError` and set the exit code accordingly:
 
 ```typescript
-// code from  /projects/vsts-npm-auth-improved/src/cli.ts
-function isCommanderError(error: unknown): error is CommanderError {
-  return error instanceof CommanderError;
-}
-
 try {
   console.log();
   const program = createProgram();
@@ -58,10 +48,16 @@ try {
 } catch (error) {
   if (isCommanderError(error)) {
     process.exitCode = error.exitCode;
-  } else {
-    console.log("🚨 Unexpected error:", error);
-    process.exitCode = 1;
+    return;
   }
+
+  console.log("🚨 Unexpected error:", error);
+  process.exitCode = 1;
+  return;
+}
+
+function isCommanderError(error: unknown): error is CommanderError {
+  return error instanceof CommanderError;
 }
 ```
 

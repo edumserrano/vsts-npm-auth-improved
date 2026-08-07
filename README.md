@@ -5,76 +5,46 @@
 [![vsts-npm-auth-improved on npm](https://img.shields.io/npm/v/vsts-npm-auth-improved?logo=npm&label=vsts-npm-auth-improved)](https://www.npmjs.com/package/vsts-npm-auth-improved)
 [![create-vsts-npm-auth-improved on npm](https://img.shields.io/npm/v/create-vsts-npm-auth-improved?logo=npm&label=create-vsts-npm-auth-improved)](https://www.npmjs.com/package/create-vsts-npm-auth-improved)
 
-TypeScript CLI tools for configuring npm projects and authenticating with private Azure DevOps
-Artifacts registries.
+`vsts-npm-auth-improved` wraps and invokes [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) to authenticate npm with private Azure DevOps Artifacts registries on Windows. It adds:
 
-## Packages
+- ✅ Configures one or more npm projects for automatic npm authentication in a single interactive setup.
+- ✅ A friendlier guided authentication experience.
+- ✅ Clearer success and error messages.
+- ✅ A one-time automatic retry that can recover from stale or expired tokens.
+- ✅ The same npm scripts remain safe to use on macOS, Linux, and CI.
 
-- `vsts-npm-auth-improved` authenticates npm with an Azure DevOps registry on Windows.
-- `create-vsts-npm-auth-improved` interactively configures project `.npmrc` and `package.json`
-  files to use the authentication command.
+## Configure a project for automatic npm authentication
 
-## Platform behavior
-
-### Windows
-
-`vsts-npm-auth-improved` runs `vsts-npm-auth` to acquire credentials for the registry configured
-in the selected project `.npmrc`. The credentials are written to the user's npm configuration at
-`~/.npmrc`. It does not pass an expiration time (`-E`) to `vsts-npm-auth`, so newly acquired tokens
-use the `vsts-npm-auth` default of 129,600 minutes (90 days).
-
-### macOS and Linux
-
-Automatic authentication is not supported outside Windows. The command warns that authentication
-must be configured manually and exits successfully without reading the project `.npmrc` or
-invoking `vsts-npm-auth`. This allows cross-platform npm scripts to continue to `npm install`
-after displaying the manual-authentication requirement.
-
-No PAT-based authentication is currently performed by this package.
-
-## Authentication CLI
-
-Run with prompts:
+From the directory containing one or more npm projects, run:
 
 ```shell
-vsts-npm-auth-improved auth
+npm init vsts-npm-auth-improved
 ```
 
-Provide all options for use from an npm script:
+Follow the prompts to choose the projects and Azure DevOps Artifacts registry you want to use. The selected projects are updated so authentication runs automatically with either `npm install` (supported on npm 12 and later) or `npm run install-packages` (supported on npm 11 and earlier).
+
+After setup, install packages using the command selected during setup.
+
+For npm 12 and later:
 
 ```shell
-vsts-npm-auth-improved auth --config-path ./.npmrc --read --no-force
+npm install
 ```
 
-The `auth` command is the default, so this is equivalent:
+For npm 11 and earlier:
 
 ```shell
-vsts-npm-auth-improved --config-path ./.npmrc --read --no-force
+npm run install-packages
 ```
 
-## Project setup CLI
+On Windows, authentication happens automatically before npm installs private packages. On macOS, Linux, and CI, the authentication step is skipped so your environment must supply the required credentials.
 
-Use the companion setup package to configure one or more npm projects:
+See the [`create-vsts-npm-auth-improved` package documentation](projects/create-vsts-npm-auth-improved/README.md) for detailed setup options and guidance.
 
-```shell
-npx create-vsts-npm-auth-improved init-auth
-```
+## Run authentication manually
 
-See the package documentation under `projects/create-vsts-npm-auth-improved` for the complete
-interactive setup flow.
+If you want to run `vsts-npm-auth-improved` manually to authenticate to an Azure DevOps Artifacts registry, see the [`vsts-npm-auth-improved` package documentation](projects/vsts-npm-auth-improved/README.md).
 
-## Development
+## Development and releases
 
-Each package is built and tested from its own directory:
-
-```shell
-cd projects/vsts-npm-auth-improved
-npm ci
-npm run build
-npm test
-```
-
-The repository currently requires Node.js 24.18.1 or later and npm 12.0.2 or later.
-
-Maintainers should follow the [release runbook](RELEASE_RUNBOOK.md) to prepare, publish, verify,
-or recover a package release.
+Maintaining the repository? See the [`developer documentation`](docs/dev-docs/README.md).
