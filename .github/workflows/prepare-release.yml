@@ -85,7 +85,7 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v6
       - name: Build and test package
-        uses: ./.github/actions/build-and-test-package
+        uses: $/.github/actions/build-and-test-package
         with:
           project-directory: ${{ env.PACKAGE_DIRECTORY }}
           node-version: ${{ env.NODE_VERSION }}
