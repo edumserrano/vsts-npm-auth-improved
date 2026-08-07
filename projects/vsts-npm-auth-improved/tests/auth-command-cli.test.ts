@@ -3,7 +3,7 @@ import { AuthCommand, VstsNpmAuthImprovedCli } from "@test-utils/auth-command";
 import { execa } from "execa";
 import { vol } from "memfs";
 import { createInMemoryNpmrcFile } from "@test-utils/npm-configuration-file";
-import { mockStderrWrite, mockStdoutWrite } from "@test-utils/stdout";
+import { mockStderrWrite, mockStdoutWrite } from "@test-utils/process-output";
 import { mockVstsNpmAuth, MockVstsNpmAuthOptions } from "@test-utils/vsts-npm-auth";
 
 /**

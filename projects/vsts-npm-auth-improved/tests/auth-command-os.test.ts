@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeEach, expect, test, vi } from "vitest";
 import { execa } from "execa";
 import { vol } from "memfs";
 import { AuthCommand } from "@test-utils/auth-command";
-import { mockStdoutWrite } from "@test-utils/stdout";
+import { mockStdoutWrite } from "@test-utils/process-output";
 
 /**
  * The tests below verify platform-specific auth command behavior outside Windows when all options

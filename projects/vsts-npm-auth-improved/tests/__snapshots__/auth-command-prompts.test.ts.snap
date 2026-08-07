@@ -227,8 +227,7 @@ exports[`complete non-default prompt flow selects read-write scope and forced ac
 │  ↑/↓ to navigate • Enter: confirm
 └
 │  ○ no
-│  ● yes (Only use this if the authentication fails without force token 
-│  acquisition.)
+│  ● yes (Only use this if the authentication fails without force token acquisition.)
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  Force token acquisition?
@@ -555,8 +554,7 @@ exports[`forced acquisition can be selected from the prompt 1`] = `
 │  ↑/↓ to navigate • Enter: confirm
 └
 │  ○ no
-│  ● yes (Only use this if the authentication fails without force token 
-│  acquisition.)
+│  ● yes (Only use this if the authentication fails without force token acquisition.)
 │  ↑/↓ to navigate • Enter: confirm
 └
 ◇  Force token acquisition?
