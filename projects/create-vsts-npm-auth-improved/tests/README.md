@@ -21,11 +21,13 @@ See:
 
 ## npm-owned Serialization Contracts
 
-CLI workflow tests use real temporary directories and assert the semantic
+CLI workflow tests use an isolated in-memory filesystem and assert the semantic
 configuration produced by `@npmcli/config` and `@npmcli/package-json` through
 the public command. Tests compare parsed configuration except when proving that
 an unchanged file is not rewritten. Deterministic read and write failures are
-injected at external library or test-owned filesystem boundaries.
+injected at external library or test-owned filesystem boundaries. The emitted
+package integration test still writes compiler output to `dist`, but its CLI
+scenario uses the same in-memory project filesystem as the source tests.
 
 The test contract deliberately does not guarantee `.npmrc` comments or inline
 comments, blank or malformed lines, exact key order, CRLF versus LF, BOMs, or
@@ -37,14 +39,13 @@ saved; unrelated semantic configuration remains covered.
 ## Public CLI Testing with Commander
 
 All the tests in this folder invoke the imported `cliAsync` function in-process
-to validate the public CLI boundary. Normal operations use isolated temporary
-directories on the host filesystem. Application modules beneath `src` are
+to validate the public CLI boundary. Normal operations use isolated in-memory
+project directories. Application modules beneath `src` are
 implementation details: tests must not import, dynamically load, mock, or assert
 calls to them. Production libraries such as Commander, Globby, and the npm
 configuration packages are also implementation choices and must remain real.
 Tests may replace external interactions at their system boundary, such as
-terminal streams or targeted Node filesystem operations that cannot be made to
-fail portably with a temporary fixture.
+terminal streams, the Node filesystem, or targeted filesystem operations.
 
 The `test:boundaries` check enforces both the application-code boundary and the
 production-dependency restriction.

@@ -144,7 +144,13 @@ function normalizeOutput(
   );
 
   const normalizedTemporaryRoots = [...(options.temporaryRoots ?? [])]
-    .map(normalizePathSeparators)
+    .flatMap(temporaryRoot => {
+      const normalizedRoot = normalizePathSeparators(temporaryRoot);
+      const withoutWindowsDrive = normalizedRoot.replace(/^[A-Za-z]:/u, "");
+      return withoutWindowsDrive === normalizedRoot
+        ? [normalizedRoot]
+        : [normalizedRoot, withoutWindowsDrive];
+    })
     .sort((left, right) => right.length - left.length);
 
   normalized = normalizePathSeparators(normalized);

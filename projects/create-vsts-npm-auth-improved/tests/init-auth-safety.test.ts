@@ -16,11 +16,12 @@ import { mockStdoutWrite } from "@test-utils/process-output";
  * planning, and persistence failures without leaving partial project changes.
  */
 
-vi.mock("node:fs", async importOriginal => {
-  const actual = await importOriginal<typeof import("node:fs")>();
+vi.mock("node:fs", async () => {
+  const { fs } = await import("memfs");
   return {
-    ...actual,
-    accessSync: vi.fn(actual.accessSync),
+    ...fs,
+    default: fs,
+    accessSync: vi.fn(fs.accessSync),
   };
 });
 

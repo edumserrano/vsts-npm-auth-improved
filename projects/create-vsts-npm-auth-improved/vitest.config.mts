@@ -4,6 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     globals: false,
+    setupFiles: ["./tests/_test-utils/in-memory-fs.ts"],
     // Clack selects Unicode symbols at module-load time. Make prompt snapshots
     // deterministic when tests run outside a Unicode-detectable Windows terminal.
     env: {

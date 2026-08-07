@@ -1,26 +1,23 @@
 import {
   access,
   mkdir,
-  mkdtemp,
   readFile,
   readdir,
   rm,
   writeFile,
 } from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 
 /**
- * Creates isolated npm project fixtures beneath one dedicated temporary parent.
- * It validates every fixture path, inventories and normalizes filesystem state,
- * and refuses cleanup outside its test-owned naming and directory boundary.
+ * Creates isolated npm project fixtures in the suite's in-memory filesystem.
+ * It validates every fixture path and inventories normalized filesystem state.
  */
 
-const ownedRootsParent = path.join(
-  os.tmpdir(),
-  "create-vsts-npm-auth-improved-tests",
+const ownedRootsParent = path.resolve(
+  import.meta.dirname,
+  "..",
+  ".in-memory-projects",
 );
-const ownedRootPrefix = "npm-project-";
 
 export type NpmPackageFixture = {
   readonly directory?: string;
@@ -36,12 +33,9 @@ export class NpmProject {
 
   public static async createAsync(name: string): Promise<NpmProject> {
     const validatedName = validateFixtureName(name);
-    await mkdir(ownedRootsParent, { recursive: true });
-    const root = await mkdtemp(
-      path.join(ownedRootsParent, `${ownedRootPrefix}${validatedName}-`),
-    );
+    const root = path.join(ownedRootsParent, validatedName);
+    await mkdir(root, { recursive: true });
     const project = new NpmProject(root);
-    project.assertOwnedRoot();
     NpmProject.activeProjects.add(project);
     return project;
   }
@@ -124,20 +118,9 @@ export class NpmProject {
     if (this.removed) {
       return;
     }
-    this.assertOwnedRoot();
     await rm(this.root, { recursive: true, force: true });
     this.removed = true;
     NpmProject.activeProjects.delete(this);
-  }
-
-  private assertOwnedRoot(): void {
-    const resolvedRoot = path.resolve(this.root);
-    if (
-      path.dirname(resolvedRoot) !== ownedRootsParent ||
-      !path.basename(resolvedRoot).startsWith(ownedRootPrefix)
-    ) {
-      throw new Error(`Refusing to remove non-test-owned path: ${resolvedRoot}`);
-    }
   }
 }
 

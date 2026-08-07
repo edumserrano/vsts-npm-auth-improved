@@ -1,9 +1,8 @@
 import { execFileSync } from "node:child_process";
-import { access, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import type { JsonObject, JsonValue, PackageJson } from "type-fest";
-import { afterEach, expect, test } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 import { NpmProject } from "@test-utils/npm-project";
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
 import { mockStdoutWrite } from "@test-utils/process-output";
@@ -24,6 +23,9 @@ type EmittedCreatePackage = {
 };
 
 const testSuiteCwd = process.cwd();
+const hostFs = await vi.importActual<typeof import("node:fs/promises")>(
+  "node:fs/promises",
+);
 
 afterEach(async () => {
   process.chdir(testSuiteCwd);
@@ -47,7 +49,7 @@ afterEach(async () => {
 test("runs the no-packages flow through the emitted package entrypoint", async () => {
   const emittedPackage = await buildAndLoadEmittedCreatePackageAsync();
   const sourcePackageJson: unknown = JSON.parse(
-    await readFile(
+    await hostFs.readFile(
       path.join(emittedPackage.packageRoot, "package.json"),
       "utf8",
     ),
@@ -58,7 +60,7 @@ test("runs the no-packages flow through the emitted package entrypoint", async (
   expect(sourcePackageJson["type"]).toBe("module");
   const binTarget = resolveBinTarget(sourcePackageJson["bin"]);
   await expect(
-    access(path.resolve(emittedPackage.outputRoot, binTarget)),
+    hostFs.access(path.resolve(emittedPackage.outputRoot, binTarget)),
   ).resolves.toBeUndefined();
 
   const project = await NpmProject.createAsync("emitted-no-packages");
@@ -83,7 +85,7 @@ async function buildAndLoadEmittedCreatePackageAsync(): Promise<EmittedCreatePac
     "dist",
     "create-vsts-npm-auth-improved",
   );
-  await rm(outputRoot, { recursive: true, force: true });
+  await hostFs.rm(outputRoot, { recursive: true, force: true });
 
   const tscPath = path.join(
     packageRoot,

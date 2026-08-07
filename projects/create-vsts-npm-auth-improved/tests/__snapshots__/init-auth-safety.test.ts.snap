@@ -343,7 +343,7 @@ exports[`reports a unreadable package.json after discovery with zero writes 1`] 
 ◇  How should users install packages with automatic authentication?
 │  Standard npm install
 │
-■  Could not read package.json: Could not read package.json: Error: EISDIR: illegal operation on a directory, read.
+■  Could not read package.json: Could not read package.json: Error: EISDIR: illegal operation on a directory, open '<test-root>/package.json'.
 │
 └  No files were changed.
 

@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { AuthSetupPlan, PlannedNpmrcChange } from "./auth-setup-plan.js";
 
@@ -31,6 +32,7 @@ export async function checkChangedNpmrcFilesForGitignoreAsync(
       convertPathToPattern(path.relative(resolvedRoot, fileChange.filePath)),
     );
     const unignoredPaths = await globby(candidatePatterns, {
+      fs,
       cwd: resolvedRoot,
       absolute: true,
       onlyFiles: true,

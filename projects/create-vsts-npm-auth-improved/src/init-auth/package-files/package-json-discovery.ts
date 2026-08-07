@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { DirectorySearchFailure } from "../init-auth-failure.js";
 
@@ -26,6 +27,7 @@ export async function discoverPackageJsonFilesAsync(
     const discoveredPaths = await globby(
       ["package.json", "**/package.json"],
       {
+        fs,
         cwd: resolvedRoot,
         absolute: true,
         onlyFiles: true,
