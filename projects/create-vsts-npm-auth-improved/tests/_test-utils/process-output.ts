@@ -77,13 +77,12 @@ export type ProcessOutputCaptureOptions = OutputNormalizationOptions & {
 export function captureProcessOutput(
   options: ProcessOutputCaptureOptions = {},
 ): ProcessOutputCapture {
-  const stdout = captureOutputChannel(process.stdout, options);
-  if (options.captureStderr !== true) {
-    return { stdout };
-  }
-
-  const stderr = captureOutputChannel(process.stderr, options);
-  return { stdout, stderr };
+  return {
+    stdout: captureOutputChannel(process.stdout, options),
+    ...(options.captureStderr === true
+      ? { stderr: captureOutputChannel(process.stderr, options) }
+      : {}),
+  };
 }
 
 /**
@@ -114,8 +113,7 @@ function captureOutputChannel(
   stream: NodeJS.WriteStream,
   options: OutputNormalizationOptions,
 ): OutputChannelCapture {
-  const write = vi.spyOn(stream, "write");
-  write.mockImplementation(() => true);
+  const write = vi.spyOn(stream, "write").mockImplementation(() => true);
   return {
     write,
     get normalizedOutput() {
@@ -145,11 +143,9 @@ function normalizeOutput(
     lineFeed,
   );
 
-  const temporaryRoots = [...(options.temporaryRoots ?? [])];
-  const normalizedTemporaryRoots = temporaryRoots.map(root =>
-    normalizePathSeparators(root),
-  );
-  normalizedTemporaryRoots.sort((left, right) => right.length - left.length);
+  const normalizedTemporaryRoots = [...(options.temporaryRoots ?? [])]
+    .map(normalizePathSeparators)
+    .sort((left, right) => right.length - left.length);
 
   normalized = normalizePathSeparators(normalized);
   normalized = normalizeProgressivelyTypedTemporaryRoots(
@@ -172,15 +168,9 @@ function normalizeOutput(
  * line so snapshots remain stable across releases.
  */
 function normalizePackageVersion(output: string): string {
-  let normalized = output.replace(
-    packageVersionAfterName,
-    `$1${packageVersionPlaceholder}`,
-  );
-  normalized = normalized.replace(
-    standalonePackageVersion,
-    packageVersionPlaceholder,
-  );
-  return normalized;
+  return output
+    .replace(packageVersionAfterName, `$1${packageVersionPlaceholder}`)
+    .replace(standalonePackageVersion, packageVersionPlaceholder);
 }
 
 /**
@@ -236,23 +226,22 @@ function normalizeTemporaryRootTypingSequence(
     return typingSequence;
   }
 
-  let normalized = typingSequence.replace(
-    temporaryRootTypingFramePattern,
-    (originalFrame, typedValue: string) => {
-      const belongsToCompletedRoot = completedRoots.some(root =>
-        startsWithIgnoringCase(root, typedValue),
-      );
-      if (belongsToCompletedRoot) {
-        return normalizedTemporaryRootFrame;
-      }
-      return originalFrame;
-    },
-  );
-  normalized = normalized.replace(
-    repeatedNormalizedTemporaryRootFrames,
-    normalizedTemporaryRootFrame,
-  );
-  return normalized;
+  return typingSequence
+    .replace(
+      temporaryRootTypingFramePattern,
+      (originalFrame, typedValue: string) => {
+        const belongsToCompletedRoot = completedRoots.some(root =>
+          startsWithIgnoringCase(root, typedValue),
+        );
+        return belongsToCompletedRoot
+          ? normalizedTemporaryRootFrame
+          : originalFrame;
+      },
+    )
+    .replace(
+      repeatedNormalizedTemporaryRootFrames,
+      normalizedTemporaryRootFrame,
+    );
 }
 
 /**
@@ -287,10 +276,9 @@ function startsWithIgnoringCase(value: string, prefix: string): boolean {
  * normalization.
  */
 function toText(chunk: string | Uint8Array): string {
-  if (typeof chunk === "string") {
-    return chunk;
-  }
-  return Buffer.from(chunk).toString();
+  return typeof chunk === "string"
+    ? chunk
+    : Buffer.from(chunk).toString();
 }
 
 /**
@@ -298,11 +286,11 @@ function toText(chunk: string | Uint8Array): string {
  * characters while leaving visible terminal text intact.
  */
 function stripTerminalControlSequences(value: string): string {
-  let normalized = value.replace(operatingSystemCommandPattern, "");
-  normalized = normalized.replace(controlSequenceIntroducerPattern, "");
-  normalized = normalized.replace(characterSetSelectionPattern, "");
-  normalized = normalized.replace(remainingControlCharactersPattern, "");
-  return normalized;
+  return value
+    .replace(operatingSystemCommandPattern, "")
+    .replace(controlSequenceIntroducerPattern, "")
+    .replace(characterSetSelectionPattern, "")
+    .replace(remainingControlCharactersPattern, "");
 }
 
 /**
@@ -347,10 +335,10 @@ function normalizeColorDrivenMultiselectRedraws(value: string): string {
     "g",
   );
 
-  let normalized = value.replace(firstFocusMove, allOption);
-  normalized = normalized.replace(laterFocusMoves, "");
-  normalized = normalized.replace(selectedFocusMoves, "$1");
-  return normalized;
+  return value
+    .replace(firstFocusMove, allOption)
+    .replace(laterFocusMoves, "")
+    .replace(selectedFocusMoves, "$1");
 }
 
 /**

@@ -74,8 +74,9 @@ function mockStreamWrite(
   stream: NodeJS.WriteStream,
   normalizedOutputPrefix = "",
 ): OutputWriteFunctionMock {
-  const mock: MockInstance<StreamWriteFunction> = vi.spyOn(stream, "write");
-  mock.mockImplementation(() => true);
+  const mock: MockInstance<StreamWriteFunction> = vi
+    .spyOn(stream, "write")
+    .mockImplementation(() => true);
   const augmentedMock = mock as OutputWriteFunctionMock;
   Object.defineProperty(augmentedMock, "normalizedOutput", {
     get() {
@@ -107,16 +108,11 @@ function normalizeOutput(
     normalizedEntry = stripTerminalControlSequences(normalizedEntry);
     return normalizedEntry.split(lineFeed);
   });
-  const joinedLines = joinSoftWrappedPromptLines(normalizedLines);
-  const linesWithVisibleText = joinedLines.filter(hasVisibleText);
-  const normalizedOutput = linesWithVisibleText.join(lineFeed);
+  const normalizedOutput = joinSoftWrappedPromptLines(normalizedLines)
+    .filter(outputEntry => outputEntry.trim() !== "")
+    .join(lineFeed);
   const prefixedOutput = prefix + normalizedOutput;
   return normalizePackageVersion(prefixedOutput);
-}
-
-/** Tests whether a normalized output line contains non-whitespace text. */
-function hasVisibleText(value: string): boolean {
-  return value.trim() !== "";
 }
 
 /**
@@ -169,10 +165,9 @@ function isSoftWrappedPromptContinuation(
  * normalization.
  */
 function toText(chunk: string | Uint8Array): string {
-  if (typeof chunk === "string") {
-    return chunk;
-  }
-  return Buffer.from(chunk).toString();
+  return typeof chunk === "string"
+    ? chunk
+    : Buffer.from(chunk).toString();
 }
 
 /**
@@ -180,11 +175,11 @@ function toText(chunk: string | Uint8Array): string {
  * characters while leaving visible terminal text and line feeds intact.
  */
 function stripTerminalControlSequences(value: string): string {
-  let normalized = value.replace(operatingSystemCommandPattern, "");
-  normalized = normalized.replace(controlSequenceIntroducerPattern, "");
-  normalized = normalized.replace(characterSetSelectionPattern, "");
-  normalized = normalized.replace(remainingControlCharactersPattern, "");
-  return normalized;
+  return value
+    .replace(operatingSystemCommandPattern, "")
+    .replace(controlSequenceIntroducerPattern, "")
+    .replace(characterSetSelectionPattern, "")
+    .replace(remainingControlCharactersPattern, "");
 }
 
 /**
@@ -192,13 +187,7 @@ function stripTerminalControlSequences(value: string): string {
  * so snapshots do not change when the package version changes.
  */
 function normalizePackageVersion(output: string): string {
-  let normalized = output.replace(
-    packageVersionAfterName,
-    `$1${packageVersionPlaceholder}`,
-  );
-  normalized = normalized.replace(
-    standalonePackageVersion,
-    packageVersionPlaceholder,
-  );
-  return normalized;
+  return output
+    .replace(packageVersionAfterName, `$1${packageVersionPlaceholder}`)
+    .replace(standalonePackageVersion, packageVersionPlaceholder);
 }
