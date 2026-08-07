@@ -25,6 +25,16 @@ afterEach(() => {
   process.exitCode = undefined;
 });
 
+/**
+ * Tests that the auth command displays help text when using --help or -h options.
+ * Verifies that:
+ * - vsts-npm-auth is not called
+ * - The process exit code is 0
+ *
+ * CLI commands:
+ * - vsts-npm-auth-improved auth --help
+ * - vsts-npm-auth-improved auth -h
+ */
 test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
   "auth command help text (useOptionAlias: $useOptionAlias)",
   async ({ useOptionAlias }) => {
@@ -42,6 +52,16 @@ test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
   },
 );
 
+/**
+ * Tests that the auth command displays version when using --version or -v options.
+ * Verifies that:
+ * - vsts-npm-auth is not called
+ * - The process exit code is 0
+ *
+ * CLI commands:
+ * - vsts-npm-auth-improved auth --version
+ * - vsts-npm-auth-improved auth -v
+ */
 test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
   "auth command version (useOptionAlias: $useOptionAlias)",
   async ({ useOptionAlias }) => {
@@ -59,6 +79,10 @@ test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
   },
 );
 
+/**
+ * Tests Commander handling for an unknown command.
+ * Verifies that cliAsync captures the usage error without invoking authentication.
+ */
 test("an unknown Commander command is captured through cliAsync", async () => {
   const stdoutWriteFunctionMock = mockStdoutWrite();
   const stderrWriteFunctionMock = mockStderrWrite();
@@ -73,6 +97,10 @@ test("an unknown Commander command is captured through cliAsync", async () => {
   expect(stderrWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests a failure while presenting the final command result.
+ * Verifies that the top-level CLI boundary converts the thrown value into a failed exit code.
+ */
 test("a top-level terminal failure is handled", async () => {
   const execaFunctionMock = vi.mocked(execa);
   const unexpectedValue = "Unexpected top-level terminal failure";

@@ -33,6 +33,10 @@ afterEach(() => {
   process.exitCode = undefined;
 });
 
+/**
+ * Tests the target configuration and expiration options through their long and short forms.
+ * Verifies that both forms map to the corresponding vsts-npm-auth arguments.
+ */
 test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
   "target and expiration auth options (useOptionAlias: $useOptionAlias)",
   async ({ useOptionAlias }) => {
@@ -64,6 +68,10 @@ test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
   },
 );
 
+/**
+ * Tests the maximum supported token expiration lifetime.
+ * Verifies that the boundary value is forwarded to vsts-npm-auth.
+ */
 test("the maximum expiration lifetime is forwarded", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
@@ -86,6 +94,10 @@ test("the maximum expiration lifetime is forwarded", async () => {
   expect(process.exitCode).toBe(0);
 });
 
+/**
+ * Tests invalid token expiration values.
+ * Verifies that malformed and out-of-range values fail before authentication starts.
+ */
 test.each(["0", "-1", "1.5", "abc", "Infinity", "525601", "9007199254740992"])(
   "invalid expiration minutes are rejected: %s",
   async expirationMinutes => {
@@ -107,6 +119,16 @@ test.each(["0", "-1", "1.5", "abc", "Infinity", "525601", "9007199254740992"])(
   },
 );
 
+/**
+ * Tests the --read and --no-read options of the auth command.
+ * Verifies that:
+ * - vsts-npm-auth is called with the correct arguments
+ * - The CLI command output reflects the token scope
+ *
+ * CLI commands:
+ * - vsts-npm-auth-improved auth -c <path> --read --no-force
+ * - vsts-npm-auth-improved auth --config-path <path> --no-read --no-force
+ */
 test.each([
   { read: false, expectedVstsNpmAuthArgs: [] },
   { read: true, expectedVstsNpmAuthArgs: ["-R"] },
@@ -132,6 +154,16 @@ test.each([
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests the --force and --no-force options of the auth command.
+ * Verifies that:
+ * - vsts-npm-auth is called with the correct arguments
+ * - The CLI command output reflects the forced token acquisition option
+ *
+ * CLI commands:
+ * - vsts-npm-auth-improved auth -c <path> --force
+ * - vsts-npm-auth-improved auth --config-path <path> --no-force
+ */
 test.each([
   { force: false, expectedVstsNpmAuthArgs: [] },
   { force: true, expectedVstsNpmAuthArgs: ["-F"] },
@@ -157,6 +189,10 @@ test.each([
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests using read-only scope and forced acquisition together.
+ * Verifies that both flags are forwarded to vsts-npm-auth.
+ */
 test("combined read and force options are passed to vsts-npm-auth", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();

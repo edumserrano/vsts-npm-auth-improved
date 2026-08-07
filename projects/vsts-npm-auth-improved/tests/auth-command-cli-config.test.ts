@@ -33,6 +33,16 @@ afterEach(() => {
   process.exitCode = undefined;
 });
 
+/**
+ * Tests the --config-path option of the auth command and its -c alias.
+ * Verifies that:
+ * - vsts-npm-auth is called with the correct arguments
+ * - The CLI command output reflects a successful token authentication.
+ *
+ * CLI commands:
+ * - vsts-npm-auth-improved auth -c <path> --no-read --no-force
+ * - vsts-npm-auth-improved auth --config-path <path> --no-read --no-force
+ */
 test.each([{ useConfigPathAlias: true }, { useConfigPathAlias: false }])(
   "npm configuration path (useConfigPathAlias: $useConfigPathAlias)",
   async ({ useConfigPathAlias }) => {
@@ -58,6 +68,10 @@ test.each([{ useConfigPathAlias: true }, { useConfigPathAlias: false }])(
   },
 );
 
+/**
+ * Tests authentication with multiple comma-separated configuration paths.
+ * Verifies that surrounding whitespace is removed and path order is preserved.
+ */
 test("comma-separated configuration paths are trimmed and forwarded in order", async () => {
   const firstConfigPath = "./client/.npmrc";
   const secondConfigPath = "./server/.npmrc";
@@ -93,6 +107,10 @@ test("comma-separated configuration paths are trimmed and forwarded in order", a
   expect(process.exitCode).toBe(0);
 });
 
+/**
+ * Tests invalid empty entries in the comma-separated configuration path option.
+ * Verifies that validation fails before vsts-npm-auth is invoked.
+ */
 test.each([
   { configPaths: "" },
   { configPaths: ",./client/.npmrc" },
@@ -115,6 +133,16 @@ test.each([
   expect(process.exitCode).toBe(1);
 });
 
+/**
+ * Tests the early failure scenario when the NPM configuration file does not exist.
+ * Verifies that:
+ * - The auth command fails before calling vsts-npm-auth
+ * - The process exit code is 1
+ * - The CLI output mentions the npm configuration file not being found
+ *
+ * CLI command:
+ * - vsts-npm-auth-improved auth --config-path <path-that-does-not-exist> --no-read --no-force
+ */
 test("npm configuration file not found", async () => {
   const stdoutWriteFunctionMock = mockStdoutWrite();
   const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
@@ -134,6 +162,16 @@ test("npm configuration file not found", async () => {
   expect(process.exitCode).toBe(1);
 });
 
+/**
+ * Tests the early failure scenario when the NPM configuration file exists but has no registry defined.
+ * Verifies that:
+ * - The auth command fails before calling vsts-npm-auth
+ * - The process exit code is 1
+ * - The CLI output mentions that no registry entry was found
+ *
+ * CLI command:
+ * - vsts-npm-auth-improved auth --config-path <path> --no-read --no-force
+ */
 test("npm configuration file without a registry defined", async () => {
   const npmConfigPath = "./this-dir-exists-only-in-memfs/.npmrc";
   vol.fromJSON({
@@ -154,6 +192,10 @@ test("npm configuration file without a registry defined", async () => {
   expect(process.exitCode).toBe(1);
 });
 
+/**
+ * Tests validation of every supplied configuration file.
+ * Verifies that one invalid file prevents authentication for the complete ordered set.
+ */
 test("every configuration file is validated before authentication starts", async () => {
   const validConfigPath = "./client/.npmrc";
   const invalidConfigPath = "./server/.npmrc";
@@ -174,6 +216,10 @@ test("every configuration file is validated before authentication starts", async
   expect(process.exitCode).toBe(1);
 });
 
+/**
+ * Tests an npm configuration containing only a scoped registry.
+ * Verifies that the missing global registry is rejected before authentication starts.
+ */
 test("a scoped registry without a global registry is rejected", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({
     vol,
@@ -195,6 +241,10 @@ test("a scoped registry without a global registry is rejected", async () => {
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests finding a global registry among unrelated npm settings.
+ * Verifies that the registry is accepted and authentication proceeds successfully.
+ */
 test("a global registry amid unrelated npm settings is used", async () => {
   const registry = "https://pkgs.dev.azure.com/org/_packaging/global/npm/registry/";
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({

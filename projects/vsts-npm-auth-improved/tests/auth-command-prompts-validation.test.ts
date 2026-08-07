@@ -34,6 +34,16 @@ afterEach(() => {
   process.exitCode = undefined;
 });
 
+/**
+ * Tests that the auth command handles validation of the npm configuration path prompt.
+ * When a non-existent file path is provided, validation should fail and show an error message
+ * that explains the error.
+ * Verifies that:
+ * - The validation error message is displayed in the prompt output
+ *
+ * CLI command:
+ * - vsts-npm-auth-improved auth
+ */
 test("npm configuration path - prompt validation - file does not exist", async () => {
   const stdoutWriteFunctionMock = mockStdoutWrite();
   const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
@@ -54,6 +64,16 @@ test("npm configuration path - prompt validation - file does not exist", async (
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests that the auth command handles validation of the npm configuration path prompt.
+ * When the npm configuration file does not contain a registry value, validation should fail and
+ * show an error message that explains the error.
+ * Verifies that:
+ * - The validation error message is displayed in the prompt output
+ *
+ * CLI command:
+ * - vsts-npm-auth-improved auth
+ */
 test.each([
   { description: "no registry key", contents: "" },
   { description: "empty registry value", contents: "registry=" },
@@ -79,6 +99,10 @@ test.each([
   },
 );
 
+/**
+ * Tests correcting an invalid configuration path at the prompt.
+ * Verifies that authentication proceeds only after a valid path is submitted.
+ */
 test("invalid configuration path can be corrected before successful completion", async () => {
   const invalidConfigPath = "./this-dir-does-not-exist-in-memfs/.npmrc";
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
@@ -107,6 +131,10 @@ test("invalid configuration path can be corrected before successful completion",
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests correcting a configuration file that does not define a registry.
+ * Verifies that the corrected file is validated and forwarded to authentication.
+ */
 test("configuration without a registry can be corrected before successful completion", async () => {
   const invalidConfigPath = "./config-without-registry/.npmrc";
   const validConfigPath = "./valid-config/.npmrc";

@@ -32,6 +32,16 @@ afterEach(() => {
   process.exitCode = undefined;
 });
 
+/**
+ * Tests the automatic retry scenario when vsts-npm-auth returns could-not-get-auth-token.
+ * Verifies that:
+ * - The retry calls vsts-npm-auth with force token acquisition (-F flag)
+ * - The process exit code is 0 after successful retry
+ * - The CLI output reflects the retry behavior
+ *
+ * CLI command:
+ * - vsts-npm-auth-improved auth --config-path <path> --no-read --no-force
+ */
 test("retries once with force token acquisition when vsts-npm-auth returns could-not-get-auth-token", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
@@ -74,6 +84,10 @@ test("retries once with force token acquisition when vsts-npm-auth returns could
   expect(process.exitCode).toBe(0);
 });
 
+/**
+ * Tests mixed output containing both existing credentials and a registry authentication failure.
+ * Verifies that the failure takes precedence and triggers one forced retry.
+ */
 test("a failed registry takes precedence over existing credentials and is retried", async () => {
   const firstConfigPath = "./client/.npmrc";
   const secondConfigPath = "./server/.npmrc";
@@ -130,6 +144,14 @@ test("a failed registry takes precedence over existing credentials and is retrie
   expect(process.exitCode).toBe(0);
 });
 
+/**
+ * Tests that the automatic retry with force token acquisition preserves the original CLI arguments.
+ * Verifies that:
+ * - The retry includes the -F flag while keeping other arguments like -R (read-only scope)
+ *
+ * CLI command:
+ * - vsts-npm-auth-improved auth --config-path <path> --read --no-force
+ */
 test("retry with force token acquisition keeps arguments", async () => {
   const firstConfigPath = "./client/.npmrc";
   const secondConfigPath = "./server/.npmrc";
@@ -188,6 +210,16 @@ test("retry with force token acquisition keeps arguments", async () => {
   expect(process.exitCode).toBe(0);
 });
 
+/**
+ * Tests the failure scenario when the automatic retry also fails.
+ * Verifies that:
+ * - When vsts-npm-auth returns could-not-get-auth-token twice (initial attempt and retry),
+ *   the process exit code is 1
+ * - The CLI output reflects the result of the final failed attempt
+ *
+ * CLI command:
+ * - vsts-npm-auth-improved auth --config-path <path> --no-read --no-force
+ */
 test("retries once but still fails", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
@@ -230,6 +262,10 @@ test("retries once but still fails", async () => {
   expect(process.exitCode).toBe(1);
 });
 
+/**
+ * Tests a failed authentication request that was already forced.
+ * Verifies that the command does not repeat an explicitly forced request.
+ */
 test("an initial forced authentication failure does not retry", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
