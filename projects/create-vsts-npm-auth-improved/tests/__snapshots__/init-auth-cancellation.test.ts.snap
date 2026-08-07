@@ -20,14 +20,6 @@ exports[`cancels at a later registry prompt after planning with zero writes 1`] 
 │  ◼ ALL (Configure every package)◇  Which packages should be configured?
 │  ALL
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◆  Registry URL for alpha/package.json
 │  https://registry.example.com/
 └
@@ -38,38 +30,6 @@ exports[`cancels at a later registry prompt after planning with zero writes 1`] 
 │  https://registry.example.com/
 └
 ■  Registry URL for beta/package.json
-│
-└  Operation failed. No files were changed. Exiting - maybe another time? 👋
-
-"
-`;
-
-exports[`cancels at installation strategy selection without changing the filesystem 1`] = `
-"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
-│
-◆  Where should package.json files be searched for?
-│  ./█
-└
-◇  Where should package.json files be searched for?
-│  ./
-│
-◇  Found 1 package.json file.
-│
-◆  Which packages should be configured?
-│  ◻ ALL (Configure every package)
-│  ◻ package.json
-│  ↑/↓ to navigate • Space: select • Enter: confirm
-└
-│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
-│  package.json
-│
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-■  How should users install packages with automatic authentication?
-│  Standard npm install
 │
 └  Operation failed. No files were changed. Exiting - maybe another time? 👋
 
@@ -117,14 +77,6 @@ exports[`cancels at the registry prompt without changing the filesystem 1`] = `
 └
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
-│
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
 │
 ◆  Registry URL for package.json
 │  https://registry.example.com/

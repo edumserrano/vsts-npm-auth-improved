@@ -19,14 +19,6 @@ exports[`displays the Git ignore warning when changed npmrc files are ignored 1`
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -51,9 +43,9 @@ exports[`displays the Git ignore warning when changed npmrc files are ignored 1`
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -81,14 +73,6 @@ exports[`does not display the Git ignore warning when no changed npmrc files are
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -107,9 +91,9 @@ exports[`does not display the Git ignore warning when no changed npmrc files are
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │

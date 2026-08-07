@@ -64,10 +64,6 @@ export class PromptsInteraction implements PromiseLike<void> {
     return this;
   }
 
-  public acceptSelectValue(): this {
-    return this.submitText();
-  }
-
   public cancel(): this {
     this.operations.push(() => {
       emitKeypress("\u001b", "escape");

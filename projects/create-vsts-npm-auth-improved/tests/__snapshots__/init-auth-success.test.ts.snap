@@ -19,14 +19,6 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 1`]
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -45,9 +37,9 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 1`]
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -75,14 +67,6 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 2`]
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  No files changed
@@ -95,9 +79,9 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 2`]
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -127,14 +111,6 @@ exports[`configures ALL mixed with an individual package through a complete CLI 
 │  ◼ ALL (Configure every package)│  ◼ beta/package.json◇  Which packages should be configured?
 │  ALL, beta/package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 3 files across 3 packages
@@ -155,9 +131,9 @@ exports[`configures ALL mixed with an individual package through a complete CLI 
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -187,14 +163,6 @@ exports[`configures ALL through a complete CLI selection 1`] = `
 │  ◼ ALL (Configure every package)◇  Which packages should be configured?
 │  ALL
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 3 files across 3 packages
@@ -215,9 +183,9 @@ exports[`configures ALL through a complete CLI selection 1`] = `
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -247,14 +215,6 @@ exports[`configures a subset through a complete CLI selection 1`] = `
 │  ◻ ALL│  ◼ alpha/package.json│  ◼ gamma/package.json◇  Which packages should be configured?
 │  alpha/package.json, gamma/package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 2 files across 2 packages
@@ -271,9 +231,9 @@ exports[`configures a subset through a complete CLI selection 1`] = `
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -303,14 +263,6 @@ exports[`configures multiple individual packages through a complete CLI selectio
 │  ◻ ALL│  ◼ alpha/package.json│  ◼ beta/package.json│  ◼ gamma/package.json◇  Which packages should be configured?
 │  alpha/package.json, beta/package.json, gamma/package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 3 files across 3 packages
@@ -331,9 +283,9 @@ exports[`configures multiple individual packages through a complete CLI selectio
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -363,14 +315,6 @@ exports[`configures one package through a complete CLI selection 1`] = `
 │  ◻ ALL│  ◼ beta/package.json◇  Which packages should be configured?
 │  beta/package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 1 file in 1 package
@@ -383,9 +327,9 @@ exports[`configures one package through a complete CLI selection 1`] = `
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -415,14 +359,6 @@ exports[`reports mixed created updated and unchanged outcomes in persistence ord
 │  ◼ ALL (Configure every package)◇  Which packages should be configured?
 │  ALL
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◆  Registry URL for gamma/package.json
 │  https://registry.example.com/
 └
@@ -449,9 +385,9 @@ exports[`reports mixed created updated and unchanged outcomes in persistence ord
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │

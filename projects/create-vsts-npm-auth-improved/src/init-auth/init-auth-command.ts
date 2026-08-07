@@ -12,6 +12,7 @@ import { formatInitAuthFailure, InitAuthFailure } from "./init-auth-failure.js";
 import {
   DEFAULT_PACKAGE_INSTALLATION_STRATEGY,
   PackageInstallationStrategy,
+  STANDARD_NPM_INSTALL_STRATEGY_ENABLED,
 } from "./package-installation-strategy.js";
 import { PromptMessages, prompts } from "./prompts-utils.js";
 
@@ -95,27 +96,31 @@ async function handleInitAuthCommandAsync(): Promise<void> {
       return;
     }
 
-    const packageInstallationStrategy = await prompts.select({
-      message: "How should users install packages with automatic authentication?",
-      initialValue: DEFAULT_PACKAGE_INSTALLATION_STRATEGY,
-      options: [
-        {
-          value: "standard-npm-install" satisfies PackageInstallationStrategy,
-          label: "Standard npm install",
-          hint: "npm i — requires npm 12 or later",
-        },
-        {
-          value: "custom-install-packages" satisfies PackageInstallationStrategy,
-          label: "Custom npm script",
-          hint: "npm run install-packages — supports npm 11 and earlier",
-        },
-      ],
-    });
+    let packageInstallationStrategy: PackageInstallationStrategy = "custom-install-packages";
+    if (STANDARD_NPM_INSTALL_STRATEGY_ENABLED) {
+      const selectedStrategy = await prompts.select({
+        message: "How should users install packages with automatic authentication?",
+        initialValue: DEFAULT_PACKAGE_INSTALLATION_STRATEGY,
+        options: [
+          {
+            value: "standard-npm-install" satisfies PackageInstallationStrategy,
+            label: "Standard npm install",
+            hint: "npm i — requires npm to reload configuration after preinstall",
+          },
+          {
+            value: "custom-install-packages" satisfies PackageInstallationStrategy,
+            label: "Custom npm script",
+            hint: "npm run install-packages",
+          },
+        ],
+      });
 
-    if (prompts.isCancel(packageInstallationStrategy)) {
-      prompts.cancel(PromptMessages.Cancel);
-      process.exitCode = 1;
-      return;
+      if (prompts.isCancel(selectedStrategy)) {
+        prompts.cancel(PromptMessages.Cancel);
+        process.exitCode = 1;
+        return;
+      }
+      packageInstallationStrategy = selectedStrategy;
     }
 
     const planResult = await buildAuthSetupPlanAsync(
@@ -188,8 +193,6 @@ function formatNextStep(packageInstallationStrategy: PackageInstallationStrategy
       "Install packages with authentication handled automatically:",
       "",
       "npm install",
-      "",
-      "This requires npm 12 or later.",
     ].join("\n");
   }
 
