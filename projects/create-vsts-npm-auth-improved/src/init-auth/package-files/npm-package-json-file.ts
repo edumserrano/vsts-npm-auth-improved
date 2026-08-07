@@ -6,7 +6,7 @@ import { PackageInstallationStrategy } from "../package-installation-strategy.js
 const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "latest";
 
 const REGISTRY_AUTH_SCRIPT =
-  `npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@${VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC} -c ./.npmrc --read --no-force`;
+  "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force";
 const PREINSTALL_AUTH_SCRIPT = "npm run registry-auth";
 const PREINSTALL_AUTH_PREFIX = `${PREINSTALL_AUTH_SCRIPT} && `;
 const CUSTOM_INSTALL_SCRIPTS = {

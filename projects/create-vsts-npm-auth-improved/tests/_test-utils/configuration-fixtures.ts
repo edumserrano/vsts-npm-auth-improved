@@ -11,7 +11,7 @@ export const DEFAULT_REGISTRY = "https://registry.example.test/";
 
 const EXPECTED_REQUIRED_SCRIPTS = {
   "registry-auth":
-    "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@latest -c ./.npmrc --read --no-force",
+    "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force",
   preinstall: "npm run registry-auth",
 } as const;
 
