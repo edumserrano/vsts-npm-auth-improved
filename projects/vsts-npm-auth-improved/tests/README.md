@@ -41,11 +41,6 @@ To prevent Commander from calling `process.exit`, we use `program.exitOverride()
 With `exitOverride()` enabled, Commander throws a `CommanderError` instead of calling `process.exit`. In the catch block after calling `program.parseAsync` in the `cliAsync` function, we check if it's a `CommanderError` and set the exit code accordingly:
 
 ```typescript
-// code from  /projects/vsts-npm-auth-improved/src/cli.ts
-function isCommanderError(error: unknown): error is CommanderError {
-  return error instanceof CommanderError;
-}
-
 try {
   console.log();
   const program = createProgram();
@@ -53,10 +48,16 @@ try {
 } catch (error) {
   if (isCommanderError(error)) {
     process.exitCode = error.exitCode;
-  } else {
-    console.log("🚨 Unexpected error:", error);
-    process.exitCode = 1;
+    return;
   }
+
+  console.log("🚨 Unexpected error:", error);
+  process.exitCode = 1;
+  return;
+}
+
+function isCommanderError(error: unknown): error is CommanderError {
+  return error instanceof CommanderError;
 }
 ```
 
