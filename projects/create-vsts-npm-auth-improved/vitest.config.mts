@@ -14,9 +14,6 @@ export default defineConfig({
     // console.log() at the start of the cliAsync function in cli.ts
     silent: true,
     environment: "node",
-    // Keep real-terminal transcripts deterministic while the emitted-package
-    // scenario compiles the CommonJS artifact at its integration boundary.
-    fileParallelism: false,
     include: ["tests/**/*.test.ts"],
     exclude: ["node_modules", "dist"],
     coverage: {
