@@ -24,11 +24,6 @@ const existingRegistry = "https://existing.test/";
 const managedScripts = {
   "registry-auth":
     "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force",
-  preinstall: "npm run registry-auth",
-} as const;
-
-const customInstallManagedScripts = {
-  "registry-auth": managedScripts["registry-auth"],
   "preinstall-packages": "npm run registry-auth",
   "install-packages": "npm i",
 } as const;
@@ -86,11 +81,9 @@ test.each([
       private: true,
       scripts: {
         ...managedScripts,
-        preinstall: "npm run registry-auth && npm run existing-preinstall",
+        preinstall: "npm run existing-preinstall",
         test: "vitest",
-        "install-packages": "wrong install",
         lint: "eslint .",
-        "preinstall-packages": "wrong preinstall",
       },
       dependencies: { lodash: "^4.17.21" },
       custom: { nested: true },
@@ -156,37 +149,16 @@ test.each([
 );
 
 /**
- * Tests selecting the custom install-packages compatibility strategy.
- * Verifies that its managed scripts are created while unrelated scripts are preserved.
+ * Tests migrating from the unsupported preinstall strategy.
+ * Verifies that managed authentication is removed while existing preinstall work is restored.
  */
-test("creates the custom install-packages compatibility scripts when selected", async () => {
+test("migrates to install-packages scripts and restores chained preinstall work", async () => {
   const scenario = await runSinglePackageScenarioAsync({
-    name: "package-json-custom-install-packages",
-    packageJson: packageJsonContent({ scripts: { test: "vitest" } }),
-    npmrc: canonicalNpmrc(existingRegistry),
-    packageInstallationStrategy: "custom-install-packages",
-  });
-
-  expect(process.exitCode ?? 0).toBe(0);
-  expect(JSON.parse(await scenario.project.readFileAsync("package.json"))).toEqual({
-    name: "test-package",
-    scripts: { ...customInstallManagedScripts, test: "vitest" },
-    devDependencies: { "vsts-npm-auth-improved": "latest" },
-  });
-  expect(scenario.output.normalizedOutput).toMatchSnapshot();
-});
-
-/**
- * Tests changing from custom install-packages scripts to the standard npm install strategy.
- * Verifies that stale hooks are replaced while existing preinstall work remains chained.
- */
-test("switches from custom install scripts to standard npm install without stale hooks", async () => {
-  const scenario = await runSinglePackageScenarioAsync({
-    name: "package-json-custom-to-standard",
+    name: "package-json-standard-to-custom",
     packageJson: packageJsonContent({
       scripts: {
-        ...customInstallManagedScripts,
-        preinstall: "npm run existing-preinstall",
+        "registry-auth": managedScripts["registry-auth"],
+        preinstall: "npm run registry-auth && npm run existing-preinstall",
       },
     }),
     npmrc: canonicalNpmrc(existingRegistry),
@@ -197,35 +169,6 @@ test("switches from custom install scripts to standard npm install without stale
     name: "test-package",
     scripts: {
       ...managedScripts,
-      preinstall: "npm run registry-auth && npm run existing-preinstall",
-    },
-    devDependencies: { "vsts-npm-auth-improved": "latest" },
-  });
-  expect(scenario.output.normalizedOutput).toMatchSnapshot();
-});
-
-/**
- * Tests changing from standard npm install scripts to the custom compatibility strategy.
- * Verifies that managed hooks are replaced and existing preinstall work is restored.
- */
-test("switches to custom install scripts and restores chained preinstall work", async () => {
-  const scenario = await runSinglePackageScenarioAsync({
-    name: "package-json-standard-to-custom",
-    packageJson: packageJsonContent({
-      scripts: {
-        ...managedScripts,
-        preinstall: "npm run registry-auth && npm run existing-preinstall",
-      },
-    }),
-    npmrc: canonicalNpmrc(existingRegistry),
-    packageInstallationStrategy: "custom-install-packages",
-  });
-
-  expect(process.exitCode ?? 0).toBe(0);
-  expect(JSON.parse(await scenario.project.readFileAsync("package.json"))).toEqual({
-    name: "test-package",
-    scripts: {
-      ...customInstallManagedScripts,
       preinstall: "npm run existing-preinstall",
     },
     devDependencies: { "vsts-npm-auth-improved": "latest" },

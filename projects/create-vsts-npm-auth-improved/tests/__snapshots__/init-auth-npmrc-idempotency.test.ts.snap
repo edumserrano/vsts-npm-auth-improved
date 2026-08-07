@@ -19,14 +19,6 @@ exports[`keeps .npmrc semantically idempotent after normalization 1`] = `
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 1 file in 1 package
@@ -39,9 +31,9 @@ exports[`keeps .npmrc semantically idempotent after normalization 1`] = `
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -69,14 +61,6 @@ exports[`keeps .npmrc semantically idempotent after normalization 2`] = `
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  No files changed
@@ -89,9 +73,9 @@ exports[`keeps .npmrc semantically idempotent after normalization 2`] = `
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │

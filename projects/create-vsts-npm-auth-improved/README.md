@@ -34,8 +34,7 @@ Follow the prompts to:
 
 1. Choose the directory containing your npm projects.
 2. Select the projects you want to configure.
-3. Choose the install command that matches the npm versions your projects support.
-4. Provide an Azure DevOps Artifacts registry URL when a selected project does not already have one.
+3. Provide an Azure DevOps Artifacts registry URL when a selected project does not already have one.
 
 You can cancel before setup completes without changing any files.
 
@@ -55,20 +54,12 @@ You can safely run the setup again when you need to update the configuration.
 
 ## Install packages after setup
 
-Use the command selected during setup.
-
-For npm 12 and later:
-
-```shell
-npm i
-```
-
-Authentication also runs automatically with `npm ci` on npm 12 and later.
-
-For npm 11 and earlier:
+Use the generated installation command:
 
 ```shell
 npm run install-packages
 ```
+
+This command runs authentication in one npm process, then starts `npm install` in a new process that reads the updated credentials. Use it instead of `npm install` when credentials may be missing, expired, or revoked.
 
 On Windows, authentication runs before npm installs packages from the private registry. On macOS, Linux, and CI, automatic authentication is skipped so your environment must supply the required credentials.

@@ -16,17 +16,9 @@ From the directory containing one or more npm projects, run:
 npm init vsts-npm-auth-improved
 ```
 
-Follow the prompts to choose the projects and Azure DevOps Artifacts registry you want to use. The selected projects are updated so authentication runs automatically with either `npm install` (supported on npm 12 and later) or `npm run install-packages` (supported on npm 11 and earlier).
+Follow the prompts to choose the projects and Azure DevOps Artifacts registry you want to use. The selected projects are updated so authentication runs automatically before a separate npm process installs dependencies.
 
-After setup, install packages using the command selected during setup.
-
-For npm 12 and later:
-
-```shell
-npm install
-```
-
-For npm 11 and earlier:
+After setup, install packages using the generated command:
 
 ```shell
 npm run install-packages
@@ -48,22 +40,7 @@ Add an npm script with the authentication choices explicitly set:
 
 This command uses `npx` to resolve and run `vsts-npm-auth-improved` before the project's dependencies have been installed. The explicit `--registry=https://registry.npmjs.org/` option fetches the publicly available package from the public npm registry, which does not require authentication. This avoids the chicken-and-egg problem of needing working private-registry credentials before the tool that obtains those credentials can run.
 
-After adding the `registry-auth` command, connect it to package installation with one of the following pre-hook scripts.
-
-For npm 12 and later, use `preinstall` to authenticate automatically before `npm install` or `npm ci`:
-
-```json
-{
-  "scripts": {
-    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force",
-    "preinstall": "npm run registry-auth"
-  }
-}
-```
-
-This `preinstall` strategy requires npm 12 or later. In npm 7 through npm 11, the root `preinstall` script runs after dependencies have already been fetched and installed, which is too late to authenticate before npm accesses a private registry. npm 12 restores the hook so it runs before dependency installation. See [npm CLI issue #2660](https://github.com/npm/cli/issues/2660) for the history of this behavior.
-
-For npm 11 and earlier, use a custom package-installation command with its matching pre-hook script:
+After adding the `registry-auth` command, connect it to a custom package-installation command with its matching pre-hook script:
 
 ```json
 {
@@ -75,7 +52,9 @@ For npm 11 and earlier, use a custom package-installation command with its match
 }
 ```
 
-Install packages with `npm run install-packages` instead of `npm install`. npm automatically runs `preinstall-packages` before `install-packages`, so authentication completes before npm accesses the private registry.
+Install packages with `npm run install-packages` instead of `npm install`. npm automatically runs `preinstall-packages` first; `install-packages` then starts a new npm process, which loads the credentials that authentication just wrote.
+
+A root `preinstall` hook is not sufficient for this workflow. Even when npm runs it before dependency fetching, the parent npm process loaded `.npmrc` before the hook began, so a newly created or refreshed token is not used until a later npm invocation.
 
 ## Use as a global module
 
