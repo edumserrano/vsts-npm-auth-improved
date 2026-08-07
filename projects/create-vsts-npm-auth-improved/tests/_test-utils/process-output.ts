@@ -17,6 +17,9 @@ const carriageReturn = "\r";
 const lineFeed = "\n";
 const unicodeLineSeparator = "\u2028";
 const unicodeParagraphSeparator = "\u2029";
+const windowsPathSeparator = "\\";
+const normalizedPathSeparator = "/";
+const temporaryRootPlaceholder = "<test-root>";
 const newlinePattern = new RegExp(
   `${carriageReturn}${lineFeed}?|${unicodeLineSeparator}|${unicodeParagraphSeparator}`,
   "g",
@@ -119,12 +122,19 @@ function normalizeOutput(
   normalized = stripTerminalControlSequences(normalized);
   normalized = stripNondeterministicSpinnerFrames(normalized);
   normalized = normalizeColorDrivenMultiselectRedraws(normalized);
-  normalized = joinSoftWrappedPromptLines(normalized.split("\n")).join("\n");
+  normalized = joinSoftWrappedPromptLines(normalized.split(lineFeed)).join(
+    lineFeed,
+  );
 
   const temporaryRoots = [...(options.temporaryRoots ?? [])]
-    .map(root => root.replaceAll("\\", "/"))
+    .map(root =>
+      root.replaceAll(windowsPathSeparator, normalizedPathSeparator),
+    )
     .sort((left, right) => right.length - left.length);
-  normalized = normalized.replaceAll("\\", "/");
+  normalized = normalized.replaceAll(
+    windowsPathSeparator,
+    normalizedPathSeparator,
+  );
   normalized = normalizeProgressivelyTypedTemporaryRoots(
     normalized,
     temporaryRoots,
@@ -133,7 +143,7 @@ function normalizeOutput(
     normalized = replaceAllCaseInsensitive(
       normalized,
       temporaryRoot,
-      "<test-root>",
+      temporaryRootPlaceholder,
     );
   }
 
@@ -160,6 +170,11 @@ function normalizeProgressivelyTypedTemporaryRoots(
   output: string,
   temporaryRoots: readonly string[],
 ): string {
+  const normalizedTemporaryRootFrame = `│  ${temporaryRootPlaceholder}█`;
+  const repeatedNormalizedTemporaryRootFrames = new RegExp(
+    `(?:${escapeForRegExp(normalizedTemporaryRootFrame)})+`,
+    "g",
+  );
   return output.replace(
     /(?:│  [^\n│]+?█)+/g,
     typingSequence => {
@@ -183,10 +198,13 @@ function normalizeProgressivelyTypedTemporaryRoots(
             completedRoots.some(root =>
               root.toLowerCase().startsWith(typedValue.toLowerCase()),
             )
-              ? "│  <test-root>█"
+              ? normalizedTemporaryRootFrame
               : match,
         )
-        .replace(/(?:│  <test-root>█)+/g, "│  <test-root>█");
+        .replace(
+          repeatedNormalizedTemporaryRootFrames,
+          normalizedTemporaryRootFrame,
+        );
     },
   );
 }
@@ -232,7 +250,9 @@ function stripNondeterministicSpinnerFrames(value: string): string {
  * snapshots do not depend on the parent terminal's styling.
  */
 function normalizeColorDrivenMultiselectRedraws(value: string): string {
-  const navigationHint = "│  ↑/↓ to navigate • Space: select • Enter: confirm\n└\n";
+  const navigationHint =
+    `│  ↑/↓ to navigate • Space: select • Enter: confirm${lineFeed}` +
+    `└${lineFeed}`;
   const firstFocusMove = new RegExp(
     `^│  ◻ ALL\\n(?:│  [◻◼] [^│\\n]+\\n)+${escapeForRegExp(navigationHint)}`,
     "gm",
