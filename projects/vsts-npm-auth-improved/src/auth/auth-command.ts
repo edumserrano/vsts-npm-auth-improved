@@ -101,24 +101,8 @@ async function handleAuthCommandAsync(options: AuthCommandOptions, _: Command): 
       `Attempting to authenticate with the Azure DevOps NPM ${registrySummary} (scope: ${tokenScopeResult.asFriendlyText}, force: ${forceOptionResult.asFriendlyText})`,
     );
     const credentialsDestination = getCredentialsDestination(options.targetConfig);
-    let credentialsConfigurationFile: string;
-    let credentialsSaveLocation: string;
-    switch (credentialsDestination.type) {
-      case "user-npm-configuration": {
-        credentialsConfigurationFile = "the user's NPM configuration file";
-        credentialsSaveLocation = `${credentialsConfigurationFile} at ~/.npmrc`;
-        break;
-      }
-      case "target-npm-configuration": {
-        credentialsConfigurationFile = `the NPM configuration file at ${credentialsDestination.path}`;
-        credentialsSaveLocation = credentialsConfigurationFile;
-        break;
-      }
-      default: {
-        const never: never = credentialsDestination;
-        throw new Error(`Unhandled credentials destination: ${JSON.stringify(never)}`);
-      }
-    }
+    const credentialsConfigurationFile = getCredentialsConfigurationFile(credentialsDestination);
+    const credentialsSaveLocation = getCredentialsSaveLocation(credentialsDestination);
     prompts.log.info(`Credentials will be saved to ${credentialsSaveLocation}`);
     spinnerPrompt = prompts.spinner();
     spinnerPrompt.start(`Authenticating`);
@@ -243,6 +227,33 @@ function getCredentialsDestination(targetConfig: string | undefined): Credential
     type: "target-npm-configuration",
     path: targetConfig,
   };
+}
+
+function getCredentialsConfigurationFile(credentialsDestination: CredentialsDestination): string {
+  switch (credentialsDestination.type) {
+    case "user-npm-configuration":
+      return "the user's NPM configuration file";
+    case "target-npm-configuration":
+      return `the NPM configuration file at ${credentialsDestination.path}`;
+    default: {
+      const never: never = credentialsDestination;
+      throw new Error(`Unhandled credentials destination: ${JSON.stringify(never)}`);
+    }
+  }
+}
+
+function getCredentialsSaveLocation(credentialsDestination: CredentialsDestination): string {
+  const credentialsConfigurationFile = getCredentialsConfigurationFile(credentialsDestination);
+  switch (credentialsDestination.type) {
+    case "user-npm-configuration":
+      return `${credentialsConfigurationFile} at ~/.npmrc`;
+    case "target-npm-configuration":
+      return credentialsConfigurationFile;
+    default: {
+      const never: never = credentialsDestination;
+      throw new Error(`Unhandled credentials destination: ${JSON.stringify(never)}`);
+    }
+  }
 }
 
 type VstsNpmAuthWithRetryResult = {
