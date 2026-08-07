@@ -39,10 +39,6 @@ Run these commands from either package directory:
 | `npm run test:ui`               | Opens the Vitest UI which also serves the coverage report.                    | Best dev experience to get test feedback without repeatedly starting the test suite. Use it to explore test results, filter tests, and investigate failures interactively |
 | `npm run test:update-snapshots` | Runs the test suite and replaces stored snapshots with the current output.    | Use it only when an output change is intentional, then review the snapshot diff before committing it.                                                                     |
 
-## Package module formats
-
-`vsts-npm-auth-improved` publishes a CommonJS CLI. `create-vsts-npm-auth-improved` publishes an ESM-only CLI, matching its Node.js 24 minimum and its ESM dependencies. Neither package exposes a supported programmatic API; consumers should invoke the npm executable.
-
 ## Build and inspect a tarball
 
 From either package directory:
@@ -59,9 +55,3 @@ The release workflow performs the same pack operation, inspects the archive for 
 - `projects/create-vsts-npm-auth-improved/README.md` for `create-vsts-npm-auth-improved`.
 
 The repository-root `README.md` is not included in either npm package.
-
-## Prerelease version policy
-
-During the prerelease phase, `create-vsts-npm-auth-improved` writes the npm `alpha` dist-tag for `vsts-npm-auth-improved` into managed projects instead of a fixed version range. Publishing a new core alpha therefore does not require a matching setup-package source change. Before the stable release, change the managed core spec to `latest` and publish a new setup-package version.
-
-See [Creating releases](releases.md) for the automated release process.
