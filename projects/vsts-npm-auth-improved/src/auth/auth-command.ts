@@ -19,7 +19,6 @@ export function addAuthCommand(program: Command): Command {
     .command("auth", { isDefault: true })
     .description("Authenticate on Windows using vsts-npm-auth NPM package")
     .option("-c, --config-path <paths>", "Comma-separated paths to .npmrc config files")
-    .option("-n, --non-interactive", "Prevent vsts-npm-auth credential prompts")
     .option(
       "-t, --target-config <path>",
       "Path to the .npmrc that receives credentials (default: ~/.npmrc)",
@@ -38,7 +37,6 @@ export function addAuthCommand(program: Command): Command {
 
 type AuthCommandOptions = {
   readonly configPath?: string;
-  readonly nonInteractive?: boolean;
   readonly targetConfig?: string;
   readonly expirationMinutes?: number;
   readonly read?: boolean;
@@ -114,7 +112,6 @@ async function handleAuthCommandAsync(options: AuthCommandOptions, _: Command): 
       configPaths,
       tokenScopeResult.value,
       forceOptionResult.value,
-      options.nonInteractive,
       options.targetConfig,
       options.expirationMinutes,
       spinnerPrompt,
@@ -229,14 +226,12 @@ async function runVstsNpmAuthWithRetryAsync(
   configPaths: readonly string[],
   tokenScope: TokenScope,
   forceOption: ForceAcquisitionOption,
-  nonInteractive: boolean | undefined,
   targetConfig: string | undefined,
   expirationMinutes: number | undefined,
   spinnerPrompt: ReturnType<typeof prompts.spinner>,
 ): Promise<VstsNpmAuthWithRetryResult> {
   const vstsNpmAuthOptions: VstsNpmAuthOptions = {
     config: configPaths,
-    nonInteractive,
     targetConfig,
     expirationMinutes,
     readOnly: tokenScope === "read",

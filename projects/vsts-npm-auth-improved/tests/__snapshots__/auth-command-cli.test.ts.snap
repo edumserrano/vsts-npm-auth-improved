@@ -82,7 +82,6 @@ Authenticate on Windows using vsts-npm-auth NPM package
 Options:
   -c, --config-path <paths>           Comma-separated paths to .npmrc config
                                       files
-  -n, --non-interactive               Prevent vsts-npm-auth credential prompts
   -t, --target-config <path>          Path to the .npmrc that receives
                                       credentials (default: ~/.npmrc)
   -e, --expiration-minutes <minutes>  Positive integer token lifetime (default:
@@ -104,7 +103,6 @@ Authenticate on Windows using vsts-npm-auth NPM package
 Options:
   -c, --config-path <paths>           Comma-separated paths to .npmrc config
                                       files
-  -n, --non-interactive               Prevent vsts-npm-auth credential prompts
   -t, --target-config <path>          Path to the .npmrc that receives
                                       credentials (default: ~/.npmrc)
   -e, --expiration-minutes <minutes>  Positive integer token lifetime (default:
@@ -447,6 +445,40 @@ exports[`retry with force token acquisition keeps arguments 1`] = `
 └  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
 `;
 
+exports[`target and expiration auth options (useOptionAlias: false) 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the NPM configuration file at ./credentials/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the NPM configuration file at ./credentials/.npmrc
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`target and expiration auth options (useOptionAlias: true) 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the NPM configuration file at ./credentials/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the NPM configuration file at ./credentials/.npmrc
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
 exports[`token acquisition (force: false) 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
@@ -527,38 +559,4 @@ exports[`unexpected errors are handled 1`] = `
 │
 ■  Unexpected test error
 └  Operation failed. Exiting - maybe another time? 👋"
-`;
-
-exports[`upstream auth options (useOptionAlias: false) 1`] = `
-"
-┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
-│
-●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
-│
-●  Credentials will be saved to the NPM configuration file at ./credentials/.npmrc
-│
-◇  Authentication attempt finished
-│
-●  New credentials were successfully obtained and written to the NPM configuration file at ./credentials/.npmrc
-│
-◆  Authentication with Azure DevOps NPM registry completed successfully 😊
-│
-└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
-`;
-
-exports[`upstream auth options (useOptionAlias: true) 1`] = `
-"
-┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
-│
-●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
-│
-●  Credentials will be saved to the NPM configuration file at ./credentials/.npmrc
-│
-◇  Authentication attempt finished
-│
-●  New credentials were successfully obtained and written to the NPM configuration file at ./credentials/.npmrc
-│
-◆  Authentication with Azure DevOps NPM registry completed successfully 😊
-│
-└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
 `;

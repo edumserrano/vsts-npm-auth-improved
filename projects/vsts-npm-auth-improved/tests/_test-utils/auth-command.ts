@@ -27,7 +27,6 @@ type FromPrompt = { readonly from: "prompt" };
 type AuthOptions = {
   readonly type: "auth";
   readonly configPath: FromCli<string> | FromPrompt;
-  readonly nonInteractive?: FromCli<boolean>;
   readonly targetConfig?: FromCli<string>;
   readonly expirationMinutes?: FromCli<string | number>;
   readonly read: FromCli<boolean> | FromPrompt;
@@ -55,10 +54,6 @@ export class AuthCommand {
             options.configPath.useOptionAlias ? "-c" : "--config-path",
             options.configPath.value,
           );
-        }
-
-        if (options.nonInteractive?.from === "cli" && options.nonInteractive.value) {
-          args.push(options.nonInteractive.useOptionAlias ? "-n" : "--non-interactive");
         }
 
         if (options.targetConfig?.from === "cli") {

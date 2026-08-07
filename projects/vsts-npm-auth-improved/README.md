@@ -46,7 +46,6 @@ See the [`create-vsts-npm-auth-improved` package documentation](https://www.npmj
 | Option                               | Description and default                                                                                                                                            |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `-c, --config-path <paths>`          | One project `.npmrc`, or a comma-separated list. Each file must contain a global `registry`. When omitted, the CLI prompts for one path, defaulting to `./.npmrc`. |
-| `-n, --non-interactive`              | Prevents `vsts-npm-auth` from prompting for credentials. It does not suppress this wrapper's prompts.                                                              |
 | `-t, --target-config <path>`         | `.npmrc` that receives generated credentials. Defaults to the user npm configuration, normally `~/.npmrc`.                                                         |
 | `-e, --expiration-minutes <minutes>` | Positive integer lifetime for a newly acquired token. Defaults to 129,600 minutes (90 days).                                                                       |
 | `--read`                             | Requests a token with Packaging (Read) scope.                                                                                                                      |
@@ -56,7 +55,7 @@ See the [`create-vsts-npm-auth-improved` package documentation](https://www.npmj
 | `-h, --help`                         | Displays command help.                                                                                                                                             |
 | `-v, --version`                      | Displays the `vsts-npm-auth-improved` package version.                                                                                                             |
 
-When config path, token scope, or force behavior is omitted on Windows, the CLI prompts for that value. `--non-interactive` controls only credential prompts made by the underlying `vsts-npm-auth` process. For a fully unattended wrapper invocation, also supply `--config-path`, either `--read` or `--no-read`, and either `--force` or `--no-force`.
+When config path, token scope, or force behavior is omitted on Windows, the CLI prompts for that value.
 
 ## Examples
 
@@ -76,12 +75,6 @@ Authenticate the registries from multiple project configurations, in order:
 
 ```shell
 vsts-npm-auth-improved -c ./client/.npmrc,./server/.npmrc --read --no-force
-```
-
-Run unattended, including disabling credential prompts in `vsts-npm-auth`:
-
-```shell
-vsts-npm-auth-improved -c ./.npmrc --read --no-force --non-interactive
 ```
 
 Write credentials to a custom npm configuration file:

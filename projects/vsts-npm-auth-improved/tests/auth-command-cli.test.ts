@@ -180,7 +180,7 @@ test.each([
 });
 
 test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
-  "upstream auth options (useOptionAlias: $useOptionAlias)",
+  "target and expiration auth options (useOptionAlias: $useOptionAlias)",
   async ({ useOptionAlias }) => {
     const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
     const targetConfig = "./credentials/.npmrc";
@@ -190,7 +190,6 @@ test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
     await AuthCommand.invokeAsync({
       type: "auth",
       configPath: { from: "cli", value: inMemoryNpmrcFile.path },
-      nonInteractive: { from: "cli", value: true, useOptionAlias },
       targetConfig: { from: "cli", value: targetConfig, useOptionAlias },
       expirationMinutes: { from: "cli", value: 60, useOptionAlias },
       read: { from: "cli", value: false },
@@ -199,7 +198,6 @@ test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
 
     expect(vstsNpmAuthMock.callCount).toBe(1);
     expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
-      "-N",
       "-C",
       inMemoryNpmrcFile.path,
       "-T",
@@ -470,7 +468,6 @@ test("retry with force token acquisition keeps arguments", async () => {
       from: "cli",
       value: `${firstConfigPath},${secondConfigPath}`,
     },
-    nonInteractive: { from: "cli", value: true },
     targetConfig: { from: "cli", value: targetConfig },
     expirationMinutes: { from: "cli", value: 120 },
     read: { from: "cli", value: true },
@@ -485,7 +482,6 @@ test("retry with force token acquisition keeps arguments", async () => {
       "--yes",
       "--registry=https://registry.npmjs.org/",
       "vsts-npm-auth@latest",
-      "-N",
       "-C",
       `${firstConfigPath},${secondConfigPath}`,
       "-T",
@@ -507,7 +503,6 @@ test("retry with force token acquisition keeps arguments", async () => {
       "--yes",
       "--registry=https://registry.npmjs.org/",
       "vsts-npm-auth@latest",
-      "-N",
       "-C",
       `${firstConfigPath},${secondConfigPath}`,
       "-T",
