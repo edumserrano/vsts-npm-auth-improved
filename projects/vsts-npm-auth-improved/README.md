@@ -54,7 +54,7 @@ After adding the `registry-auth` command, connect it to a custom package-install
 
 Install packages with `npm run install-packages` instead of `npm install`. npm automatically runs `preinstall-packages` first; `install-packages` then starts a new npm process, which loads the credentials that authentication just wrote.
 
-A root `preinstall` hook is not sufficient for this workflow. Even when npm runs it before dependency fetching, the parent npm process loaded `.npmrc` before the hook began, so a newly created or refreshed token is not used until a later npm invocation.
+A root `preinstall` hook is not sufficient for this workflow, even with npm 12. Although npm 12 runs the hook before dependency fetching, the parent npm process loaded `.npmrc` before the hook began, so a newly created or refreshed token is not used until a later npm invocation. This npm behavior is tracked by [npm/cli#9853](https://github.com/npm/cli/issues/9853). The custom `install-packages` command provides the required later invocation automatically.
 
 ## Use as a global module
 
