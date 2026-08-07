@@ -22,6 +22,14 @@ const packageVersionAfterName = new RegExp(
   "g",
 );
 const standalonePackageVersion = new RegExp(`^${semanticVersionPattern}$`, "gm");
+const carriageReturn = "\r";
+const lineFeed = "\n";
+const unicodeLineSeparator = "\u2028";
+const unicodeParagraphSeparator = "\u2029";
+const newlinePattern = new RegExp(
+  `${carriageReturn}${lineFeed}?|${unicodeLineSeparator}|${unicodeParagraphSeparator}`,
+  "g",
+);
 
 export type OutputWriteFunctionMock = MockInstance<StreamWriteFunction> & {
   readonly normalizedOutput: string;
@@ -33,7 +41,7 @@ export type OutputWriteFunctionMock = MockInstance<StreamWriteFunction> & {
  * snapshot-friendly `normalizedOutput` property.
  */
 export function mockStdoutWrite(): OutputWriteFunctionMock {
-  return mockStreamWrite(process.stdout, "\n");
+  return mockStreamWrite(process.stdout, lineFeed);
 }
 
 /**
@@ -82,23 +90,22 @@ function normalizeOutput(
     return "";
   }
 
-  const normalizedLines = outputs
-    .map(outputEntry =>
-      stripTerminalControlSequences(
-        outputEntry.replace(/\r\n?|\u2028|\u2029/g, "\n"),
-      ),
-    )
-    .flatMap(outputEntry => outputEntry.split("\n"));
+  const normalizedLines = outputs.flatMap(outputEntry => {
+    let normalizedEntry = outputEntry.replace(newlinePattern, lineFeed);
+    normalizedEntry = stripTerminalControlSequences(normalizedEntry);
+    return normalizedEntry.split(lineFeed);
+  });
   const normalizedOutput = joinSoftWrappedPromptLines(normalizedLines)
     .filter(outputEntry => outputEntry.trim() !== "")
-    .join("\n");
-  return normalizePackageVersion(prefix + normalizedOutput);
+    .join(lineFeed);
+  const prefixedOutput = prefix + normalizedOutput;
+  return normalizePackageVersion(prefixedOutput);
 }
 
 /**
- * Rejoins lines that Clack soft-wraps to the active terminal width. Its wrapper
- * preserves the break-space at the end of the preceding guide line, which
- * distinguishes a visual continuation from intentional prompt output lines.
+ * Rejoins lines that Clack soft-wraps to the active terminal width. Depending
+ * on the wrapper path, a continuation is marked by either a trailing break
+ * space or one extra indentation column after the prompt guide.
  */
 function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
   const joinedLines: string[] = [];
@@ -110,7 +117,7 @@ function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
       previousLine !== undefined &&
       guidePrefix !== undefined &&
       previousLine.startsWith(guidePrefix) &&
-      previousLine.endsWith(" ")
+      (previousLine.endsWith(" ") || /^[│|] {3}\S/.test(line))
     ) {
       joinedLines[previousLineIndex] = previousLine + line.slice(guidePrefix.length);
     } else {

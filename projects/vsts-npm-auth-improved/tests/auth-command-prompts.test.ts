@@ -2,7 +2,7 @@ import { test, expect, afterAll, afterEach, vi, beforeEach } from "vitest";
 import { AuthCommand, VstsNpmAuthImprovedCli } from "@test-utils/auth-command";
 import { vol } from "memfs";
 import { createInMemoryNpmrcFile } from "@test-utils/npm-configuration-file";
-import { mockStdoutWrite } from "@test-utils/stdout";
+import { mockStdoutWrite } from "@test-utils/process-output";
 import { mockVstsNpmAuth } from "@test-utils/vsts-npm-auth";
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
 
