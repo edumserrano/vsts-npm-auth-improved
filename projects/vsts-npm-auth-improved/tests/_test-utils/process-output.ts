@@ -12,13 +12,19 @@ import { vi } from "vitest";
 type StreamWriteFunction = typeof process.stdout.write;
 
 const packageVersionPlaceholder = "<PACKAGE_VERSION>";
-const semanticVersionPattern =
-  String.raw`(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)` +
-  String.raw`(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)` +
-  String.raw`(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?` +
-  String.raw`(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
+const numericVersionIdentifierPattern = String.raw`(?:0|[1-9]\d*)`;
+const nonNumericPrereleaseIdentifierPattern =
+  String.raw`\d*[A-Za-z-][0-9A-Za-z-]*`;
+const prereleaseIdentifierPattern =
+  `(?:${numericVersionIdentifierPattern}|${nonNumericPrereleaseIdentifierPattern})`;
+const prereleasePattern = String.raw`(?:-${prereleaseIdentifierPattern}(?:\.${prereleaseIdentifierPattern})*)?`;
+const buildIdentifierPattern = String.raw`[0-9A-Za-z-]+`;
+const buildMetadataPattern = String.raw`(?:\+${buildIdentifierPattern}(?:\.${buildIdentifierPattern})*)?`;
+const semanticVersionPattern = String.raw`${numericVersionIdentifierPattern}\.${numericVersionIdentifierPattern}\.${numericVersionIdentifierPattern}${prereleasePattern}${buildMetadataPattern}`;
+const packageNamePattern = String.raw`vsts-npm-auth-improved`;
+const packageVersionTerminatorPattern = String.raw`(?![0-9A-Za-z.+-])`;
 const packageVersionAfterName = new RegExp(
-  `(vsts-npm-auth-improved )${semanticVersionPattern}(?![0-9A-Za-z.+-])`,
+  `(${packageNamePattern} )${semanticVersionPattern}${packageVersionTerminatorPattern}`,
   "g",
 );
 const standalonePackageVersion = new RegExp(`^${semanticVersionPattern}$`, "gm");
@@ -30,6 +36,13 @@ const newlinePattern = new RegExp(
   `${carriageReturn}${lineFeed}?|${unicodeLineSeparator}|${unicodeParagraphSeparator}`,
   "g",
 );
+const operatingSystemCommandPattern =
+  /\u001b\][^\u0007]*(?:\u0007|\u001b\\)/g;
+const controlSequenceIntroducerPattern = /\u001b\[[0-?]*[ -/]*[@-~]/g;
+const characterSetSelectionPattern = /\u001b[()][0-2A-Z0-9]/g;
+const remainingControlCharactersPattern =
+  /[\u0000-\u0008\u000b-\u001a\u001c-\u001f\u007f]/g;
+const promptGuidePrefixPattern = /^[│|] {2}/;
 
 export type OutputWriteFunctionMock = MockInstance<StreamWriteFunction> & {
   readonly normalizedOutput: string;
@@ -61,9 +74,8 @@ function mockStreamWrite(
   stream: NodeJS.WriteStream,
   normalizedOutputPrefix = "",
 ): OutputWriteFunctionMock {
-  const mock: MockInstance<StreamWriteFunction> = vi
-    .spyOn(stream, "write")
-    .mockImplementation(() => true);
+  const mock: MockInstance<StreamWriteFunction> = vi.spyOn(stream, "write");
+  mock.mockImplementation(() => true);
   const augmentedMock = mock as OutputWriteFunctionMock;
   Object.defineProperty(augmentedMock, "normalizedOutput", {
     get() {
@@ -95,30 +107,39 @@ function normalizeOutput(
     normalizedEntry = stripTerminalControlSequences(normalizedEntry);
     return normalizedEntry.split(lineFeed);
   });
-  const normalizedOutput = joinSoftWrappedPromptLines(normalizedLines)
-    .filter(outputEntry => outputEntry.trim() !== "")
-    .join(lineFeed);
+  const joinedLines = joinSoftWrappedPromptLines(normalizedLines);
+  const linesWithVisibleText = joinedLines.filter(hasVisibleText);
+  const normalizedOutput = linesWithVisibleText.join(lineFeed);
   const prefixedOutput = prefix + normalizedOutput;
   return normalizePackageVersion(prefixedOutput);
 }
 
+/** Tests whether a normalized output line contains non-whitespace text. */
+function hasVisibleText(value: string): boolean {
+  return value.trim() !== "";
+}
+
 /**
- * Rejoins lines that Clack soft-wraps to the active terminal width. Depending
- * on the wrapper path, a continuation is marked by either a trailing break
- * space or one extra indentation column after the prompt guide.
+ * Rejoins lines that Clack soft-wraps to the active terminal width. A trailing
+ * space on the preceding line marks the location of the soft line break.
  */
 function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
   const joinedLines: string[] = [];
   for (const line of lines) {
     const previousLineIndex = joinedLines.length - 1;
     const previousLine = joinedLines[previousLineIndex];
-    const guidePrefix = line.match(/^[│|] {2}/)?.[0];
-    if (
-      previousLine !== undefined &&
-      guidePrefix !== undefined &&
-      previousLine.startsWith(guidePrefix) &&
-      previousLine.endsWith(" ")
-    ) {
+    const guidePrefix = line.match(promptGuidePrefixPattern)?.[0];
+    if (previousLine === undefined || guidePrefix === undefined) {
+      joinedLines.push(line);
+      continue;
+    }
+
+    const lineContinuesPreviousPrompt = isSoftWrappedPromptContinuation(
+      previousLine,
+      guidePrefix,
+    );
+
+    if (lineContinuesPreviousPrompt) {
       joinedLines[previousLineIndex] = previousLine + line.slice(guidePrefix.length);
     } else {
       joinedLines.push(line);
@@ -128,13 +149,30 @@ function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
 }
 
 /**
+ * Determines whether two adjacent lines belong to the same prompt and the
+ * preceding line ends at a soft-wrap break space.
+ */
+function isSoftWrappedPromptContinuation(
+  previousLine: string,
+  guidePrefix: string,
+): boolean {
+  const belongsToSamePrompt = previousLine.startsWith(guidePrefix);
+  if (!belongsToSamePrompt) {
+    return false;
+  }
+
+  return previousLine.endsWith(" ");
+}
+
+/**
  * Converts either form accepted by a Node.js stream write into UTF-8 text for
  * normalization.
  */
 function toText(chunk: string | Uint8Array): string {
-  return typeof chunk === "string"
-    ? chunk
-    : Buffer.from(chunk).toString();
+  if (typeof chunk === "string") {
+    return chunk;
+  }
+  return Buffer.from(chunk).toString();
 }
 
 /**
@@ -142,11 +180,11 @@ function toText(chunk: string | Uint8Array): string {
  * characters while leaving visible terminal text and line feeds intact.
  */
 function stripTerminalControlSequences(value: string): string {
-  return value
-    .replace(/\u001b\][^\u0007]*(?:\u0007|\u001b\\)/g, "")
-    .replace(/\u001b\[[0-?]*[ -/]*[@-~]/g, "")
-    .replace(/\u001b[()][0-2A-Z0-9]/g, "")
-    .replace(/[\u0000-\u0008\u000b-\u001a\u001c-\u001f\u007f]/g, "");
+  let normalized = value.replace(operatingSystemCommandPattern, "");
+  normalized = normalized.replace(controlSequenceIntroducerPattern, "");
+  normalized = normalized.replace(characterSetSelectionPattern, "");
+  normalized = normalized.replace(remainingControlCharactersPattern, "");
+  return normalized;
 }
 
 /**
@@ -154,7 +192,13 @@ function stripTerminalControlSequences(value: string): string {
  * so snapshots do not change when the package version changes.
  */
 function normalizePackageVersion(output: string): string {
-  return output
-    .replace(packageVersionAfterName, `$1${packageVersionPlaceholder}`)
-    .replace(standalonePackageVersion, packageVersionPlaceholder);
+  let normalized = output.replace(
+    packageVersionAfterName,
+    `$1${packageVersionPlaceholder}`,
+  );
+  normalized = normalized.replace(
+    standalonePackageVersion,
+    packageVersionPlaceholder,
+  );
+  return normalized;
 }

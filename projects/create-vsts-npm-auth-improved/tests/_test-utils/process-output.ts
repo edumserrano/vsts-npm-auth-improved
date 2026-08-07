@@ -3,13 +3,19 @@ import type { MockInstance } from "vitest";
 import { vi } from "vitest";
 
 const packageVersionPlaceholder = "<PACKAGE_VERSION>";
-const semanticVersionPattern =
-  String.raw`(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)` +
-  String.raw`(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)` +
-  String.raw`(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?` +
-  String.raw`(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
+const numericVersionIdentifierPattern = String.raw`(?:0|[1-9]\d*)`;
+const nonNumericPrereleaseIdentifierPattern =
+  String.raw`\d*[A-Za-z-][0-9A-Za-z-]*`;
+const prereleaseIdentifierPattern =
+  `(?:${numericVersionIdentifierPattern}|${nonNumericPrereleaseIdentifierPattern})`;
+const prereleasePattern = String.raw`(?:-${prereleaseIdentifierPattern}(?:\.${prereleaseIdentifierPattern})*)?`;
+const buildIdentifierPattern = String.raw`[0-9A-Za-z-]+`;
+const buildMetadataPattern = String.raw`(?:\+${buildIdentifierPattern}(?:\.${buildIdentifierPattern})*)?`;
+const semanticVersionPattern = String.raw`${numericVersionIdentifierPattern}\.${numericVersionIdentifierPattern}\.${numericVersionIdentifierPattern}${prereleasePattern}${buildMetadataPattern}`;
+const packageNamePattern = String.raw`(?:create-)?vsts-npm-auth-improved`;
+const packageVersionTerminatorPattern = String.raw`(?![0-9A-Za-z.+-])`;
 const packageVersionAfterName = new RegExp(
-  `((?:create-)?vsts-npm-auth-improved )${semanticVersionPattern}(?![0-9A-Za-z.+-])`,
+  `(${packageNamePattern} )${semanticVersionPattern}${packageVersionTerminatorPattern}`,
   "g",
 );
 const standalonePackageVersion = new RegExp(`^${semanticVersionPattern}$`, "gm");
@@ -24,6 +30,17 @@ const newlinePattern = new RegExp(
   `${carriageReturn}${lineFeed}?|${unicodeLineSeparator}|${unicodeParagraphSeparator}`,
   "g",
 );
+const operatingSystemCommandPattern =
+  /\u001b\][^\u0007]*(?:\u0007|\u001b\\)/g;
+const controlSequenceIntroducerPattern = /\u001b\[[0-?]*[ -/]*[@-~]/g;
+const characterSetSelectionPattern = /\u001b[()][0-2A-Z0-9]/g;
+const remainingControlCharactersPattern =
+  /[\u0000-\u0008\u000b-\u001a\u001c-\u001f\u007f]/g;
+const nondeterministicSpinnerFramePattern =
+  /^(?:◒|◐|◓|◑|•|o|O|0) {2}(?:Searching for package\.json files|Writing configuration files)\.\.\.\n?/gm;
+const promptGuidePrefixPattern = /^[│|] {2}/;
+const temporaryRootTypingSequencePattern = /(?:│  [^\n│]+?█)+/g;
+const temporaryRootTypingFramePattern = /│  ([^\n│]+?)█/g;
 
 /**
  * Captures stdout and optional stderr for complete terminal snapshots. It
@@ -60,12 +77,13 @@ export type ProcessOutputCaptureOptions = OutputNormalizationOptions & {
 export function captureProcessOutput(
   options: ProcessOutputCaptureOptions = {},
 ): ProcessOutputCapture {
-  return {
-    stdout: captureOutputChannel(process.stdout, options),
-    ...(options.captureStderr === true
-      ? { stderr: captureOutputChannel(process.stderr, options) }
-      : {}),
-  };
+  const stdout = captureOutputChannel(process.stdout, options);
+  if (options.captureStderr !== true) {
+    return { stdout };
+  }
+
+  const stderr = captureOutputChannel(process.stderr, options);
+  return { stdout, stderr };
 }
 
 /**
@@ -96,7 +114,8 @@ function captureOutputChannel(
   stream: NodeJS.WriteStream,
   options: OutputNormalizationOptions,
 ): OutputChannelCapture {
-  const write = vi.spyOn(stream, "write").mockImplementation(() => true);
+  const write = vi.spyOn(stream, "write");
+  write.mockImplementation(() => true);
   return {
     write,
     get normalizedOutput() {
@@ -126,20 +145,18 @@ function normalizeOutput(
     lineFeed,
   );
 
-  const temporaryRoots = [...(options.temporaryRoots ?? [])]
-    .map(root =>
-      root.replaceAll(windowsPathSeparator, normalizedPathSeparator),
-    )
-    .sort((left, right) => right.length - left.length);
-  normalized = normalized.replaceAll(
-    windowsPathSeparator,
-    normalizedPathSeparator,
+  const temporaryRoots = [...(options.temporaryRoots ?? [])];
+  const normalizedTemporaryRoots = temporaryRoots.map(root =>
+    normalizePathSeparators(root),
   );
+  normalizedTemporaryRoots.sort((left, right) => right.length - left.length);
+
+  normalized = normalizePathSeparators(normalized);
   normalized = normalizeProgressivelyTypedTemporaryRoots(
     normalized,
-    temporaryRoots,
+    normalizedTemporaryRoots,
   );
-  for (const temporaryRoot of temporaryRoots) {
+  for (const temporaryRoot of normalizedTemporaryRoots) {
     normalized = replaceAllCaseInsensitive(
       normalized,
       temporaryRoot,
@@ -155,9 +172,23 @@ function normalizeOutput(
  * line so snapshots remain stable across releases.
  */
 function normalizePackageVersion(output: string): string {
-  return output
-    .replace(packageVersionAfterName, `$1${packageVersionPlaceholder}`)
-    .replace(standalonePackageVersion, packageVersionPlaceholder);
+  let normalized = output.replace(
+    packageVersionAfterName,
+    `$1${packageVersionPlaceholder}`,
+  );
+  normalized = normalized.replace(
+    standalonePackageVersion,
+    packageVersionPlaceholder,
+  );
+  return normalized;
+}
+
+/**
+ * Converts Windows path separators to the separator used in cross-platform
+ * snapshots.
+ */
+function normalizePathSeparators(value: string): string {
+  return value.replaceAll(windowsPathSeparator, normalizedPathSeparator);
 }
 
 /**
@@ -176,37 +207,79 @@ function normalizeProgressivelyTypedTemporaryRoots(
     "g",
   );
   return output.replace(
-    /(?:│  [^\n│]+?█)+/g,
-    typingSequence => {
-      const typedValues = [
-        ...typingSequence.matchAll(/│  ([^\n│]+?)█/g),
-      ].map(([, typedValue]) => typedValue);
-      const completedRoots = temporaryRoots.filter(root =>
-        typedValues.some(
-          typedValue => typedValue.toLowerCase() === root.toLowerCase(),
-        ),
+    temporaryRootTypingSequencePattern,
+    typingSequence =>
+      normalizeTemporaryRootTypingSequence(
+        typingSequence,
+        temporaryRoots,
+        normalizedTemporaryRootFrame,
+        repeatedNormalizedTemporaryRootFrames,
+      ),
+  );
+}
+
+/**
+ * Normalizes one sequence of progressively typed frames when that sequence
+ * reaches a configured temporary root, leaving unrelated input unchanged.
+ */
+function normalizeTemporaryRootTypingSequence(
+  typingSequence: string,
+  temporaryRoots: readonly string[],
+  normalizedTemporaryRootFrame: string,
+  repeatedNormalizedTemporaryRootFrames: RegExp,
+): string {
+  const completedRoots = findCompletedTemporaryRoots(
+    typingSequence,
+    temporaryRoots,
+  );
+  if (completedRoots.length === 0) {
+    return typingSequence;
+  }
+
+  let normalized = typingSequence.replace(
+    temporaryRootTypingFramePattern,
+    (originalFrame, typedValue: string) => {
+      const belongsToCompletedRoot = completedRoots.some(root =>
+        startsWithIgnoringCase(root, typedValue),
       );
-
-      if (completedRoots.length === 0) {
-        return typingSequence;
+      if (belongsToCompletedRoot) {
+        return normalizedTemporaryRootFrame;
       }
-
-      return typingSequence
-        .replace(
-          /│  ([^\n│]+?)█/g,
-          (match, typedValue: string) =>
-            completedRoots.some(root =>
-              root.toLowerCase().startsWith(typedValue.toLowerCase()),
-            )
-              ? normalizedTemporaryRootFrame
-              : match,
-        )
-        .replace(
-          repeatedNormalizedTemporaryRootFrames,
-          normalizedTemporaryRootFrame,
-        );
+      return originalFrame;
     },
   );
+  normalized = normalized.replace(
+    repeatedNormalizedTemporaryRootFrames,
+    normalizedTemporaryRootFrame,
+  );
+  return normalized;
+}
+
+/**
+ * Returns the configured temporary roots that appear as complete values in a
+ * progressively typed frame sequence.
+ */
+function findCompletedTemporaryRoots(
+  typingSequence: string,
+  temporaryRoots: readonly string[],
+): string[] {
+  const typedValues = [
+    ...typingSequence.matchAll(temporaryRootTypingFramePattern),
+  ].map(([, typedValue]) => typedValue);
+
+  return temporaryRoots.filter(root =>
+    typedValues.some(typedValue => equalsIgnoringCase(typedValue, root)),
+  );
+}
+
+/** Compares two strings without regard to casing. */
+function equalsIgnoringCase(left: string, right: string): boolean {
+  return left.toLowerCase() === right.toLowerCase();
+}
+
+/** Tests whether a string starts with a prefix without regard to casing. */
+function startsWithIgnoringCase(value: string, prefix: string): boolean {
+  return value.toLowerCase().startsWith(prefix.toLowerCase());
 }
 
 /**
@@ -214,9 +287,10 @@ function normalizeProgressivelyTypedTemporaryRoots(
  * normalization.
  */
 function toText(chunk: string | Uint8Array): string {
-  return typeof chunk === "string"
-    ? chunk
-    : Buffer.from(chunk).toString();
+  if (typeof chunk === "string") {
+    return chunk;
+  }
+  return Buffer.from(chunk).toString();
 }
 
 /**
@@ -224,11 +298,11 @@ function toText(chunk: string | Uint8Array): string {
  * characters while leaving visible terminal text intact.
  */
 function stripTerminalControlSequences(value: string): string {
-  return value
-    .replace(/\u001b\][^\u0007]*(?:\u0007|\u001b\\)/g, "")
-    .replace(/\u001b\[[0-?]*[ -/]*[@-~]/g, "")
-    .replace(/\u001b[()][0-2A-Z0-9]/g, "")
-    .replace(/[\u0000-\u0008\u000b-\u001a\u001c-\u001f\u007f]/g, "");
+  let normalized = value.replace(operatingSystemCommandPattern, "");
+  normalized = normalized.replace(controlSequenceIntroducerPattern, "");
+  normalized = normalized.replace(characterSetSelectionPattern, "");
+  normalized = normalized.replace(remainingControlCharactersPattern, "");
+  return normalized;
 }
 
 /**
@@ -236,10 +310,7 @@ function stripTerminalControlSequences(value: string): string {
  * success or error line remains as the deterministic operation result.
  */
 function stripNondeterministicSpinnerFrames(value: string): string {
-  return value.replace(
-    /^(?:◒|◐|◓|◑|•|o|O|0) {2}(?:Searching for package\.json files|Writing configuration files)\.\.\.\n?/gm,
-    "",
-  );
+  return value.replace(nondeterministicSpinnerFramePattern, "");
 }
 
 /**
@@ -253,23 +324,33 @@ function normalizeColorDrivenMultiselectRedraws(value: string): string {
   const navigationHint =
     `│  ↑/↓ to navigate • Space: select • Enter: confirm${lineFeed}` +
     `└${lineFeed}`;
+  const allOption = String.raw`│  ◻ ALL`;
+  const selectedOptionPrefix = String.raw`│  ◼`;
+  const anyOptionLine = String.raw`│  [◻◼] [^│\n]+\n`;
+  const unselectedOptionExceptAllLine =
+    String.raw`│  ◻ (?!ALL)[^│\n]+\n`;
+  const selectedOptionLineWithoutNewline = String.raw`│  ◼ [^│\n]+`;
+  const completeOptionBlock =
+    `(?:${anyOptionLine})+${escapeForRegExp(navigationHint)}`;
+  const unselectedOptionBlock =
+    `(?:${unselectedOptionExceptAllLine})+${escapeForRegExp(navigationHint)}`;
   const firstFocusMove = new RegExp(
-    `^│  ◻ ALL\\n(?:│  [◻◼] [^│\\n]+\\n)+${escapeForRegExp(navigationHint)}`,
+    `^${allOption}\\n${completeOptionBlock}`,
     "gm",
   );
   const laterFocusMoves = new RegExp(
-    `(?<=│  ◻ ALL)(?:(?:│  ◻ (?!ALL)[^│\\n]+\\n)+${escapeForRegExp(navigationHint)})+(?=│  ◼)`,
+    `(?<=${allOption})(?:${unselectedOptionBlock})+(?=${selectedOptionPrefix})`,
     "g",
   );
   const selectedFocusMoves = new RegExp(
-    `(│  ◼ [^│\\n]+)(?:(?:│  [◻◼] [^│\\n]+\\n)+${escapeForRegExp(navigationHint)})+(?=│  ◼)`,
+    `(${selectedOptionLineWithoutNewline})(?:${completeOptionBlock})+(?=${selectedOptionPrefix})`,
     "g",
   );
 
-  return value
-    .replace(firstFocusMove, "│  ◻ ALL")
-    .replace(laterFocusMoves, "")
-    .replace(selectedFocusMoves, "$1");
+  let normalized = value.replace(firstFocusMove, allOption);
+  normalized = normalized.replace(laterFocusMoves, "");
+  normalized = normalized.replace(selectedFocusMoves, "$1");
+  return normalized;
 }
 
 /**
@@ -282,7 +363,7 @@ function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
   for (const line of lines) {
     const previousLineIndex = joinedLines.length - 1;
     const previousLine = joinedLines[previousLineIndex];
-    const guidePrefix = line.match(/^[│|] {2}/)?.[0];
+    const guidePrefix = line.match(promptGuidePrefixPattern)?.[0];
     if (previousLine === undefined || guidePrefix === undefined) {
       joinedLines.push(line);
       continue;
@@ -303,6 +384,10 @@ function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
   return joinedLines;
 }
 
+/**
+ * Determines whether two adjacent prompt lines represent a terminal-width
+ * soft wrap rather than two independent lines.
+ */
 function isSoftWrappedPromptContinuation(
   line: string,
   previousLine: string,
@@ -324,6 +409,7 @@ function isSoftWrappedPromptContinuation(
   return previousLineEndsAtBreakSpace || continuationUsesExtraIndent;
 }
 
+/** Escapes regular-expression syntax so a value can be matched literally. */
 function escapeForRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
