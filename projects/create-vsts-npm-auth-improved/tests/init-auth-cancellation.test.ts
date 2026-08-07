@@ -6,7 +6,7 @@ import { PromptsInteraction } from "@test-utils/prompts-interaction";
 import { mockStdoutWrite } from "@test-utils/process-output";
 
 /**
- * Tests cancellation at each interactive workflow stage.
+ * Verifies cancellation at each interactive workflow stage.
  */
 
 const testSuiteCwd = process.cwd();
@@ -23,11 +23,12 @@ afterEach(async () => {
 const promptedRegistry = "https://registry.prompted.test/";
 
 /**
- * Tests cancellation at the initial project-root prompt.
- * Verifies that:
- * - Cancellation exits with a failure status
- * - Existing package.json content remains unchanged
- * - No .npmrc file is created and the cancellation is reported
+ * Verifies cancellation at the initial project-root prompt.
+ * Expected results:
+ * - The command exits with a failure status.
+ * - Existing package.json content does not change.
+ * - The command does not create a .npmrc file.
+ * - The command reports the cancellation.
  */
 test("cancels at the root prompt without changing the filesystem", async () => {
   const project = await NpmProject.createAsync("root-cancelled");
@@ -50,11 +51,12 @@ test("cancels at the root prompt without changing the filesystem", async () => {
 });
 
 /**
- * Tests cancellation after discovery at the package-selection prompt.
- * Verifies that:
- * - Cancellation exits with a failure status before configuration begins
- * - Existing package.json content remains unchanged
- * - No .npmrc file is created and the cancellation is reported
+ * Verifies cancellation at the package-selection prompt after discovery.
+ * Expected results:
+ * - The command exits with a failure status before configuration starts.
+ * - Existing package.json content does not change.
+ * - The command does not create a .npmrc file.
+ * - The command reports the cancellation.
  */
 test("cancels at package selection without changing the filesystem", async () => {
   const project = await NpmProject.createAsync("selection-cancelled");
@@ -102,11 +104,12 @@ test("cancels at installation strategy selection without changing the filesystem
 });
 
 /**
- * Tests cancellation at the registry prompt for a selected package.
- * Verifies that:
- * - Cancellation exits with a failure status without persisting the prepared changes
- * - Existing package.json content remains unchanged
- * - No .npmrc file is created and the cancellation is reported
+ * Verifies cancellation at the registry prompt for a selected package.
+ * Expected results:
+ * - The command exits with a failure status and does not save prepared changes.
+ * - Existing package.json content does not change.
+ * - The command does not create a .npmrc file.
+ * - The command reports the cancellation.
  */
 test("cancels at the registry prompt without changing the filesystem", async () => {
   const project = await NpmProject.createAsync("registry-cancelled");
@@ -135,11 +138,11 @@ test("cancels at the registry prompt without changing the filesystem", async () 
 });
 
 /**
- * Tests cancellation while collecting registries for several selected packages.
- * Verifies that:
- * - Supplying an earlier registry does not persist partial work
- * - Cancelling a later registry prompt exits with a failure status and zero writes
- * - All selected packages retain their original files
+ * Verifies cancellation during registry collection for multiple selected packages.
+ * Expected results:
+ * - An earlier registry response does not save partial work.
+ * - Cancellation at a later registry prompt gives a failure status and no writes.
+ * - All selected packages keep their original files.
  */
 test("cancels at a later registry prompt after planning with zero writes", async () => {
   const project = await NpmProject.createAsync("later-registry-cancelled");

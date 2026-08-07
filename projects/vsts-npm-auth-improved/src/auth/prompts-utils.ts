@@ -1,8 +1,7 @@
 import * as prompts from "@clack/prompts";
 
-// Re-export prompts for use in other modules, whenever I type prompts I want the IDE auto-suggest this import.
-// Without this re-export the IDE doesn't suggest any import because it has no way of knowing that I want to threat
-// the "@clack/prompts" module as "prompts".
+// Re-export prompts to give all modules the same import name. This re-export
+// also lets the IDE suggest the "prompts" name for "@clack/prompts".
 export { prompts };
 
 export class PromptMessages {

@@ -5,7 +5,7 @@ import { NpmProject } from "@test-utils/npm-project";
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
 
 /**
- * Tests the semantic package.json content produced by the init-auth workflow.
+ * Verifies the semantic package.json content from the init-auth workflow.
  */
 
 const testSuiteCwd = process.cwd();
@@ -34,13 +34,12 @@ const customInstallManagedScripts = {
 } as const;
 
 /**
- * Tests how init-auth adds its managed package.json scripts and development
- * dependency across different existing document shapes.
- * Verifies that:
- * - Managed fields are created or corrected as required
- * - Unrelated package metadata, dependencies, and scripts are preserved
- * - Invalid supported containers are replaced
- * - The already-correct .npmrc is not rewritten
+ * Verifies managed package.json scripts and the development dependency in different documents.
+ * Expected results:
+ * - The command creates or corrects managed fields as necessary.
+ * - The command keeps unrelated package metadata, dependencies, and scripts.
+ * - The command replaces invalid supported containers.
+ * - The command does not rewrite the correct .npmrc file.
  */
 test.each([
   [

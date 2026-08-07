@@ -5,8 +5,7 @@ import { AuthCommand } from "@test-utils/auth-command";
 import { mockStdoutWrite } from "@test-utils/process-output";
 
 /**
- * The tests below verify CI-specific auth command behavior when all options are provided via the
- * CLI.
+ * These tests verify the auth command behavior in CI when the CLI supplies all options.
  */
 
 const { originalCiEnvironment } = vi.hoisted(() => {
@@ -37,18 +36,19 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.resetAllMocks(); // clears history on module mocks like execa
-  vi.restoreAllMocks(); // restores original implementations of spied functions
+  vi.resetAllMocks(); // Clear the call history of module mocks such as Execa.
+  vi.restoreAllMocks(); // Restore the original implementations of spied functions.
   vol.reset();
   process.exitCode = undefined;
 });
 
 /**
- * Tests that automatic authentication is skipped in CI when every auth option is supplied.
- * Verifies that:
- * - The CI authentication warning is displayed without reading the NPM configuration file
- * - vsts-npm-auth is not called
- * - The process exit code is 0 so an npm script can continue
+ * Verifies that the command does not start automatic authentication in CI.
+ * Expected results:
+ * - The command shows the CI authentication warning.
+ * - The command does not read the npm configuration file.
+ * - The command does not call vsts-npm-auth.
+ * - The process exit code is 0, and the npm script can continue.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth --config-path <path> --read --force
@@ -73,8 +73,8 @@ test("automatic authentication is skipped in CI", async () => {
 });
 
 /**
- * Tests that CI detection takes precedence over the non-Windows platform check.
- * Verifies that the CI-specific warning is displayed instead of the non-Windows warning.
+ * Verifies that CI detection occurs before the non-Windows platform check.
+ * The command must show the CI warning, not the non-Windows warning.
  */
 test("CI detection takes precedence over the non-Windows platform check", async () => {
   mockedPlatform = "darwin";

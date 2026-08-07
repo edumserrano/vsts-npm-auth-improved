@@ -4,14 +4,14 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     globals: false,
-    // Clack selects Unicode symbols at module-load time. Make prompt snapshots
-    // deterministic when tests run outside a Unicode-detectable Windows terminal.
+    // Clack selects Unicode symbols when the module loads. Set the terminal
+    // environment to make prompt snapshots repeatable on Windows.
     env: {
       CI: "true",
     },
-    // Suppress console output during tests. Alternatively mock the console methods like console.log,
-    // console.error, etc. Without this there's several empty output lines in vitest output due to the
-    // console.log() at the start of the cliAsync function in cli.ts
+    // Suppress console output during tests. As an alternative, mock console
+    // methods such as console.log and console.error. The console.log call at the
+    // start of cliAsync otherwise adds empty lines to the Vitest output.
     silent: true,
     environment: "node",
     include: ["tests/**/*.test.ts"],

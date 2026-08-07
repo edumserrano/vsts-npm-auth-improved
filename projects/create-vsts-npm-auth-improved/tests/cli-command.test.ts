@@ -9,8 +9,7 @@ import { PromptsInteraction } from "@test-utils/prompts-interaction";
 import { captureProcessOutput, mockStdoutWrite } from "@test-utils/process-output";
 
 /**
- * The tests below verify the create-vsts-npm-auth-improved CLI entry commands,
- * informational output, and top-level error handling.
+ * These tests verify the CLI entry commands, information output, and top-level error processing.
  */
 
 const testSuiteCwd = process.cwd();
@@ -25,12 +24,11 @@ afterEach(async () => {
 });
 
 /**
- * Tests that both the default invocation and the explicit init-auth subcommand
- * dispatch to the real interactive workflow.
- * Verifies that:
- * - Both command forms complete successfully
- * - The no-packages flow leaves the selected project unchanged
- * - The terminal transcript reflects the command form that was invoked
+ * Verifies the default command and the explicit init-auth subcommand.
+ * Expected results:
+ * - Both command forms start the real interactive workflow and complete successfully.
+ * - The no-packages flow does not change the selected project.
+ * - The terminal text shows the command form that started.
  *
  * CLI commands:
  * - create-vsts-npm-auth-improved
@@ -58,12 +56,12 @@ test.each([
 });
 
 /**
- * Tests the root and init-auth help options and the root version options,
- * including their short aliases.
- * Verifies that:
- * - Each informational command exits successfully
- * - No project files are created or modified
- * - The complete stdout output is rendered as expected
+ * Verifies the root and init-auth help options and the root version options.
+ * The test also verifies their short aliases.
+ * Expected results:
+ * - Each information command exits successfully.
+ * - The commands do not create or change project files.
+ * - The complete stdout output agrees with the expected output.
  */
 test.each([
   ["long root help", ["--help"]],
@@ -86,11 +84,11 @@ test.each([
 });
 
 /**
- * Tests the CLI response to an unrecognized subcommand.
- * Verifies that:
- * - Commander reports the failure with process exit code 1
- * - The project filesystem remains unchanged
- * - The terminal transcript contains the expected usage error
+ * Verifies the CLI response to an unrecognized subcommand.
+ * Expected results:
+ * - Commander reports the failure with process exit code 1.
+ * - The project file system does not change.
+ * - The terminal text contains the expected usage error.
  *
  * CLI command:
  * - create-vsts-npm-auth-improved not-a-command
@@ -111,8 +109,8 @@ test("reports an unknown command with the effective Commander exit code", async 
 });
 
 /**
- * Tests command-level handling when terminal output throws an Error outside
- * the modeled init-auth failure boundaries.
+ * Verifies command-level processing when terminal output throws an Error. This
+ * error occurs outside the specified init-auth failure boundaries.
  */
 test("reports an unexpected Error from the terminal boundary", async () => {
   const project = await NpmProject.createAsync("unexpected-terminal-error");
@@ -135,12 +133,11 @@ test("reports an unexpected Error from the terminal boundary", async () => {
 });
 
 /**
- * Tests top-level handling when a dependency throws a value that is not an
- * Error instance.
- * Verifies that:
- * - The command exits with process exit code 1
- * - The empty project remains unchanged
- * - The thrown value is handled without escaping to the CLI fallback
+ * Verifies top-level processing when a dependency throws a value that is not an Error.
+ * Expected results:
+ * - The command exits with process exit code 1.
+ * - The empty project does not change.
+ * - The command processes the value before it gets to the CLI fallback.
  */
 test("reports an unexpected non-Error value from the terminal boundary", async () => {
   const project = await NpmProject.createAsync("unexpected-non-error");
@@ -161,8 +158,8 @@ test("reports an unexpected non-Error value from the terminal boundary", async (
 });
 
 /**
- * Tests the outer CLI fallback through the terminal boundary before Commander
- * begins parsing.
+ * Verifies the outer CLI fallback through the terminal boundary. The failure
+ * occurs before Commander starts to parse the command.
  */
 test("reports a top-level terminal failure", async () => {
   const project = await NpmProject.createAsync("top-level-cli-failure");

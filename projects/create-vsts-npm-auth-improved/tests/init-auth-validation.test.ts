@@ -13,7 +13,7 @@ import { PromptsInteraction } from "@test-utils/prompts-interaction";
 import { mockStdoutWrite } from "@test-utils/process-output";
 
 /**
- * Tests root-directory and registry prompt validation and registry reuse.
+ * Verifies root-directory and registry prompt validation and registry reuse.
  */
 
 const testSuiteCwd = process.cwd();
@@ -30,11 +30,11 @@ afterEach(async () => {
 const promptedRegistry = "https://registry.prompted.test/";
 
 /**
- * Tests correction of a project root that does not exist.
- * Verifies that:
- * - The prompt displays targeted missing-directory feedback
- * - A subsequent valid relative root is accepted
- * - The corrected no-packages flow exits successfully without writes
+ * Verifies correction of a project root that does not exist.
+ * Expected results:
+ * - The prompt shows the specified missing-directory message.
+ * - The prompt accepts the next valid relative root.
+ * - The corrected no-packages flow exits successfully without writes.
  */
 test("shows invalid root feedback before accepting a valid correction", async () => {
   const project = await NpmProject.createAsync("corrected-root");
@@ -56,11 +56,11 @@ test("shows invalid root feedback before accepting a valid correction", async ()
 });
 
 /**
- * Tests selecting a project root with an absolute filesystem path.
- * Verifies that:
- * - The real directory prompt accepts the absolute path
- * - Discovery completes successfully for that root
- * - The empty project remains unchanged
+ * Verifies selection of a project root with an absolute file-system path.
+ * Expected results:
+ * - The real directory prompt accepts the absolute path.
+ * - Discovery completes successfully for that root.
+ * - The empty project does not change.
  */
 test("accepts an absolute root through the real directory prompt", async () => {
   const project = await NpmProject.createAsync("absolute-root");
@@ -79,11 +79,11 @@ test("accepts an absolute root through the real directory prompt", async () => {
 });
 
 /**
- * Tests correction of an empty project-root response.
- * Verifies that:
- * - The prompt requires a directory path
- * - A subsequent valid relative root is accepted
- * - The corrected no-packages flow exits successfully without writes
+ * Verifies correction of an empty project-root response.
+ * Expected results:
+ * - The prompt requires a directory path.
+ * - The prompt accepts the next valid relative root.
+ * - The corrected no-packages flow exits successfully without writes.
  */
 test("shows empty-root feedback before accepting a valid correction", async () => {
   const project = await NpmProject.createAsync("empty-root-correction");
@@ -105,11 +105,11 @@ test("shows empty-root feedback before accepting a valid correction", async () =
 });
 
 /**
- * Tests correction when the supplied project root points to a file.
- * Verifies that:
- * - The prompt explains that the selected path is not a directory
- * - A subsequent valid relative root is accepted
- * - The existing file remains unchanged and no writes occur
+ * Verifies correction when the specified project root points to a file.
+ * Expected results:
+ * - The prompt explains that the selected path is not a directory.
+ * - The prompt accepts the next valid relative root.
+ * - The existing file does not change, and no writes occur.
  */
 test("shows file-root feedback before accepting a valid correction", async () => {
   const project = await NpmProject.createAsync("file-root-correction");
@@ -133,12 +133,12 @@ test("shows file-root feedback before accepting a valid correction", async () =>
 });
 
 /**
- * Tests registry validation for empty, whitespace-only, scheme-less, and relative
- * values before a valid registry is supplied.
- * Verifies that:
- * - Each invalid value produces the targeted validation message
- * - The prompt remains active and accepts a valid correction
- * - The selected package is configured only after validation succeeds
+ * Verifies registry validation before the test supplies a valid registry.
+ * It uses empty, space-only, scheme-less, and relative values.
+ * Expected results:
+ * - Each invalid value causes the specified validation message.
+ * - The prompt stays active and accepts a valid correction.
+ * - Configuration of the selected package occurs only after successful validation.
  */
 test.each([
   ["empty", ""],
@@ -184,11 +184,11 @@ test.each([
 );
 
 /**
- * Tests accepted registry URL forms through the real registry prompt.
- * Verifies that:
- * - Standard HTTPS and custom-scheme absolute URLs are accepted
- * - The chosen registry is persisted with the managed .npmrc settings
- * - package.json is configured and the command exits successfully
+ * Verifies accepted registry URL forms through the real registry prompt.
+ * Expected results:
+ * - The prompt accepts standard HTTPS and custom-scheme absolute URLs.
+ * - The command saves the selected registry with the managed .npmrc settings.
+ * - The command configures package.json and exits successfully.
  */
 test.each([
   ["HTTPS", "https://registry.example.test/"],
@@ -228,12 +228,12 @@ test.each([
 );
 
 /**
- * Tests configuration of a package whose .npmrc already contains a valid global registry.
- * Verifies that:
- * - No registry prompt is displayed
- * - package.json receives the managed configuration
- * - The canonical .npmrc content is preserved
- * - The command exits successfully with only the required write
+ * Verifies a package whose .npmrc already contains a valid global registry.
+ * Expected results:
+ * - The command does not show the registry prompt.
+ * - package.json receives the managed configuration.
+ * - The canonical .npmrc content does not change.
+ * - The command exits successfully with only the necessary write.
  */
 test("reuses an existing global registry without showing a registry prompt", async () => {
   const project = await NpmProject.createAsync("existing-registry");

@@ -3,9 +3,8 @@ import type { ExpectationResult } from "@vitest/expect";
 import type { VstsNpmAuthMock } from "./vsts-npm-auth.js";
 
 /**
- * Registers the Vitest matcher used to verify the complete vsts-npm-auth
- * process boundary, including the npx command, registry pin, executable
- * arguments, and Execa options.
+ * Registers the Vitest matcher for the complete vsts-npm-auth process boundary.
+ * It verifies the npx command, registry pin, executable arguments, and Execa options.
  */
 
 interface CustomMatchers<R = unknown> {

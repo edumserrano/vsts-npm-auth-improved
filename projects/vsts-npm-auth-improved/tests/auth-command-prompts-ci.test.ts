@@ -5,8 +5,7 @@ import { mockStdoutWrite } from "@test-utils/process-output";
 import { mockVstsNpmAuth } from "@test-utils/vsts-npm-auth";
 
 /**
- * The tests below verify CI-specific auth command behavior when options would normally be provided
- * via user prompts.
+ * These tests verify the auth command behavior in CI when prompts usually supply the options.
  */
 
 const { originalCiEnvironment } = vi.hoisted(() => {
@@ -34,18 +33,19 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.resetAllMocks(); // clears history on module mocks like execa
-  vi.restoreAllMocks(); // restores original implementations of spied functions
+  vi.resetAllMocks(); // Clear the call history of module mocks such as Execa.
+  vi.restoreAllMocks(); // Restore the original implementations of spied functions.
   vol.reset();
   process.exitCode = undefined;
 });
 
 /**
- * Tests the CI flow when every auth option would normally be provided via prompts.
- * Verifies that:
- * - NPM configuration path, token scope, and forced-acquisition prompts are all skipped
- * - The CI authentication warning is displayed
- * - vsts-npm-auth is not called and the process exit code is 0
+ * Verifies the CI flow when prompts usually supply all authentication options.
+ * Expected results:
+ * - The command does not show the config-path, token-scope, or force prompts.
+ * - The command shows the CI authentication warning.
+ * - The command does not call vsts-npm-auth.
+ * - The process exit code is 0.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth

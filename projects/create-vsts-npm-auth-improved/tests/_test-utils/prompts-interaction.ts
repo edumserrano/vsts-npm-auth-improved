@@ -1,9 +1,9 @@
 import type { Key } from "node:readline";
 
 /**
- * Drives real terminal prompts with queued text and keypress events, waiting
- * for a prompt to accept input and for rendering to settle around each
- * interaction. Cleanup removes only prompt listeners observed by this helper.
+ * Controls real terminal prompts with queued text and keypress events. It waits
+ * until a prompt can accept input and until rendering is stable. Cleanup removes
+ * only the prompt listeners that this helper detects.
  */
 
 type PromptOperation = () => void | Promise<void>;
@@ -11,7 +11,7 @@ type KeypressListener = (...args: any[]) => void;
 type KeypressModifiers = Pick<Key, "ctrl" | "meta" | "shift">;
 
 const initialKeypressListeners = new Set(currentKeypressListeners());
-// Node installs its terminal-data bridge before the prompt's input listener.
+// Node installs its terminal-data bridge before the prompt input listener.
 const promptListenerOffset = initialKeypressListeners.size === 0 ? 1 : 0;
 const observedPromptListeners = new Set<KeypressListener>();
 
@@ -76,9 +76,9 @@ export class PromptsInteraction implements PromiseLike<void> {
   }
 
   /**
-   * Runs test-owned setup while the current prompt remains open. This is useful
-   * for reproducing filesystem changes that happen between discovery/planning
-   * and persistence without importing or mocking application internals.
+   * Runs test-owned setup while the current prompt stays open. Use this method
+   * to repeat file-system changes between planning and file writes. It does not
+   * import or mock application internals.
    */
   public performAsync(operation: () => Promise<void>): this {
     this.operations.push(operation);

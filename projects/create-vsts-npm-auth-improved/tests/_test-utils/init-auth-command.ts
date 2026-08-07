@@ -1,9 +1,9 @@
 import { cliAsync } from "@create-vsts-npm-auth-improved";
 
 /**
- * Provides the typed source-test entry points for the public create CLI. It
- * constructs normal Commander argv for default and explicit init-auth
- * invocations and is the only source helper that imports production cliAsync.
+ * Provides typed source-test entry points for the public create CLI. It makes
+ * standard Commander arguments for default and explicit init-auth commands.
+ * This is the only source helper that imports production cliAsync.
  */
 
 export class CreateVstsNpmAuthImprovedCli {

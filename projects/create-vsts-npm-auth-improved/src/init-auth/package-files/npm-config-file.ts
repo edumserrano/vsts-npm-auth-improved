@@ -91,11 +91,11 @@ export type NpmConfigFile = {
 };
 
 export type LoadNpmConfigFileOptions = {
-  /** Additional controlled npm-style arguments. The package prefix is always forced last. */
+  /** Additional controlled npm-style arguments. The package prefix is always last. */
   readonly argv?: readonly string[];
-  /** Defaults to the real process environment. Primarily overridden by isolated tests. */
+  /** The default is the real process environment. Isolated tests can override it. */
   readonly env?: Readonly<NodeJS.ProcessEnv>;
-  /** Defaults to the installed @npmcli/config package root. */
+  /** The default is the installed @npmcli/config package root. */
   readonly npmPath?: string;
   readonly packageDirectory: string;
 };

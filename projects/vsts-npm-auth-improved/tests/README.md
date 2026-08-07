@@ -7,7 +7,7 @@
 
 ## Mocking ES Modules with vi.mock
 
-`vi.mock` calls are hoisted to the top of the file. They will always be executed before all imports. That's what allows us to mock ES modules.
+Vitest moves `vi.mock` calls to the top of the file. It always runs them before all imports. Thus, the tests can mock ES modules.
 
 From the Vitest docs:
 
@@ -20,25 +20,32 @@ See:
 
 ## Public CLI Testing with Commander
 
-The tests in this folder invoke the imported `cliAsync` function in-process to validate the public CLI boundary. Execa is mocked as the boundary to the external `npx` process for [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth), and `node:fs` is replaced by memfs as the filesystem boundary. Environment and platform state may also be controlled directly. These are full-layer source tests rather than tests of the emitted executable, host filesystem, real authentication process, or Azure registry. This approach provides several benefits:
+The tests in this folder call the imported `cliAsync` function in the test process. This validates the public CLI boundary. A mock of Execa replaces the external `npx` process for [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth). memfs replaces `node:fs` at the file-system boundary. The tests can also control the environment and platform state.
 
-Application modules beneath `src` are implementation details: tests must not import, dynamically load, mock, or assert calls to them. Production libraries are implementation choices and must also remain real unless they implement an approved external boundary. Execa is the explicit process-boundary exception; Commander and CI detection remain real. The `test:boundaries` check enforces these restrictions as well as the single `cliAsync` import.
+These tests examine the full source layer. They do not examine these items:
 
-- **Testing the CLI interface**: All commands, options, and aliases are tested as users would interact with them.
-- **Testing CLI error handling**: Ensures error scenarios are handled correctly at the CLI level, including Commander's error handling.
-- **Minimizes breaking tests**: Tests remain stable when internal implementation changes, as long as the public CLI interface stays consistent.
+- The emitted executable.
+- The host file system.
+- The real authentication process.
+- An Azure registry.
+
+Application modules below `src` are implementation details. Tests must not import, dynamically load, mock, or verify calls to them. Production libraries must also stay real unless they implement an approved external boundary. Execa is the specified process-boundary exception. Commander and CI detection stay real. The `test:boundaries` check enforces these restrictions and the single `cliAsync` import.
+
+- **CLI interface tests**: The tests use all commands, options, and aliases in the same way as users.
+- **CLI error tests**: The tests make sure that the CLI and Commander process errors correctly.
+- **Stable tests**: The tests stay stable after internal implementation changes if the public CLI interface does not change.
 
 ### The process.exit challenge
 
-When unit testing with Commander, there's an important challenge: by default, Commander calls `process.exit` when it detects errors (via `Command.error`), or after displaying help or version information.
+By default, Commander calls `process.exit` when it detects errors through `Command.error`. It also calls `process.exit` after it shows help or version information.
 
-This would cause tests to abort due to unexpected calls to `process.exit`.
+These unexpected calls to `process.exit` would stop the tests.
 
 ### Solution: Using program.exitOverride()
 
-To prevent Commander from calling `process.exit`, we use `program.exitOverride()`. See the [Override exit and output handling](https://www.npmjs.com/package/commander#override-exit-and-output-handling) section in Commander's documentation.
+Use `program.exitOverride()` to prevent Commander from calling `process.exit`. Refer to [Override exit and output handling](https://www.npmjs.com/package/commander#override-exit-and-output-handling) in the Commander documentation.
 
-With `exitOverride()` enabled, Commander throws a `CommanderError` instead of calling `process.exit`. In the catch block after calling `program.parseAsync` in the `cliAsync` function, we check if it's a `CommanderError` and set the exit code accordingly:
+With `exitOverride()` enabled, Commander throws a `CommanderError` instead of calling `process.exit`. The catch block follows the `program.parseAsync` call in `cliAsync`. This block identifies a `CommanderError` and sets the applicable exit code:
 
 ```typescript
 try {
@@ -61,7 +68,7 @@ function isCommanderError(error: unknown): error is CommanderError {
 }
 ```
 
-With this approach, the CLI does not call `process.exit`. Commander errors set `process.exitCode` to their effective exit code, while unexpected errors are reported and set it to `1`. The tests can verify the exit code without the process actually exiting:
+With this method, the CLI does not call `process.exit`. Commander errors set `process.exitCode` to their effective exit code. Unexpected errors set it to `1` and show an error message. The tests can verify the exit code while the process continues:
 
 ```typescript
 expect(process.exitCode).toBe(1);

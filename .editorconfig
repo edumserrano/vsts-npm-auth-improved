@@ -1,4 +1,4 @@
-# Editor configuration, see https://editorconfig.org
+# Editor configuration. Refer to https://editorconfig.org.
 root = true
 
 [*]
@@ -9,24 +9,24 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 max_line_length = 100
 
-# TypeScript Files
+# TypeScript files
 [*.ts]
 indent_size = 2
 
-# Web Files
+# Web files
 [*.{htm,html,js,jsm,tsx,pcss,svg,vue}]
 indent_size = 2
 
-# Style Sheets
+# Style sheets
 [*.{css,sass,scss,less}]
 max_line_length = 120
 indent_size = 2
 
-# JSON Files
+# JSON files
 [*.{json,json5,webmanifest}]
 indent_size = 2
 
-# YAML Files
+# YAML files
 [*.{yml,yaml}]
 indent_size = 2
 

@@ -20,8 +20,8 @@ export async function discoverPackageJsonFilesAsync(
   const resolvedRoot = path.resolve(rootDirectory);
 
   try {
-    // Globby is ESM-only while this package emits CommonJS, so it must remain a
-    // dynamic import in the compiled output.
+    // Globby is ESM-only, but this package emits CommonJS. Thus, the compiled
+    // output must use a dynamic import.
     const { globby } = await import("globby");
     const discoveredPaths = await globby(
       ["package.json", "**/package.json"],
@@ -34,8 +34,8 @@ export async function discoverPackageJsonFilesAsync(
         gitignore: true,
         globalGitignore: false,
         suppressErrors: false,
-        // Preserve the existing case-insensitive directory exclusions. The
-        // exact basename filter below keeps package.json itself case-sensitive.
+        // Keep the case-insensitive directory exclusions. The exact base-name
+        // filter below keeps package.json case-sensitive.
         caseSensitiveMatch: false,
         ignore: EXCLUDED_DIRECTORY_PATTERNS,
       },

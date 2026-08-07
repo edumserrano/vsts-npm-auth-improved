@@ -86,12 +86,12 @@ async function getConfigPathAsync(options: AuthCommandOptionsFromCli): Promise<s
     initialValue: "./.npmrc",
     validate: value => {
       if (typeof value === "undefined") {
-        return undefined; // valid, no validation error message displayed
+        return undefined; // The value is valid. Do not show a validation error.
       }
 
       const getRegistryResult = getRegistryFromConfigFile(value);
       if (getRegistryResult.type === "registry-found") {
-        return undefined; // valid, no validation error message displayed
+        return undefined; // The value is valid. Do not show a validation error.
       }
 
       return getRegistryErrorMessage(getRegistryResult);

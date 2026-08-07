@@ -5,13 +5,13 @@
 
 ## Context
 
-The manually dispatched release-preparation workflow creates a version commit and pull request, applies the package's release label, and enables squash auto-merge. Required build-and-test workflows must run automatically on that pull request before it can merge.
+The release-preparation workflow starts manually. It creates a version commit and a pull request. It applies the package release label and enables squash auto-merge. The necessary build-and-test workflows must run automatically before the pull request can merge.
 
-`GITHUB_TOKEN` has enough permission to create the branch and pull request, but GitHub's workflow-recursion protection places resulting `pull_request` workflow runs in an approval-required state. This would add a manual approval step to every release.
+`GITHUB_TOKEN` has sufficient permission to create the branch and pull request. But GitHub's workflow-recursion protection requires approval for the resultant `pull_request` workflow runs. Thus, each release would require manual approval.
 
 ## Decision
 
-Use the `vsts-npm-auth-release-bot` GitHub App for the write operations that create and manage release-preparation pull requests. Events created with its short-lived installation token can start the required workflows without manual approval.
+Use the `vsts-npm-auth-release-bot` GitHub App to create and manage release-preparation pull requests. Events that use its short-lived installation token can start the necessary workflows without manual approval.
 
 The workflow creates the token with `actions/create-github-app-token` and requests only:
 
@@ -21,7 +21,7 @@ The workflow creates the token with `actions/create-github-app-token` and reques
 
 Use the App token only to push the commit and create, label, and configure the pull request. Continue using `${{ github.token }}` for read-only checks, and create the App token only after those checks pass.
 
-Publishing remains separate. After merge, `publish-merged-release-pr.yml` publishes the selected package from the exact pushed commit through the protected `npm-publish` environment and npm trusted publishing. The App token is not used by the publish job.
+Publication stays separate. After the merge, `publish-merged-release-pr.yml` publishes the selected package from the exact pushed commit. It uses the protected `npm-publish` environment and npm trusted publishing. The publish job does not use the App token.
 
 The App client ID is stored in the `RELEASE_APP_CLIENT_ID` repository variable. Its private key is stored in the `VSTS_NPM_AUTH_RELEASE_BOT_PRIVATE_KEY` secret in the `vsts-npm-auth-release-bot` environment.
 
@@ -44,15 +44,15 @@ The App client ID is stored in the `RELEASE_APP_CLIENT_ID` repository variable. 
 
 ### Use only `GITHUB_TOKEN`
 
-Rejected because pull-request workflows created by `GITHUB_TOKEN` require manual approval, preventing unattended auto-merge.
+This alternative does not permit automatic merge without supervision. Pull-request workflows that `GITHUB_TOKEN` creates require manual approval.
 
 ### Use a personal access token
 
-Rejected because it is tied to a user account and can provide broader or longer-lived access than an App installation token.
+This alternative connects the token to a user account. It can give more permissions or longer access than an App installation token.
 
 ### Explicitly dispatch the required pull-request checks
 
-Rejected because it would duplicate the normal `pull_request` check orchestration and make required-check behavior harder to follow.
+This alternative would duplicate the normal `pull_request` check sequence. It would make the behavior of necessary checks difficult to follow.
 
 ## References
 

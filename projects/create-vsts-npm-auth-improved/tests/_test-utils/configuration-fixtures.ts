@@ -2,9 +2,9 @@ import path from "node:path";
 import type { JsonObject } from "type-fest";
 
 /**
- * Supplies deterministic package.json and .npmrc content plus fixture path
- * builders. The helpers centralize managed settings while allowing tests to
- * vary metadata, registry values, and package locations.
+ * Supplies repeatable package.json and .npmrc content and fixture path builders.
+ * The helpers keep managed settings in one place. Tests can change metadata,
+ * registry values, and package locations.
  */
 
 export const DEFAULT_REGISTRY = "https://registry.example.test/";
@@ -60,9 +60,9 @@ export function canonicalNpmrc(registry = DEFAULT_REGISTRY): string {
 }
 
 /**
- * Parses the effective key/value state used by workflow assertions. npm owns
- * .npmrc serialization, so tests intentionally ignore comments, line endings,
- * key order, and other byte-level presentation details.
+ * Parses the effective key/value state that workflow assertions use. npm controls
+ * .npmrc serialization. Thus, tests ignore comments, line endings, key order,
+ * and other byte-level presentation details.
  */
 export function parseNpmrcContent(content: string): Record<string, string> {
   const parsed: Record<string, string> = {};

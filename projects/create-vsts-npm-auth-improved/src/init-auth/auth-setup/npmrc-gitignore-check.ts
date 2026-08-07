@@ -24,8 +24,8 @@ export async function checkChangedNpmrcFilesForGitignoreAsync(
 
   const resolvedRoot = path.resolve(rootDirectory);
   try {
-    // Globby is ESM-only while this package emits CommonJS, so it must remain a
-    // dynamic import in the compiled output.
+    // Globby is ESM-only, but this package emits CommonJS. Thus, the compiled
+    // output must use a dynamic import.
     const { convertPathToPattern, globby } = await import("globby");
     const candidatePatterns = changedNpmrcFiles.map(fileChange =>
       convertPathToPattern(path.relative(resolvedRoot, fileChange.filePath)),

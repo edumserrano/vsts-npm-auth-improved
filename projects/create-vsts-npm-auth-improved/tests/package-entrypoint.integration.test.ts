@@ -9,8 +9,8 @@ import { PromptsInteraction } from "@test-utils/prompts-interaction";
 import { mockStdoutWrite } from "@test-utils/process-output";
 
 /**
- * The tests below verify the built create package through its emitted public API
- * and npm executable entrypoint rather than the source-level command helpers.
+ * These tests verify the built create package. They use its emitted public API
+ * and npm executable entry point, not the source command helpers.
  */
 
 type EmittedCliAsync = (argv: readonly string[]) => Promise<void>;
@@ -33,13 +33,13 @@ afterEach(async () => {
 });
 
 /**
- * Tests that the compiled and publish-cleaned package exposes a working CLI and
- * points its npm bin declaration at an emitted file.
- * Verifies that:
- * - The package builds and its declared executable exists in the output
- * - The emitted cliAsync export runs the explicit init-auth workflow
- * - A project with no packages exits successfully without filesystem changes
- * - The emitted-package terminal transcript matches the expected no-packages flow
+ * Verifies the compiled and publish-cleaned package.
+ * Expected results:
+ * - The package build is successful.
+ * - The declared executable exists in the output.
+ * - The emitted cliAsync export runs the explicit init-auth workflow.
+ * - A project with no packages exits successfully without file-system changes.
+ * - The emitted-package terminal text agrees with the expected no-packages flow.
  *
  * CLI command represented by the emitted API call:
  * - create-vsts-npm-auth-improved init-auth

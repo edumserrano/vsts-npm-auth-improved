@@ -1,9 +1,9 @@
 import { Volume } from "memfs";
 
 /**
- * Creates deterministic .npmrc fixtures inside the supplied memfs volume and
- * returns both the fixture path and parsed registry value. This keeps tests
- * from reading a real user configuration or writing to the host filesystem.
+ * Creates repeatable .npmrc fixtures in the specified memfs volume. It returns
+ * the fixture path and parsed registry value. Thus, tests do not read a real
+ * user configuration or write to the host file system.
  */
 
 export type InMemoryNpmrcFile = {

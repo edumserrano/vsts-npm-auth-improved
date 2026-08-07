@@ -5,8 +5,7 @@ import { mockStdoutWrite } from "@test-utils/process-output";
 import { mockVstsNpmAuth } from "@test-utils/vsts-npm-auth";
 
 /**
- * The tests below verify platform-specific auth command behavior outside Windows when options are
- * provided via user prompts.
+ * These tests verify the auth command behavior on non-Windows platforms when prompts supply the options.
  */
 
 const { originalCiEnvironment } = vi.hoisted(() => {
@@ -34,18 +33,19 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.resetAllMocks(); // clears history on module mocks like execa
-  vi.restoreAllMocks(); // restores original implementations of spied functions
+  vi.resetAllMocks(); // Clear the call history of module mocks such as Execa.
+  vi.restoreAllMocks(); // Restore the original implementations of spied functions.
   vol.reset();
   process.exitCode = undefined;
 });
 
 /**
- * Tests the non-Windows flow when every auth option would normally be provided via prompts.
- * Verifies that:
- * - NPM configuration path, token scope, and forced-acquisition prompts are all skipped
- * - The manual-authentication warning is displayed without a registry URL
- * - vsts-npm-auth is not called and the process exit code is 0
+ * Verifies the non-Windows flow when prompts usually supply all authentication options.
+ * Expected results:
+ * - The command does not show the config-path, token-scope, or force prompts.
+ * - The command shows the manual-authentication warning without a registry URL.
+ * - The command does not call vsts-npm-auth.
+ * - The process exit code is 0.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth

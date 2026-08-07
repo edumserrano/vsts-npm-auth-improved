@@ -1,9 +1,9 @@
 /**
- * Enforces the test architecture for one project: tests may reach application
- * code only through the public CLI test helper. It scans module references in
- * test files and rejects paths into src or production dependencies that are not
- * approved external boundaries, preventing implementation coupling from
- * returning unnoticed.
+ * Enforces the test architecture for one project. Tests can access application
+ * code only through the public CLI test helper. This script scans module
+ * references in test files. It rejects paths to src or production dependencies
+ * that are not approved external boundaries. Thus, it identifies unwanted
+ * implementation coupling.
  */
 const fs = require("node:fs");
 const path = require("node:path");

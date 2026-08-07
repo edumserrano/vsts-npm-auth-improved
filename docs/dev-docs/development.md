@@ -34,10 +34,10 @@ Run these commands from either package directory:
 
 | Command                         | What it does                                                                  | Why it is useful                                                                                                                                                           |
 | ------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`                      | Runs the public-boundary checks and the full Vitest suite once with coverage. | Quick way to run all the tests.                                                                                                                                            |
-| `npm run test:watch`            | Reruns affected tests with coverage as files change.                          | Use it while developing for fast feedback without repeatedly starting the test suite.                                                                                      |
-| `npm run test:ui`               | Opens the Vitest UI with coverage enabled.                                    | Best dev experience to get test feedback without repeatedly starting the test suite. Use it to explore test results, filter tests, and investigate failures interactively. |
-| `npm run test:update-snapshots` | Runs the test suite and replaces stored snapshots with the current output.    | Use it only when an output change is intentional, then review the snapshot diff before committing it.                                                                      |
+| `npm test`                      | Runs the public-boundary checks and the full Vitest suite one time with coverage. | Use it to run all tests.                                                               |
+| `npm run test:watch`            | Runs affected tests again when files change. Coverage stays enabled.             | Use it during development to get test results quickly.                                  |
+| `npm run test:ui`               | Opens the Vitest UI with coverage enabled.                                       | Use it to examine and filter test results. You can also examine failures interactively. |
+| `npm run test:update-snapshots` | Runs the test suite and replaces stored snapshots with the current output.       | Use it only for an intentional output change. Examine the snapshot differences first.  |
 
 ## Build and inspect a tarball
 
@@ -47,9 +47,19 @@ From either package directory:
 npm run pack
 ```
 
-The tarball is written beneath `dist/<package-name>-package/`. The `prepack` script builds the package and copies that package directory's `README.md`, the repository `LICENSE`, and a cleaned `package.json` into the publish directory before `npm pack` runs.
+The command writes the tarball below `dist/<package-name>-package/`. The `prepack` script builds the package. It copies these files into the publish directory before `npm pack` runs:
 
-The release workflow performs the same pack operation, inspects the archive for `package/README.md`, `package/LICENSE`, and `package/package.json`, smoke-tests the executable, and publishes that exact tarball. Consequently, the README displayed on npm is:
+- The package directory `README.md`.
+- The repository `LICENSE`.
+- A clean `package.json`.
+
+The release workflow does the same pack operation. It makes sure that the archive contains these files:
+
+- `package/README.md`.
+- `package/LICENSE`.
+- `package/package.json`.
+
+The workflow also does a smoke test of the executable. Then, it publishes that tarball. npm shows the applicable README:
 
 - `projects/vsts-npm-auth-improved/README.md` for `vsts-npm-auth-improved`;
 - `projects/create-vsts-npm-auth-improved/README.md` for `create-vsts-npm-auth-improved`.

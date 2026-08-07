@@ -1,11 +1,11 @@
 # vsts-npm-auth-improved
 
-`vsts-npm-auth-improved` wraps and invokes [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) to authenticate npm with private Azure DevOps Artifacts registries on Windows. It adds:
+`vsts-npm-auth-improved` uses [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth). It authenticates npm with private Azure DevOps Artifacts registries on Windows. It provides these functions:
 
-- ✅ A friendlier guided authentication experience.
-- ✅ Clearer success and error messages.
-- ✅ A one-time automatic retry that can recover from stale or expired tokens.
-- ✅ The same npm scripts remain safe to use on macOS, Linux, and CI.
+- ✅ Guides you through the authentication process.
+- ✅ Gives clear success and error messages.
+- ✅ Automatically tries the authentication one more time if a token is stale or expired.
+- ✅ Lets you safely use the same npm scripts on macOS, Linux, and CI.
 
 ## Install and run
 
@@ -31,7 +31,7 @@ For an npm script, provide the project `.npmrc` and authentication choices expli
 }
 ```
 
-This command uses `npx` to resolve and run `vsts-npm-auth-improved` before the project's dependencies have been installed. The explicit `--registry=https://registry.npmjs.org/` option fetches the publicly available package from the public npm registry, which does not require authentication. This avoids the chicken-and-egg problem of needing working private-registry credentials before the tool that obtains those credentials can run.
+This command uses `npx` to find and run `vsts-npm-auth-improved` before npm installs the project dependencies. The `--registry=https://registry.npmjs.org/` option gets the public package from the public npm registry. This registry does not require authentication. Thus, the tool can get private-registry credentials before these credentials are available.
 
 To configure your projects interactively, run:
 
@@ -39,25 +39,25 @@ To configure your projects interactively, run:
 npm init vsts-npm-auth-improved
 ```
 
-See the [`create-vsts-npm-auth-improved` package documentation](https://www.npmjs.com/package/create-vsts-npm-auth-improved) for detailed setup options and guidance.
+Refer to the [`create-vsts-npm-auth-improved` package documentation](https://www.npmjs.com/package/create-vsts-npm-auth-improved) for detailed setup options and instructions.
 
 ## Options
 
 | Option                     | Description and default                                                                                 |
 | -------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `-c, --config-path <path>` | Project `.npmrc` containing the registry. When omitted, the CLI prompts with `./.npmrc` as the default. |
-| `--read`                   | Requests a token with Packaging (Read) scope.                                                           |
-| `--no-read`                | Requests a token with Packaging (Read & Write) scope.                                                   |
-| `--force`                  | Forces token acquisition even when an existing token is still valid.                                    |
-| `--no-force`               | Allows reuse of an existing valid token. A failed request is retried once with forced acquisition.      |
-| `-h, --help`               | Displays command help.                                                                                  |
-| `-v, --version`            | Displays the `vsts-npm-auth-improved` package version.                                                  |
+| `--read`                   | Requests a token with the Packaging (Read) scope.                                                        |
+| `--no-read`                | Requests a token with the Packaging (Read & Write) scope.                                                |
+| `--force`                  | Gets a token even when an existing token is valid.                                                       |
+| `--no-force`               | Permits the use of an existing valid token. After a failed request, the CLI tries once to get a token.   |
+| `-h, --help`               | Shows command help.                                                                                      |
+| `-v, --version`            | Shows the `vsts-npm-auth-improved` package version.                                                      |
 
-When config path, token scope, or force behavior is omitted on Windows, the CLI prompts for that value. Newly acquired tokens expire in 90 days.
+On Windows, the CLI prompts for each option that you do not supply. These options are the config path, token scope, and force behavior. New tokens expire after 90 days.
 
 ## Examples
 
-Authenticate with the standard read-only token and non-forced choices:
+Get a standard read-only token. Permit the use of an existing valid token:
 
 ```shell
 vsts-npm-auth-improved -c ./.npmrc --read --no-force
@@ -73,14 +73,14 @@ vsts-npm-auth-improved -c ./.npmrc --read --force
 
 ### CI environments
 
-If invoked in CI, the command detects it's in a CI environment and skips automatic authentication. It warns that authentication must be configured in CI and exits successfully so the npm script can continue.
+In CI, the command detects the CI environment and does not start automatic authentication. It tells you to configure authentication in CI. Then, it exits successfully and lets the npm script continue.
 
-CI environment detection is done by the [ci-info](https://www.npmjs.com/package/ci-info) package.
+The [ci-info](https://www.npmjs.com/package/ci-info) package detects the CI environment.
 
 ### Windows
 
-The command reads the global registry from the selected `.npmrc`, invokes [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth), and writes credentials to the user npm configuration at `~/.npmrc`. Failed token acquisition is retried once with forced acquisition unless `--force` was supplied.
+The command reads the global registry from the selected `.npmrc`. It uses [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) and writes credentials to the user npm configuration at `~/.npmrc`. After a failed token request, the command tries once to get a token. It does not try again if you supplied `--force`.
 
 ### macOS and Linux
 
-Automatic authentication is not available. The command warns that registry authentication must be configured manually, [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) is not invoked, and exits successfully so a cross-platform npm script can continue.
+Automatic authentication is not available. The command tells you to configure registry authentication manually. It does not use [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth). The command exits successfully and lets a cross-platform npm script continue.

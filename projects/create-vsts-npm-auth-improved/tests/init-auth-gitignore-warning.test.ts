@@ -6,9 +6,8 @@ import { mockStdoutWrite, OutputChannelCapture } from "@test-utils/process-outpu
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
 
 /**
- * These tests verify the complete CLI decision to display or suppress the
- * post-write Git ignore warning through real temporary filesystem fixtures and
- * the public CLI.
+ * These tests verify when the CLI shows the post-write Git ignore warning. They
+ * use real temporary file-system fixtures and the public CLI.
  */
 
 const testSuiteCwd = process.cwd();

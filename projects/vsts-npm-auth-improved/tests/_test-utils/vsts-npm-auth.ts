@@ -3,9 +3,9 @@ import { MockedFunction, vi } from "vitest";
 import { execa } from "execa";
 
 /**
- * Controls the mocked Execa boundary for vsts-npm-auth by translating typed
- * result cases into representative process output and exposing exact call
- * counts. Tests never launch the real authentication process or contact Azure.
+ * Controls the Execa mock boundary for vsts-npm-auth. It converts typed results
+ * into representative process output and supplies exact call counts. Tests do
+ * not start the real authentication process or contact Azure.
  */
 
 type MockVstsNpmAuthResult =
@@ -49,7 +49,7 @@ function getVstsNpmAuthOutputForResult(result: MockVstsNpmAuthResult): string[] 
   const commandOutputLines: string[] = [];
   switch (result) {
     case "credentials-not-required": {
-      // Empty output (no lines after headers) triggers this case in parseResult
+      // Empty output after the headers starts this case in parseResult.
       break;
     }
     case "already-have-credentials": {

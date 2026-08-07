@@ -12,8 +12,8 @@ import { PromptsInteraction } from "@test-utils/prompts-interaction";
 import { mockStdoutWrite } from "@test-utils/process-output";
 
 /**
- * The tests below verify that init-auth handles discovery, parsing, reading,
- * planning, and persistence failures without leaving partial project changes.
+ * These tests verify discovery, parse, read, planning, and save failures. The
+ * init-auth command must not leave partial project changes.
  */
 
 vi.mock("node:fs", async importOriginal => {
@@ -37,12 +37,12 @@ afterEach(async () => {
 });
 
 /**
- * Tests a directory-read failure during package discovery.
- * Verifies that:
- * - The command exits with process exit code 1
- * - No package files are read after discovery fails
- * - No files are written and the original project remains intact
- * - The terminal transcript reports the discovery failure
+ * Verifies a directory-read failure during package discovery.
+ * Expected results:
+ * - The command exits with process exit code 1.
+ * - The command does not read package files after the discovery failure.
+ * - The command does not write files, and the original project does not change.
+ * - The terminal output reports the discovery failure.
  */
 test("reports a discovery failure before package reads or writes", async () => {
   const project = await NpmProject.createAsync("discovery-failure");
@@ -87,13 +87,12 @@ test("reports a discovery failure before package reads or writes", async () => {
 });
 
 /**
- * Tests invalid package.json content, including malformed JSON and valid JSON
- * whose root value is not an object.
- * Verifies that:
- * - The command exits with process exit code 1
- * - The invalid package.json remains byte-for-byte unchanged
- * - No .npmrc is created and no writes occur
- * - The terminal transcript explains the content problem
+ * Verifies malformed JSON and valid JSON whose root value is not an object.
+ * Expected results:
+ * - The command exits with process exit code 1.
+ * - The invalid package.json does not change.
+ * - The command does not create a .npmrc file or write other files.
+ * - The terminal output explains the content problem.
  */
 test.each([
   ["malformed JSON", "{ malformed"],
@@ -126,11 +125,11 @@ test.each([
 });
 
 /**
- * Tests a selected package.json disappearing or becoming unreadable after discovery.
- * Verifies that:
- * - The command exits with process exit code 1
- * - The error identifies the package with project-relative context
- * - No application writes occur and the test-owned original remains unchanged
+ * Verifies a selected package.json that disappears or becomes unreadable after discovery.
+ * Expected results:
+ * - The command exits with process exit code 1.
+ * - The error identifies the package with a project-relative path.
+ * - The application does not write files, and the test-owned original does not change.
  */
 test.each([
   ["missing", false],
@@ -171,11 +170,11 @@ test.each([
 );
 
 /**
- * Tests a selected package whose existing .npmrc is not a regular file.
- * Verifies that:
- * - package.json is read before the targeted .npmrc failure is surfaced
- * - The command exits with process exit code 1 and relative file context
- * - Neither package.json nor .npmrc is changed and no writes occur
+ * Verifies a selected package whose existing .npmrc is not a regular file.
+ * Expected results:
+ * - The command reads package.json before it reports the specified .npmrc failure.
+ * - The command exits with process exit code 1 and a relative file path.
+ * - The command does not change package.json or .npmrc, and no writes occur.
  */
 test("reports an .npmrc read failure with relative context and zero writes", async () => {
   const project = await NpmProject.createAsync("npmrc-read-failure");
@@ -203,12 +202,11 @@ test("reports an .npmrc read failure with relative context and zero writes", asy
 });
 
 /**
- * Tests that all selected packages are read and validated before interactive
- * registry collection begins.
- * Verifies that:
- * - Planning reads package.json and .npmrc for every selected package
- * - Invalid content in a later package prevents the first registry prompt
- * - No package receives partial changes and no writes occur
+ * Verifies that the command reads and validates all packages before registry collection.
+ * Expected results:
+ * - Planning reads package.json and .npmrc for each selected package.
+ * - Invalid content in a later package prevents the first registry prompt.
+ * - Packages do not receive partial changes, and no writes occur.
  */
 test("rejects a later invalid package before prompting or writing", async () => {
   const project = await NpmProject.createAsync("complete-planning-failure");
@@ -247,11 +245,11 @@ test("rejects a later invalid package before prompting or writing", async () => 
 });
 
 /**
- * Tests failure of a planned package.json write after planning has completed.
- * Verifies that:
- * - The command exits with process exit code 1 and reports the failed file
- * - No .npmrc is created after the package write fails
- * - The test-owned original package content remains available for verification
+ * Verifies a planned package.json write failure after planning is complete.
+ * Expected results:
+ * - The command exits with process exit code 1 and reports the failed file.
+ * - The command does not create a .npmrc file after the package write failure.
+ * - The test-owned original package content stays available for verification.
  */
 test("surfaces a targeted write failure through the persistence spinner", async () => {
   const project = await NpmProject.createAsync("write-failure");
@@ -354,11 +352,11 @@ test("reports a later write failure after preserving earlier completed writes", 
 });
 
 /**
- * Tests prompt-safe mapping of known filesystem errors while validating a root.
- * Verifies that:
- * - Permission and general I/O failures receive distinct user-facing messages
- * - The root prompt remains active and accepts a valid correction
- * - The recovered no-packages flow exits successfully without writes
+ * Verifies prompt-safe mapping of known file-system errors during root validation.
+ * Expected results:
+ * - Permission and general I/O failures receive different user messages.
+ * - The root prompt stays active and accepts a valid correction.
+ * - The recovered no-packages flow exits successfully without writes.
  */
 test.each([
   ["EACCES", "inaccessible"],

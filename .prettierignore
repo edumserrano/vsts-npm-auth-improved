@@ -1,4 +1,4 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
+# For more information about ignored files, refer to https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files.
 
 # Compiled output
 /dist
@@ -29,7 +29,7 @@ package.lock.json
 !.vscode/on-startup.ps1
 .history/*
 
-# JetBrains IDE's
+# JetBrains IDEs
 .idea/
 !.idea/workspace.xml
 !.idea/tasks.xml
@@ -47,5 +47,5 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# tests
+# Tests
 /test-reporters/

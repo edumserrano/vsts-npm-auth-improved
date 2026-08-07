@@ -14,8 +14,8 @@ import {
 } from "@test-utils/process-output";
 
 /**
- * The tests below verify successful end-to-end init-auth workflows, including
- * package selection, persistence reporting, and repeat-run behavior.
+ * These tests verify successful end-to-end init-auth workflows. They include
+ * package selection, save reports, and repeated runs.
  */
 
 const testSuiteCwd = process.cwd();
@@ -34,12 +34,12 @@ afterEach(async () => {
 });
 
 /**
- * Tests the supported multiselect combinations for choosing discovered packages.
- * Verifies that:
- * - Individual, subset, multi-package, ALL, and mixed ALL selections resolve correctly
- * - Only selected package.json files receive the managed configuration
- * - Existing canonical .npmrc files remain unchanged
- * - The command exits successfully and reports selected packages in order
+ * Verifies the supported multiselect combinations for discovered packages.
+ * Expected results:
+ * - Individual, subset, multiple-package, ALL, and mixed ALL selections give the correct packages.
+ * - Only selected package.json files receive the managed configuration.
+ * - Existing canonical .npmrc files do not change.
+ * - The command exits successfully and reports selected packages in order.
  */
 test.each([
   ["one package", [2], ["beta"]],
@@ -104,12 +104,12 @@ test.each([
 );
 
 /**
- * Tests one run containing packages whose files are unchanged, updated, and created.
- * Verifies that:
- * - Each package receives the required final package.json and .npmrc content
- * - Only files whose content changes are written
- * - Registry prompts appear only for packages without an effective registry
- * - Persistence results are reported in write order
+ * Verifies one run with unchanged, updated, and new package files.
+ * Expected results:
+ * - Each package receives the necessary final package.json and .npmrc content.
+ * - The command writes only files with changed content.
+ * - Registry prompts occur only for packages without an effective registry.
+ * - Save results occur in write order.
  */
 test("reports mixed created updated and unchanged outcomes in persistence order", async () => {
   const project = await NpmProject.createAsync("mixed-outcomes");
@@ -177,13 +177,12 @@ test("reports mixed created updated and unchanged outcomes in persistence order"
 });
 
 /**
- * Tests idempotency by running the complete interactive workflow twice against
- * the same package.
- * Verifies that:
- * - The first run creates the expected package.json and .npmrc configuration
- * - The second run preserves exactly the same content
- * - The second run requires no registry prompt and performs no writes
- * - Both runs exit successfully and report the expected outcomes
+ * Verifies idempotency with two complete interactive runs on the same package.
+ * Expected results:
+ * - The first run creates the expected package.json and .npmrc configuration.
+ * - The second run keeps exactly the same content.
+ * - The second run does not require a registry prompt or write files.
+ * - Both runs exit successfully and report the expected results.
  */
 test("a second complete CLI run is idempotent for package.json and .npmrc", async () => {
   const project = await NpmProject.createAsync("complete-idempotency");

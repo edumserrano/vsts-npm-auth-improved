@@ -14,7 +14,7 @@ import { PromptsInteraction } from "@test-utils/prompts-interaction";
 import { mockStdoutWrite } from "@test-utils/process-output";
 
 /**
- * Tests that .npmrc normalization is idempotent.
+ * Verifies that .npmrc normalization is idempotent.
  */
 
 const testSuiteCwd = process.cwd();
@@ -31,11 +31,11 @@ afterEach(async () => {
 const existingRegistry = "https://existing.test/";
 
 /**
- * Tests that .npmrc normalization reaches a stable semantic result.
- * Verifies that:
- * - The first run writes the required effective values
- * - A second complete run produces identical files
- * - Both command transcripts report successful outcomes
+ * Verifies that .npmrc normalization gives a stable semantic result.
+ * Expected results:
+ * - The first run writes the necessary effective values.
+ * - A second complete run produces identical files.
+ * - The output from both commands reports successful results.
  */
 test(
   "keeps .npmrc semantically idempotent after normalization",

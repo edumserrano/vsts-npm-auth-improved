@@ -1,18 +1,18 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
+# For more information about ignored files, refer to https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files.
 
-# System Files
+# System files
 .DS_Store
 Thumbs.db
 
 # Dependencies
 node_modules
 
-# Compiled Output
+# Compiled output
 dist
 out-tsc
 *.tgz
 
-# Test Outputs
+# Test output
 test-reporters
 projects/create-vsts-npm-auth-improved/tests/temp/
 

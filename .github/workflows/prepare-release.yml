@@ -30,7 +30,7 @@ env:
 concurrency:
   group: release-preparation-${{ inputs.package }}
   cancel-in-progress: false
-  queue: max # https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency#example-queueing-multiple-pending-runs
+  queue: max # Refer to https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency#example-queueing-multiple-pending-runs.
 
 jobs:
   validate-release-request:
@@ -125,7 +125,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.release-app-token.outputs.token }}
         run: |
-          # As recommended in https://github.com/actions/create-github-app-token#configure-git-cli-for-an-apps-bot-user
+          # Follow the instructions at https://github.com/actions/create-github-app-token#configure-git-cli-for-an-apps-bot-user.
           $PSNativeCommandUseErrorActionPreference = $true
           $botLogin = "${{ steps.release-app-token.outputs.app-slug }}[bot]"
           $botId = gh api "/users/$botLogin" --jq ".id"

@@ -7,7 +7,7 @@ import { mockStderrWrite, mockStdoutWrite } from "@test-utils/process-output";
 import { mockVstsNpmAuth, MockVstsNpmAuthOptions } from "@test-utils/vsts-npm-auth";
 
 /**
- * The tests below will test the auth command when all the options are provided via the CLI.
+ * These tests verify the auth command when the CLI supplies all options.
  */
 
 const { originalCiEnvironment } = vi.hoisted(() => {
@@ -27,17 +27,18 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.resetAllMocks(); // clears history on module mocks like execa
-  vi.restoreAllMocks(); // restores original implementations of spied functions
+  vi.resetAllMocks(); // Clear the call history of module mocks such as Execa.
+  vi.restoreAllMocks(); // Restore the original implementations of spied functions.
   vol.reset();
   process.exitCode = undefined;
 });
 
 /**
- * Tests that the auth command displays help text when using --help or -h options.
- * Verifies that:
- * - vsts-npm-auth is not called
- * - The process exit code is 0
+ * Verifies the --help and -h options.
+ * Expected results:
+ * - The command shows the help text.
+ * - The command does not call vsts-npm-auth.
+ * - The process exit code is 0.
  *
  * CLI commands:
  * - vsts-npm-auth-improved auth --help
@@ -61,10 +62,11 @@ test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
 );
 
 /**
- * Tests that the auth command displays version when using --version or -v options.
- * Verifies that:
- * - vsts-npm-auth is not called
- * - The process exit code is 0
+ * Verifies the --version and -v options.
+ * Expected results:
+ * - The command shows the version.
+ * - The command does not call vsts-npm-auth.
+ * - The process exit code is 0.
  *
  * CLI commands:
  * - vsts-npm-auth-improved auth --version
@@ -88,10 +90,10 @@ test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
 );
 
 /**
- * Tests the --config-path option of the auth command and its -c alias.
- * Verifies that:
- * - vsts-npm-auth is called with the correct arguments
- * - The CLI command output reflects a successful token authentication.
+ * Verifies the --config-path option and its -c alias.
+ * Expected results:
+ * - The command calls vsts-npm-auth with the correct arguments.
+ * - The CLI output shows successful token authentication.
  *
  * CLI commands:
  * - vsts-npm-auth-improved auth -c <path> --no-read --no-force
@@ -123,10 +125,10 @@ test.each([{ useConfigPathAlias: true }, { useConfigPathAlias: false }])(
 );
 
 /**
- * Tests the --read and --no-read options of the auth command.
- * Verifies that:
- * - vsts-npm-auth is called with the correct arguments
- * - The CLI command output reflects the token scope
+ * Verifies the --read and --no-read options.
+ * Expected results:
+ * - The command calls vsts-npm-auth with the correct arguments.
+ * - The CLI output shows the token scope.
  *
  * CLI commands:
  * - vsts-npm-auth-improved auth -c <path> --read --no-force
@@ -161,10 +163,10 @@ test.each([
 });
 
 /**
- * Tests the --force and --no-force options of the auth command.
- * Verifies that:
- * - vsts-npm-auth is called with the correct arguments
- * - The CLI command output reflects the forced token acquisition option
+ * Verifies the --force and --no-force options.
+ * Expected results:
+ * - The command calls vsts-npm-auth with the correct arguments.
+ * - The CLI output shows the force option.
  *
  * CLI commands:
  * - vsts-npm-auth-improved auth -c <path> --force
@@ -199,11 +201,10 @@ test.each([
 });
 
 /**
- * Tests the possible success scenarios for results from the vsts-npm-auth package.
- * Verifies that:
- * - The process exit code is 0
- * - The CLI output reflects what was done in regards to the authentication process
- *   (e.g., obtaining new credentials, already having credentials, etc)
+ * Verifies successful results from the vsts-npm-auth package.
+ * Expected results:
+ * - The process exit code is 0.
+ * - The CLI output shows if the command got new credentials or used existing credentials.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth --config-path <path> --no-read --no-force
@@ -239,10 +240,10 @@ test.each<{ vstsNpmAuthResult: MockVstsNpmAuthOptions }>([
 );
 
 /**
- * Tests failure scenarios for results from the vsts-npm-auth package where there isn't an automatic retry.
- * Verifies that:
- * - The process exit code is 1
- * - The CLI output reflects the error (e.g., config file not found, credentials not required, etc)
+ * Verifies vsts-npm-auth failures that do not start an automatic retry.
+ * Expected results:
+ * - The process exit code is 1.
+ * - The CLI output shows the applicable error.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth --config-path <path> --no-read --no-force
@@ -280,11 +281,11 @@ test.each<{ vstsNpmAuthResult: MockVstsNpmAuthOptions }>([
 );
 
 /**
- * Tests the automatic retry scenario when vsts-npm-auth returns could-not-get-auth-token.
- * Verifies that:
- * - The retry calls vsts-npm-auth with force token acquisition (-F flag)
- * - The process exit code is 0 after successful retry
- * - The CLI output reflects the retry behavior
+ * Verifies the automatic retry after a could-not-get-auth-token result.
+ * Expected results:
+ * - The retry calls vsts-npm-auth with the -F option.
+ * - The process exit code is 0 after a successful retry.
+ * - The CLI output shows the retry.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth --config-path <path> --no-read --no-force
@@ -306,7 +307,7 @@ test("retries once with force token acquisition when vsts-npm-auth returns could
 
   expect(vstsNpmAuthMock.callCount).toBe(2);
   expect(vstsNpmAuthMock).toHaveBeenNthCalledWith(
-    1, // first call, failed attempt
+    1, // The first call fails.
     "npx",
     [
       "--yes",
@@ -322,7 +323,7 @@ test("retries once with force token acquisition when vsts-npm-auth returns could
     },
   );
   expect(vstsNpmAuthMock).toHaveBeenNthCalledWith(
-    2, // second call, retry with force and succeeded
+    2, // The second call uses force and succeeds.
     "npx",
     [
       "--yes",
@@ -343,9 +344,9 @@ test("retries once with force token acquisition when vsts-npm-auth returns could
 });
 
 /**
- * Tests that the automatic retry with force token acquisition preserves the original CLI arguments.
- * Verifies that:
- * - The retry includes the -F flag while keeping other arguments like -R (read-only scope)
+ * Verifies that the forced retry keeps the original CLI arguments.
+ * Expected result:
+ * - The retry adds -F and keeps other arguments such as -R.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth --config-path <path> --read --no-force
@@ -367,7 +368,7 @@ test("retry with force token acquisition keeps arguments", async () => {
 
   expect(vstsNpmAuthMock.callCount).toBe(2);
   expect(vstsNpmAuthMock).toHaveBeenNthCalledWith(
-    1, // first call, failed attempt
+    1, // The first call fails.
     "npx",
     [
       "--yes",
@@ -384,7 +385,7 @@ test("retry with force token acquisition keeps arguments", async () => {
     },
   );
   expect(vstsNpmAuthMock).toHaveBeenNthCalledWith(
-    2, // second call, retry with force and succeeded
+    2, // The second call uses force and succeeds.
     "npx",
     [
       "--yes",
@@ -406,11 +407,11 @@ test("retry with force token acquisition keeps arguments", async () => {
 });
 
 /**
- * Tests the failure scenario when the automatic retry also fails.
- * Verifies that:
- * - When vsts-npm-auth returns could-not-get-auth-token twice (initial attempt and retry),
- *   the process exit code is 1
- * - The CLI output reflects the result of the final failed attempt
+ * Verifies a failure of the automatic retry.
+ * Expected results:
+ * - vsts-npm-auth returns could-not-get-auth-token for the first call and the retry.
+ * - The process exit code is 1.
+ * - The CLI output shows the result of the final failed call.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth --config-path <path> --no-read --no-force
@@ -469,11 +470,11 @@ test("retries once but still fails", async () => {
 });
 
 /**
- * Tests the early failure scenario when the NPM configuration file does not exist.
- * Verifies that:
- * - The auth command fails before calling vsts-npm-auth
- * - The process exit code is 1
- * - The CLI output mentions the npm configuration file not being found
+ * Verifies an early failure when the npm configuration file does not exist.
+ * Expected results:
+ * - The auth command fails before it calls vsts-npm-auth.
+ * - The process exit code is 1.
+ * - The CLI output shows that the command did not find the npm configuration file.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth --config-path <path-that-does-not-exist> --no-read --no-force
@@ -498,11 +499,11 @@ test("npm configuration file not found", async () => {
 });
 
 /**
- * Tests the early failure scenario when the NPM configuration file exists but has no registry defined.
- * Verifies that:
- * - The auth command fails before calling vsts-npm-auth
- * - The process exit code is 1
- * - The CLI output mentions that no registry entry was found
+ * Verifies an early failure when the npm configuration file has no registry.
+ * Expected results:
+ * - The auth command fails before it calls vsts-npm-auth.
+ * - The process exit code is 1.
+ * - The CLI output shows that the command did not find a registry entry.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth --config-path <path> --no-read --no-force
@@ -532,19 +533,17 @@ test("npm configuration file without a registry defined", async () => {
 });
 
 /**
- * Tests the error handling when executing the auth command.
- * Verifies that:
- * - When an unexpected error is thrown during the auth command execution,
- *   the process exit code is 1
- * - The CLI output shows the error message
- *
- * This test simulates a failure when calling vsts-npm-auth by mocking execa to throw an error.
+ * Verifies the processing of an unexpected auth command error.
+ * The Execa mock throws an error during the vsts-npm-auth call.
+ * Expected results:
+ * - The process exit code is 1.
+ * - The CLI output shows the error message.
  */
 test("unexpected errors are handled", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
   const execaFunctionMock = vi.mocked(execa);
-  // Mock execa to throw an error to simulate an unexpected failure
+  // Make the Execa mock throw an error to simulate an unexpected failure.
   execaFunctionMock.mockRejectedValueOnce(new Error("Unexpected test error"));
 
   await AuthCommand.invokeAsync({

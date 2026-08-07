@@ -11,9 +11,9 @@ import os from "node:os";
 import path from "node:path";
 
 /**
- * Creates isolated npm project fixtures beneath one dedicated temporary parent.
- * It validates every fixture path, inventories and normalizes filesystem state,
- * and refuses cleanup outside its test-owned naming and directory boundary.
+ * Creates isolated npm project fixtures below one temporary parent directory.
+ * It validates each fixture path and records and normalizes file-system state.
+ * It prevents cleanup outside the test-owned name and directory boundary.
  */
 
 const ownedRootsParent = path.join(

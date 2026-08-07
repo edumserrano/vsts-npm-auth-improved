@@ -1,9 +1,9 @@
 import type { Key } from "node:readline";
 
 /**
- * Drives real terminal prompts with only the text, selection, and cancellation
- * interactions used by this project's tests. It waits for a prompt to accept
- * input, lets rendering settle, and tracks listeners for safe cleanup.
+ * Controls real terminal prompts with text, selection, and cancellation input.
+ * It waits until a prompt can accept input and until rendering is stable. It
+ * tracks listeners to make cleanup safe.
  */
 
 type PromptOperation = () => void;
@@ -11,7 +11,7 @@ type KeypressListener = (...args: any[]) => void;
 type KeypressModifiers = Pick<Key, "ctrl" | "meta" | "shift">;
 
 const initialKeypressListeners = new Set(currentKeypressListeners());
-// Node installs its terminal-data bridge before the prompt's input listener.
+// Node installs its terminal-data bridge before the prompt input listener.
 const promptListenerOffset = initialKeypressListeners.size === 0 ? 1 : 0;
 const observedPromptListeners = new Set<KeypressListener>();
 

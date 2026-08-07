@@ -7,8 +7,8 @@ The repository contains two independently built and published npm packages:
 
 ## Dev docs
 
-- [development, testing, and package inspection](development.md)
-- [the release process, including automatic releases for Dependabot updates](releases.md)
+- [Development, tests, and package inspection](development.md)
+- [The release process, including automatic releases for Dependabot updates](releases.md)
 
 ## Testing strategies
 

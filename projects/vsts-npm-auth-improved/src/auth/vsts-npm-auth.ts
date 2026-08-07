@@ -2,23 +2,23 @@ import { execa } from "execa";
 
 export type VstsNpmAuthVerbosity = "silent" | "quiet" | "normal" | "detailed";
 
-// See https://www.npmjs.com/package/vsts-npm-auth
+// Refer to https://www.npmjs.com/package/vsts-npm-auth.
 export type VstsNpmAuthOptions = {
-  /** Shows help */
+  /** Shows help. */
   readonly help?: boolean;
-  /** Don't allow interactively prompting for credentials to obtain a token */
+  /** Prevents interactive credential prompts. */
   readonly nonInteractive?: boolean;
-  /** REQUIRED: List of paths to npm configuration file containing package sources to acquire authentication tokens for */
+  /** Required paths to npm configuration files that contain package sources. */
   readonly config: readonly string[];
-  /** npm configuration file to write the generated tokens to */
+  /** npm configuration file that receives the generated tokens. */
   readonly targetConfig?: string;
-  /** Minutes until acquired tokens should expire. Default: 129600 */
+  /** Token life in minutes. The default is 129600. */
   readonly expirationMinutes?: number;
-  /** Request a read-only token. Default: false */
+  /** Requests a read-only token. The default is false. */
   readonly readOnly?: boolean;
-  /** Force token acquisition. Default: false */
+  /** Gets a token even when a valid token exists. The default is false. */
   readonly force?: boolean;
-  /** Display this amount of detail in the output */
+  /** Sets the amount of detail in the output. */
   readonly verbosity?: VstsNpmAuthVerbosity;
 };
 
@@ -46,37 +46,37 @@ export type VstsNpmAuthCommonResultOptions = {
   readonly output: readonly string[];
 };
 
-/** Credentials already exist and are valid */
+/** The credentials exist and are valid. */
 export type AlreadyHaveCredentialsResult = VstsNpmAuthCommonResultOptions & {
   readonly type: "already-have-credentials";
 };
 
-/** New credentials were successfully obtained */
+/** The command got new credentials. */
 export type CredentialsObtainedResult = VstsNpmAuthCommonResultOptions & {
   readonly type: "credentials-obtained";
 };
 
-/** Failed to get authentication token */
+/** The command did not get an authentication token. */
 export type CouldNotGetAuthTokenResult = VstsNpmAuthCommonResultOptions & {
   readonly type: "could-not-get-auth-token";
 };
 
-/** No registry entry found in the config file */
+/** The config file does not contain a registry entry. */
 export type NoRegistryEntryResult = VstsNpmAuthCommonResultOptions & {
   readonly type: "no-registry-entry-found";
 };
 
-/** Config file not found */
+/** The command did not find the config file. */
 export type ConfigFileNotFoundResult = VstsNpmAuthCommonResultOptions & {
   readonly type: "config-file-not-found";
 };
 
-/** Credentials not required, was able to probe the registry without auth and got a 200 back */
+/** The registry probe returned 200 without credentials. */
 export type CredentialsNotRequiredResult = VstsNpmAuthCommonResultOptions & {
   readonly type: "credentials-not-required";
 };
 
-/** Unknown result type */
+/** The result type is unknown. */
 export type UnknownResult = VstsNpmAuthCommonResultOptions & {
   readonly type: "unknown";
 };
@@ -99,9 +99,11 @@ export async function runVstsNpmAuthAsync(options: VstsNpmAuthOptions): Promise<
     ...vstsNpmAuthArgs,
   ];
   const result = await execa("npx", npxArgs, {
-    lines: true, // provide output as a string[] instead of a single string with newlines
-    all: true, // combine both stdout and stderr into the result.all property
-    reject: false, // don't throw an exception when the executed action returns non-zero exit codes, if needed check result.exitCode or result.failed
+    lines: true, // Return string[] output instead of one string with newlines.
+    all: true, // Combine stdout and stderr in the result.all property.
+    // Do not throw an exception for a nonzero exit code. Examine result.exitCode
+    // or result.failed when necessary.
+    reject: false,
   });
   return parseResult(result.all);
 }
@@ -145,7 +147,7 @@ function buildArgs(options: VstsNpmAuthOptions): string[] {
 }
 
 function removeHeadersFromOutput(output: readonly string[]): readonly string[] {
-  // Always remove the first 3 lines of vsts-npm-auth output.
+  // Always remove the first three lines of vsts-npm-auth output.
   //
   // Example output lines:
   //
@@ -154,14 +156,14 @@ function removeHeadersFromOutput(output: readonly string[]): readonly string[] {
   // '-----------------------',
   // "Config file not found. File name: './.npmrc'"
   //
-  // The first three lines are just header information.
-  // The actual useful output starts from line 4.
+  // The first three lines contain only header information.
+  // The result information starts on line 4.
   return output.slice(3);
 }
 
 /**
- * Mapping of output patterns to their corresponding result types.
- * Order matters - first match wins.
+ * Maps output patterns to result types.
+ * The first matching pattern sets the result.
  */
 type VstsNpmAuthOutputPattern = {
   readonly pattern: string;

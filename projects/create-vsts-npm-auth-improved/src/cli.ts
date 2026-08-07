@@ -4,7 +4,7 @@ import { packageVersion } from "./package-metadata.js";
 
 export async function cliAsync(argv: string[]): Promise<void> {
   try {
-    console.log(); // Add a blank line before any CLI output for better readability
+    console.log(); // Add a blank line to make the CLI output easy to read.
     const program = createProgram();
     await program.parseAsync(argv);
   } catch (error) {
@@ -22,7 +22,7 @@ export async function cliAsync(argv: string[]): Promise<void> {
 function createProgram(): Command {
   const program = new Command();
   program
-    .exitOverride() // See /projects/create-vsts-npm-auth-improved/tests/README.md
+    .exitOverride() // Refer to /projects/create-vsts-npm-auth-improved/tests/README.md.
     .name("create-vsts-npm-auth-improved")
     .description("Configure projects to use vsts-npm-auth-improved.")
     .version(packageVersion, "-v, --version")

@@ -1,15 +1,15 @@
 import { cliAsync } from "@vsts-npm-auth-improved";
 
 /**
- * Provides typed test entry points for the public CLI. It converts auth,
- * help, version, option, and prompt choices into normal Commander argv so
- * tests exercise production exclusively through cliAsync.
+ * Provides typed test entry points for the public CLI. It converts auth, help,
+ * version, option, and prompt selections into standard Commander arguments.
+ * Thus, tests use production code only through cliAsync.
  */
 
 export class VstsNpmAuthImprovedCli {
   static async invokeAsync(argv: string[] = []): Promise<void> {
-    // The first two arguments are normally "node" and the script name/bin executable.
-    // For testing purposes they can be anything, Commander doesn't validate them.
+    // The first two arguments are usually "node" and the executable name.
+    // Commander does not validate them. Thus, the tests can use other values.
     const args = ["node", "main.js", ...argv];
     await cliAsync(args);
   }

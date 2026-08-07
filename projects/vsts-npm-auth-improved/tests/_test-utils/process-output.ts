@@ -3,10 +3,10 @@ import type { MockInstance } from "vitest";
 import { vi } from "vitest";
 
 /**
- * Captures writes to process output streams and exposes normalized terminal
+ * Captures writes to process output streams. It supplies normalized terminal
  * output for complete scenario snapshots. Normalization removes terminal
- * control formatting, transport-only blank lines, and release-specific package
- * versions while preserving the CLI's visible content.
+ * controls, transport-only blank lines, and release-specific package versions.
+ * It keeps the visible CLI content.
  */
 
 type StreamWriteFunction = typeof process.stdout.write;
@@ -49,26 +49,26 @@ export type OutputWriteFunctionMock = MockInstance<StreamWriteFunction> & {
 };
 
 /**
- * Replaces `process.stdout.write` with a Vitest spy that suppresses terminal
- * output and exposes the captured text through a lazily evaluated,
- * snapshot-friendly `normalizedOutput` property.
+ * Replaces `process.stdout.write` with a Vitest spy. The spy suppresses terminal
+ * output. Its `normalizedOutput` property calculates and supplies captured text
+ * when a test reads the property.
  */
 export function mockStdoutWrite(): OutputWriteFunctionMock {
   return mockStreamWrite(process.stdout, lineFeed);
 }
 
 /**
- * Replaces `process.stderr.write` with a Vitest spy that suppresses terminal
- * output and exposes the captured text through a lazily evaluated,
- * snapshot-friendly `normalizedOutput` property.
+ * Replaces `process.stderr.write` with a Vitest spy. The spy suppresses terminal
+ * output. Its `normalizedOutput` property calculates and supplies captured text
+ * when a test reads the property.
  */
 export function mockStderrWrite(): OutputWriteFunctionMock {
   return mockStreamWrite(process.stderr);
 }
 
 /**
- * Creates a normalized write spy for either process output stream. The optional
- * prefix preserves the historical leading newline used by stdout snapshots.
+ * Creates a normalized write spy for a process output stream. The optional
+ * prefix keeps the initial newline that stdout snapshots use.
  */
 function mockStreamWrite(
   stream: NodeJS.WriteStream,
@@ -88,9 +88,9 @@ function mockStreamWrite(
 }
 
 /**
- * Collects text and byte writes from an output spy, normalizes newlines, removes
- * terminal control sequences and transport-only blank lines, joins the visible
- * lines, and replaces the package version with a stable placeholder.
+ * Collects text and byte writes from an output spy. It normalizes newlines and
+ * removes terminal controls and transport-only blank lines. It joins visible
+ * lines and replaces the package version with a stable placeholder.
  */
 function normalizeOutput(
   outputWriteFunctionMock: MockInstance<StreamWriteFunction>,
@@ -116,8 +116,8 @@ function normalizeOutput(
 }
 
 /**
- * Rejoins lines that Clack soft-wraps to the active terminal width. A trailing
- * space on the preceding line marks the location of the soft line break.
+ * Joins lines that Clack wraps to the active terminal width. A space at the end
+ * of the preceding line identifies a soft line break.
  */
 function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
   const joinedLines: string[] = [];
@@ -145,8 +145,8 @@ function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
 }
 
 /**
- * Determines whether two adjacent lines belong to the same prompt and the
- * preceding line ends at a soft-wrap break space.
+ * Determines if two adjacent lines belong to one prompt. It also makes sure
+ * that a soft line break ends the preceding line.
  */
 function isSoftWrappedPromptContinuation(
   previousLine: string,
@@ -161,8 +161,7 @@ function isSoftWrappedPromptContinuation(
 }
 
 /**
- * Converts either form accepted by a Node.js stream write into UTF-8 text for
- * normalization.
+ * Converts each Node.js stream-write input form into UTF-8 text.
  */
 function toText(chunk: string | Uint8Array): string {
   return typeof chunk === "string"
@@ -171,8 +170,8 @@ function toText(chunk: string | Uint8Array): string {
 }
 
 /**
- * Removes ANSI control-sequence families and remaining non-printing control
- * characters while leaving visible terminal text and line feeds intact.
+ * Removes ANSI control sequences and other nonprinting control characters. It
+ * keeps visible terminal text and line feeds.
  */
 function stripTerminalControlSequences(value: string): string {
   return value
@@ -183,8 +182,8 @@ function stripTerminalControlSequences(value: string): string {
 }
 
 /**
- * Replaces semantic versions shown after the package name or on their own line
- * so snapshots do not change when the package version changes.
+ * Replaces semantic versions after the package name or on a separate line.
+ * Thus, a package version change does not change snapshots.
  */
 function normalizePackageVersion(output: string): string {
   return output

@@ -11,9 +11,8 @@ import { PromptsInteraction } from "@test-utils/prompts-interaction";
 import { mockStdoutWrite } from "@test-utils/process-output";
 
 /**
- * Tests semantic .npmrc creation and normalization through the complete workflow.
- * Byte-level npm serialization behavior is covered only as deliberately relaxed
- * behavior in the testing documentation.
+ * Verifies semantic .npmrc creation and normalization through the complete workflow.
+ * The test documentation identifies byte-level npm serialization as relaxed behavior.
  */
 
 const testSuiteCwd = process.cwd();

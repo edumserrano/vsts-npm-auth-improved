@@ -101,8 +101,8 @@ export async function buildAuthSetupPlanAsync(
   packageInstallationStrategy: PackageInstallationStrategy,
   requestRegistryAsync: RequestRegistryAsync,
 ): Promise<AuthSetupPlanResult> {
-  // Load all package adapters before any adjacent npm configuration. Adapter
-  // loading both validates package data and prepares its changes in memory.
+  // Load all package adapters before adjacent npm configuration. This operation
+  // validates package data and prepares the changes in memory.
   const packageJsonResults = await Promise.allSettled(
     packageJsonPaths.map((packageJsonPath) =>
       loadNpmPackageJsonFileAsync({
@@ -146,8 +146,8 @@ export async function buildAuthSetupPlanAsync(
     } satisfies LoadedPackageFiles;
   });
 
-  // Registry prompts depend only on the project layer. Inherited user, global,
-  // environment, and CLI values must not suppress creation of a project value.
+  // Registry prompts use only the project layer. Inherited user, global,
+  // environment, and CLI values must not prevent a project value.
   for (const loadedPackage of loadedPackages) {
     if (loadedPackage.npmrc.projectRegistry === undefined) {
       const registryResult = await requestRegistryAsync(loadedPackage.displayPath);
@@ -170,7 +170,7 @@ export async function writeAuthSetupPlanAsync(
   plan: AuthSetupPlan,
 ): Promise<WriteAuthSetupPlanResult> {
   for (const packageChange of plan.packages) {
-    // Retain package order and save package.json before its adjacent .npmrc.
+    // Keep the package order. Save package.json before its adjacent .npmrc.
     for (const fileChange of [packageChange.packageJson, packageChange.npmrc]) {
       if (fileChange.disposition === "unchanged") {
         continue;

@@ -44,9 +44,8 @@ const temporaryRootTypingFramePattern = /│  ([^\n│]+?)█/g;
 
 /**
  * Captures stdout and optional stderr for complete terminal snapshots. It
- * normalizes only terminal control sequences, timing-dependent spinner frames,
- * test-owned absolute paths, path separators, newline representation, and
- * release-specific package versions.
+ * normalizes terminal controls, variable spinner frames, test-owned absolute
+ * paths, path separators, newlines, and release-specific package versions.
  */
 
 type StreamWrite = typeof process.stdout.write;
@@ -70,9 +69,8 @@ export type ProcessOutputCaptureOptions = OutputNormalizationOptions & {
 };
 
 /**
- * Captures stdout and, when requested, stderr with the same normalization
- * options so tests can assert complete process output without writing it to the
- * terminal.
+ * Captures stdout and optional stderr with the same normalization options.
+ * Thus, tests can verify complete process output without terminal writes.
  */
 export function captureProcessOutput(
   options: ProcessOutputCaptureOptions = {},
@@ -86,8 +84,8 @@ export function captureProcessOutput(
 }
 
 /**
- * Replaces `process.stdout.write` with a capture that exposes both the write
- * spy and its lazily normalized output.
+ * Replaces `process.stdout.write` with a capture. The capture supplies the write
+ * spy and calculates normalized output when a test reads it.
  */
 export function mockStdoutWrite(
   options: OutputNormalizationOptions = {},
@@ -96,8 +94,8 @@ export function mockStdoutWrite(
 }
 
 /**
- * Replaces `process.stderr.write` with a capture that exposes both the write
- * spy and its lazily normalized output.
+ * Replaces `process.stderr.write` with a capture. The capture supplies the write
+ * spy and calculates normalized output when a test reads it.
  */
 export function mockStderrWrite(
   options: OutputNormalizationOptions = {},
@@ -106,8 +104,8 @@ export function mockStderrWrite(
 }
 
 /**
- * Spies on one process stream, suppresses its real writes, and returns a getter
- * that normalizes all captured chunks on demand using the supplied options.
+ * Adds a spy to one process stream and suppresses its real writes. It returns a
+ * getter that normalizes captured chunks with the specified options.
  */
 function captureOutputChannel(
   stream: NodeJS.WriteStream,
@@ -123,9 +121,8 @@ function captureOutputChannel(
 }
 
 /**
- * Concatenates captured chunks and removes platform-, timing-, terminal-, and
- * release-specific differences while preserving the CLI content that tests
- * are intended to verify.
+ * Joins captured chunks. It removes platform, time, terminal, and release
+ * differences. It keeps the CLI content that the tests verify.
  */
 function normalizeOutput(
   write: MockInstance<StreamWrite>,
@@ -164,8 +161,8 @@ function normalizeOutput(
 }
 
 /**
- * Replaces semantic versions shown after either package name or on their own
- * line so snapshots remain stable across releases.
+ * Replaces semantic versions after each package name or on a separate line.
+ * Thus, snapshots stay stable across releases.
  */
 function normalizePackageVersion(output: string): string {
   return output
@@ -174,18 +171,16 @@ function normalizePackageVersion(output: string): string {
 }
 
 /**
- * Converts Windows path separators to the separator used in cross-platform
- * snapshots.
+ * Converts Windows path separators to the separator in cross-platform snapshots.
  */
 function normalizePathSeparators(value: string): string {
   return value.replaceAll(windowsPathSeparator, normalizedPathSeparator);
 }
 
 /**
- * Collapses the redraw frames produced while a complete known temporary root
- * is typed into one `<test-root>` frame. Requiring the complete root in the
- * same sequence prevents unrelated absolute input from matching a shared
- * prefix such as `/` on Linux.
+ * Replaces redraw frames for a known temporary root with one `<test-root>` frame.
+ * A match requires the complete root in one sequence. Thus, unrelated absolute
+ * input cannot match a common prefix such as `/` on Linux.
  */
 function normalizeProgressivelyTypedTemporaryRoots(
   output: string,
@@ -209,8 +204,8 @@ function normalizeProgressivelyTypedTemporaryRoots(
 }
 
 /**
- * Normalizes one sequence of progressively typed frames when that sequence
- * reaches a configured temporary root, leaving unrelated input unchanged.
+ * Normalizes a sequence of typed frames when it gets to a configured temporary
+ * root. It does not change unrelated input.
  */
 function normalizeTemporaryRootTypingSequence(
   typingSequence: string,
@@ -245,8 +240,7 @@ function normalizeTemporaryRootTypingSequence(
 }
 
 /**
- * Returns the configured temporary roots that appear as complete values in a
- * progressively typed frame sequence.
+ * Returns configured temporary roots that occur as complete values in a typed-frame sequence.
  */
 function findCompletedTemporaryRoots(
   typingSequence: string,
@@ -261,19 +255,18 @@ function findCompletedTemporaryRoots(
   );
 }
 
-/** Compares two strings without regard to casing. */
+/** Compares two strings without case differences. */
 function equalsIgnoringCase(left: string, right: string): boolean {
   return left.toLowerCase() === right.toLowerCase();
 }
 
-/** Tests whether a string starts with a prefix without regard to casing. */
+/** Tests if a string starts with a prefix without case differences. */
 function startsWithIgnoringCase(value: string, prefix: string): boolean {
   return value.toLowerCase().startsWith(prefix.toLowerCase());
 }
 
 /**
- * Converts either form accepted by a Node.js stream write into UTF-8 text for
- * normalization.
+ * Converts each Node.js stream-write input form into UTF-8 text.
  */
 function toText(chunk: string | Uint8Array): string {
   return typeof chunk === "string"
@@ -282,8 +275,8 @@ function toText(chunk: string | Uint8Array): string {
 }
 
 /**
- * Removes ANSI control-sequence families and remaining non-printing control
- * characters while leaving visible terminal text intact.
+ * Removes ANSI control sequences and other nonprinting control characters. It
+ * keeps visible terminal text.
  */
 function stripTerminalControlSequences(value: string): string {
   return value
@@ -294,19 +287,19 @@ function stripTerminalControlSequences(value: string): string {
 }
 
 /**
- * Removes Clack's timing-dependent in-progress spinner frames. The final
- * success or error line remains as the deterministic operation result.
+ * Removes variable Clack spinner frames. The final success or error line stays
+ * as the repeatable operation result.
  */
 function stripNondeterministicSpinnerFrames(value: string): string {
   return value.replace(nondeterministicSpinnerFramePattern, "");
 }
 
 /**
- * Clack compares ANSI-styled frames when deciding how much of a multiselect to
- * redraw. A color-enabled terminal therefore emits unchanged option blocks as
- * focus moves, while a non-color terminal emits only lines whose visible text
- * changed. Collapse the color-only blocks to those same visible updates so
- * snapshots do not depend on the parent terminal's styling.
+ * Clack compares ANSI-styled frames to select how much of a multiselect to draw
+ * again. A color terminal emits unchanged option blocks when focus moves. A
+ * noncolor terminal emits only lines with changed visible text. Replace the
+ * color-only blocks with the same visible updates. Thus, snapshots do not
+ * depend on the parent terminal style.
  */
 function normalizeColorDrivenMultiselectRedraws(value: string): string {
   const navigationHint =
@@ -342,9 +335,9 @@ function normalizeColorDrivenMultiselectRedraws(value: string): string {
 }
 
 /**
- * Rejoins lines that Clack soft-wraps to the active terminal width. Depending
- * on the wrapper path, a continuation is marked by either a trailing break
- * space or one extra indentation column after the prompt guide.
+ * Joins lines that Clack wraps to the active terminal width. A space at the end
+ * of a line can identify a continuation. One more indent column after the prompt
+ * guide can also identify a continuation.
  */
 function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
   const joinedLines: string[] = [];
@@ -373,8 +366,7 @@ function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
 }
 
 /**
- * Determines whether two adjacent prompt lines represent a terminal-width
- * soft wrap rather than two independent lines.
+ * Determines if two adjacent prompt lines are one line wrapped at the terminal width.
  */
 function isSoftWrappedPromptContinuation(
   line: string,
@@ -397,14 +389,14 @@ function isSoftWrappedPromptContinuation(
   return previousLineEndsAtBreakSpace || continuationUsesExtraIndent;
 }
 
-/** Escapes regular-expression syntax so a value can be matched literally. */
+/** Escapes regular-expression syntax to permit a literal value match. */
 function escapeForRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
- * Replaces every occurrence of a string without regard to casing. An explicit
- * scan avoids regular-expression escaping and preserves the original text
+ * Replaces all occurrences of a string without case differences. An explicit
+ * scan does not require regular-expression escaping. It keeps the original text
  * outside each match.
  */
 function replaceAllCaseInsensitive(

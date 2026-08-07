@@ -7,9 +7,8 @@ import { mockVstsNpmAuth } from "@test-utils/vsts-npm-auth";
 import { PromptsInteraction } from "@test-utils/prompts-interaction";
 
 /**
- * The tests below will test the auth command when all the options are provided via user prompts.
- * These tests are focused on checking the user prompt interactions, the bulk of the auth command
- * behavior is tested in auth-command-cli.test.ts.
+ * These tests verify the auth command when user prompts supply all options.
+ * They examine prompt interactions. auth-command-cli.test.ts examines most other command behavior.
  */
 
 const { originalCiEnvironment } = vi.hoisted(() => {
@@ -38,18 +37,18 @@ beforeEach(() => {
 
 afterEach(() => {
   PromptsInteraction.resetPromptListeners();
-  vi.resetAllMocks(); // clears history on module mocks like execa
-  vi.restoreAllMocks(); // restores original implementations of spied functions
+  vi.resetAllMocks(); // Clear the call history of module mocks such as Execa.
+  vi.restoreAllMocks(); // Restore the original implementations of spied functions.
   vol.reset();
   process.exitCode = undefined;
 });
 
 /**
- * Tests that the auth command succeeds when all required options are provided via user prompts.
- * Verifies that:
- * - All prompts are answered successfully without errors
- * - vsts-npm-auth is called once with the correct arguments based on prompt responses
- * - The process exit code is 0
+ * Verifies successful authentication when prompts supply all necessary options.
+ * Expected results:
+ * - The test answers all prompts without errors.
+ * - The command calls vsts-npm-auth one time with arguments from the prompt responses.
+ * - The process exit code is 0.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth
@@ -79,11 +78,11 @@ test("all prompts successful", async () => {
 });
 
 /**
- * Tests that the auth command is the default one.
- * Verifies that:
- * - All prompts are answered successfully without errors
- * - vsts-npm-auth is called once with the correct arguments based on prompt responses
- * - The process exit code is 0
+ * Verifies that auth is the default command.
+ * Expected results:
+ * - The test answers all prompts without errors.
+ * - The command calls vsts-npm-auth one time with arguments from the prompt responses.
+ * - The process exit code is 0.
  *
  * CLI commands:
  * - vsts-npm-auth-improved
@@ -108,11 +107,10 @@ test("default command", async () => {
 });
 
 /**
- * Tests that the auth command handles validation of the npm configuration path prompt.
- * When a non-existent file path is provided, validation should fail and show an error message
- * that explains the error.
- * Verifies that:
- * - The validation error message is displayed in the prompt output
+ * Verifies the validation of the npm configuration path prompt.
+ * The test supplies a path that does not exist.
+ * Expected result:
+ * - The prompt output shows a validation error message.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth
@@ -130,9 +128,9 @@ test("npm configuration path - prompt validation - file does not exist", async (
     .replaceText("./this-dir-does-not-exist-in-memfs/.npmrc")
     .submitText();
 
-  // Cancel the prompt to complete the auth command Promise and prevent output leaking into subsequent tests.
-  // Without this, the auth command Promise stays running, receiving input from process.stdin from other tests
-  // and producing output to process.stdout that pollutes other tests' output.
+  // Cancel the prompt to complete the auth command Promise. This action prevents
+  // output in subsequent tests. Without cancellation, the Promise continues to
+  // use process.stdin and process.stdout during the other tests.
   await new PromptsInteraction().cancel();
   await result;
 
@@ -142,11 +140,10 @@ test("npm configuration path - prompt validation - file does not exist", async (
 });
 
 /**
- * Tests that the auth command handles validation of the npm configuration path prompt.
- * When the npm configuration file does not contain a registry value, validation should fail and
- * show an error message that explains the error.
- * Verifies that:
- * - The validation error message is displayed in the prompt output
+ * Verifies the validation of the npm configuration path prompt.
+ * The test supplies an npm configuration file without a registry value.
+ * Expected result:
+ * - The prompt output shows a validation error message.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth
@@ -171,9 +168,9 @@ test.each([
     });
     await new PromptsInteraction().replaceText(inMemoryNpmrcFile.path).submitText();
 
-    // Cancel the prompt to complete the auth command Promise and prevent output leaking into subsequent tests.
-    // Without this, the auth command Promise stays running, receiving input from process.stdin from other tests
-    // and producing output to process.stdout that pollutes other tests' output.
+    // Cancel the prompt to complete the auth command Promise. This action prevents
+    // output in subsequent tests. Without cancellation, the Promise continues to
+    // use process.stdin and process.stdout during the other tests.
     await new PromptsInteraction().cancel();
     await result;
 
@@ -184,10 +181,10 @@ test.each([
 );
 
 /**
- * Tests that the auth command handles the initial value for the npm configuration path prompt.
- * When the user submits without editing the value, the initial path should be used.
- * Verifies that:
- * - The initial value is accepted, validated, and used without errors
+ * Verifies the initial value of the npm configuration path prompt.
+ * The user submits the value without an edit.
+ * Expected result:
+ * - The command accepts, validates, and uses the initial value without errors.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth
@@ -222,10 +219,10 @@ test("npm configuration path - initial value", async () => {
 });
 
 /**
- * Tests that the auth command handles cancellation of the npm configuration path prompt gracefully.
- * Verifies that:
- * - The prompt output shows the prompt cancellation message
- * - The process exit code is 1
+ * Verifies cancellation of the npm configuration path prompt.
+ * Expected results:
+ * - The prompt output shows the cancellation message.
+ * - The process exit code is 1.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth
@@ -248,10 +245,10 @@ test("npm configuration path prompt cancelled", async () => {
 });
 
 /**
- * Tests that the auth command handles cancellation of the token scope select prompt gracefully.
- * Verifies that:
- * - The prompt output shows the prompt cancellation message
- * - The process exit code is 1
+ * Verifies cancellation of the token-scope prompt.
+ * Expected results:
+ * - The prompt output shows the cancellation message.
+ * - The process exit code is 1.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth
@@ -276,10 +273,10 @@ test("token scope select prompt cancelled", async () => {
 });
 
 /**
- * Tests that the auth command handles cancellation of the force token acquisition select prompt gracefully.
- * Verifies that:
- * - The prompt output shows the prompt cancellation message
- * - The process exit code is 1
+ * Verifies cancellation of the force prompt.
+ * Expected results:
+ * - The prompt output shows the cancellation message.
+ * - The process exit code is 1.
  *
  * CLI command:
  * - vsts-npm-auth-improved auth

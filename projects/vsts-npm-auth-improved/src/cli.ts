@@ -4,7 +4,7 @@ import { packageVersion } from "./package-json-utils.js";
 
 export async function cliAsync(argv: string[]): Promise<void> {
   try {
-    console.log(); // Add a blank line before any CLI output for better readability
+    console.log(); // Add a blank line to make the CLI output easy to read.
     const program = createProgram();
     await program.parseAsync(argv);
   } catch (error) {
@@ -22,7 +22,7 @@ export async function cliAsync(argv: string[]): Promise<void> {
 function createProgram(): Command {
   const program = new Command();
   program
-    .exitOverride() // See /projects/vsts-npm-auth-improved/tests/README.md
+    .exitOverride() // Refer to /projects/vsts-npm-auth-improved/tests/README.md.
     .name("vsts-npm-auth-improved")
     .description("Authenticates with Azure DevOps NPM registry.")
     .version(packageVersion, "-v, --version")

@@ -7,7 +7,7 @@ import { PromptsInteraction } from "@test-utils/prompts-interaction";
 import { mockStdoutWrite } from "@test-utils/process-output";
 
 /**
- * Tests package discovery and package selection in the interactive workflow.
+ * Verifies package discovery and package selection in the interactive workflow.
  */
 
 const testSuiteCwd = process.cwd();
@@ -22,11 +22,11 @@ afterEach(async () => {
 });
 
 /**
- * Tests the workflow when the selected root contains no package.json files.
- * Verifies that:
- * - The command exits successfully after discovery
- * - No files are written or created
- * - The terminal output reports that no packages were found
+ * Verifies the workflow when the selected root contains no package.json files.
+ * Expected results:
+ * - The command exits successfully after discovery.
+ * - The command does not create or write files.
+ * - The terminal output reports that the command found no packages.
  */
 test("reports that no packages were discovered", async () => {
   const project = await NpmProject.createAsync("no-packages");
@@ -44,11 +44,12 @@ test("reports that no packages were discovered", async () => {
 });
 
 /**
- * Tests accepting the package multiselect without choosing any packages.
- * Verifies that:
- * - The command exits successfully without continuing to configuration
- * - The discovered package remains unchanged and no .npmrc is created
- * - No writes occur and the terminal output reports the empty selection
+ * Verifies acceptance of the package multiselect without a package selection.
+ * Expected results:
+ * - The command exits successfully before configuration.
+ * - The discovered package does not change.
+ * - The command does not create a .npmrc file or write other files.
+ * - The terminal output reports the empty selection.
  */
 test("reports that packages were discovered but none were selected", async () => {
   const project = await NpmProject.createAsync("no-selection");
@@ -70,13 +71,12 @@ test("reports that packages were discovered but none were selected", async () =>
 });
 
 /**
- * Tests recursive package discovery and the ordering of choices shown in the
- * package-selection prompt.
- * Verifies that:
- * - Root and nested packages are displayed in deterministic path order
- * - Hidden and dependency directories are excluded
- * - Conventional output directory names remain discoverable when not ignored
- * - Selecting no packages leaves every fixture unchanged
+ * Verifies recursive package discovery and the order in the package-selection prompt.
+ * Expected results:
+ * - Root and nested packages occur in a repeatable path order.
+ * - The command excludes hidden and dependency directories.
+ * - The command finds standard output directories when ignore rules do not exclude them.
+ * - An empty package selection does not change fixtures.
  */
 test("shows deterministic nested discovery while excluding dependency and hidden directories", async () => {
   const project = await NpmProject.createAsync("discovery-order");
@@ -141,11 +141,11 @@ test("shows deterministic nested discovery while excluding dependency and hidden
 });
 
 /**
- * Tests that the node_modules exclusion does not depend on path casing.
- * Verifies that:
- * - Normal packages and a mixed-case dist directory are discovered
- * - An uppercase node_modules directory is excluded
- * - The discovery-only flow makes no filesystem changes
+ * Verifies that path case does not affect the node_modules exclusion.
+ * Expected results:
+ * - The command finds normal packages and a mixed-case dist directory.
+ * - The command excludes an uppercase node_modules directory.
+ * - The discovery-only flow does not change the file system.
  */
 test("excludes node_modules case-insensitively", async () => {
   const project = await NpmProject.createAsync("case-insensitive-discovery");
@@ -188,11 +188,11 @@ test("excludes node_modules case-insensitively", async () => {
 });
 
 /**
- * Tests Git ignore rules at the selected root and in nested directories.
- * Verifies that:
- * - Root and nested ignore files exclude matching packages
- * - A nested negation can re-include a package
- * - Unignored packages remain discoverable in deterministic order
+ * Verifies Git ignore rules at the selected root and in nested directories.
+ * Expected results:
+ * - Root and nested ignore files exclude matching packages.
+ * - A nested negation can include a package again.
+ * - The command finds packages that are not ignored in a repeatable order.
  */
 test("respects root, nested, and negated gitignore rules", async () => {
   const project = await NpmProject.createAsync("gitignore-rules");
@@ -231,8 +231,8 @@ test("respects root, nested, and negated gitignore rules", async () => {
 });
 
 /**
- * Tests discovery when the selected root is below the Git repository root.
- * Verifies that parent .gitignore rules are resolved relative to their file.
+ * Verifies discovery when the selected root is below the Git repository root.
+ * The command must resolve parent .gitignore rules relative to their file.
  */
 test("respects parent gitignore rules up to the repository root", async () => {
   const project = await NpmProject.createAsync("parent-gitignore");
@@ -261,11 +261,11 @@ test("respects parent gitignore rules up to the repository root", async () => {
 });
 
 /**
- * Tests recursive discovery when the selected root contains a linked directory.
- * Verifies that:
- * - A real child package is discovered
- * - A package reachable only through a directory symbolic link is not followed
- * - Neither the selected project nor the link target is modified
+ * Verifies recursive discovery when the selected root contains a linked directory.
+ * Expected results:
+ * - The command finds a real child package.
+ * - The command does not follow a directory symbolic link to a package.
+ * - The command does not change the selected project or the link target.
  */
 test("does not follow a symbolic-link directory during discovery", async () => {
   const project = await NpmProject.createAsync("discovery-symlink");

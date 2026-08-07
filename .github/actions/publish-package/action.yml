@@ -211,7 +211,7 @@ runs:
           ${{ steps.package.outputs.tarball }}
           ${{ steps.package.outputs.checksum }}
         if-no-files-found: error
-        # The downstream GitHub Release job consumes this artifact during the same workflow run.
+        # The subsequent GitHub Release job uses this artifact in the same workflow run.
         retention-days: 1
     - name: Confirm release tag does not exist
       shell: pwsh
