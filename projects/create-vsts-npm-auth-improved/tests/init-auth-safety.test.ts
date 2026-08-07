@@ -114,7 +114,8 @@ test.each([
     .submitText()
     .down()
     .toggleMultiselectItem()
-    .acceptMultiselectValues();
+    .acceptMultiselectValues()
+    .acceptSelectValue();
   await command;
 
   expect(process.exitCode).toBe(1);
@@ -154,7 +155,8 @@ test.each([
           await mkdir(project.path("package.json"));
         }
       })
-      .acceptMultiselectValues();
+      .acceptMultiselectValues()
+      .acceptSelectValue();
     await command;
 
     expect(process.exitCode).toBe(1);
@@ -190,7 +192,8 @@ test("reports an .npmrc read failure with relative context and zero writes", asy
     .submitText()
     .down()
     .toggleMultiselectItem()
-    .acceptMultiselectValues();
+    .acceptMultiselectValues()
+    .acceptSelectValue();
   await command;
 
   expect(process.exitCode).toBe(1);
@@ -222,7 +225,11 @@ test("rejects a later invalid package before prompting or writing", async () => 
   });
   process.chdir(project.root);
   const command = InitAuthCommand.invokeAsync();
-  await new PromptsInteraction().submitText().toggleMultiselectItem().acceptMultiselectValues();
+  await new PromptsInteraction()
+    .submitText()
+    .toggleMultiselectItem()
+    .acceptMultiselectValues()
+    .acceptSelectValue();
   await command;
 
   expect(process.exitCode).toBe(1);
@@ -261,6 +268,7 @@ test("surfaces a targeted write failure through the persistence spinner", async 
     .down()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
+    .acceptSelectValue()
     .performAsync(async () => {
       await rename(project.path("package.json"), project.path("package.json.original"));
       await mkdir(project.path("package.json"));
@@ -276,6 +284,10 @@ test("surfaces a targeted write failure through the persistence spinner", async 
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests an .npmrc write failure after its package.json update succeeds.
+ * Verifies that the completed package.json write is preserved and the failure is reported.
+ */
 test("reports an .npmrc write failure after package.json is persisted", async () => {
   const project = await NpmProject.createAsync("npmrc-write-failure");
   await project.createPackageAsync({ packageJson: originalPackageJson });
@@ -288,6 +300,7 @@ test("reports an .npmrc write failure after package.json is persisted", async ()
     .down()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
+    .acceptSelectValue()
     .performAsync(async () => {
       await mkdir(project.path(".npmrc"));
     })
@@ -303,6 +316,10 @@ test("reports an .npmrc write failure after package.json is persisted", async ()
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests a write failure in a later selected package.
+ * Verifies that earlier package writes remain complete while the failed package stays unmodified.
+ */
 test("reports a later write failure after preserving earlier completed writes", async () => {
   const project = await NpmProject.createAsync("later-write-failure");
   await project.createPackageAsync({
@@ -321,6 +338,7 @@ test("reports a later write failure after preserving earlier completed writes", 
     .submitText()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
+    .acceptSelectValue()
     .enterText("https://alpha.example.test/")
     .submitText()
     .performAsync(async () => {

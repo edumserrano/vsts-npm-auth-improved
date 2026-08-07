@@ -3,16 +3,44 @@ import type { MockInstance } from "vitest";
 import { vi } from "vitest";
 
 const packageVersionPlaceholder = "<PACKAGE_VERSION>";
-const semanticVersionPattern =
-  String.raw`(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)` +
-  String.raw`(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)` +
-  String.raw`(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?` +
-  String.raw`(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
+const numericVersionIdentifierPattern = String.raw`(?:0|[1-9]\d*)`;
+const nonNumericPrereleaseIdentifierPattern =
+  String.raw`\d*[A-Za-z-][0-9A-Za-z-]*`;
+const prereleaseIdentifierPattern =
+  `(?:${numericVersionIdentifierPattern}|${nonNumericPrereleaseIdentifierPattern})`;
+const prereleasePattern = String.raw`(?:-${prereleaseIdentifierPattern}(?:\.${prereleaseIdentifierPattern})*)?`;
+const buildIdentifierPattern = String.raw`[0-9A-Za-z-]+`;
+const buildMetadataPattern = String.raw`(?:\+${buildIdentifierPattern}(?:\.${buildIdentifierPattern})*)?`;
+const semanticVersionPattern = String.raw`${numericVersionIdentifierPattern}\.${numericVersionIdentifierPattern}\.${numericVersionIdentifierPattern}${prereleasePattern}${buildMetadataPattern}`;
+const packageNamePattern = String.raw`(?:create-)?vsts-npm-auth-improved`;
+const packageVersionTerminatorPattern = String.raw`(?![0-9A-Za-z.+-])`;
 const packageVersionAfterName = new RegExp(
-  `((?:create-)?vsts-npm-auth-improved )${semanticVersionPattern}(?![0-9A-Za-z.+-])`,
+  `(${packageNamePattern} )${semanticVersionPattern}${packageVersionTerminatorPattern}`,
   "g",
 );
 const standalonePackageVersion = new RegExp(`^${semanticVersionPattern}$`, "gm");
+const carriageReturn = "\r";
+const lineFeed = "\n";
+const unicodeLineSeparator = "\u2028";
+const unicodeParagraphSeparator = "\u2029";
+const windowsPathSeparator = "\\";
+const normalizedPathSeparator = "/";
+const temporaryRootPlaceholder = "<test-root>";
+const newlinePattern = new RegExp(
+  `${carriageReturn}${lineFeed}?|${unicodeLineSeparator}|${unicodeParagraphSeparator}`,
+  "g",
+);
+const operatingSystemCommandPattern =
+  /\u001b\][^\u0007]*(?:\u0007|\u001b\\)/g;
+const controlSequenceIntroducerPattern = /\u001b\[[0-?]*[ -/]*[@-~]/g;
+const characterSetSelectionPattern = /\u001b[()][0-2A-Z0-9]/g;
+const remainingControlCharactersPattern =
+  /[\u0000-\u0008\u000b-\u001a\u001c-\u001f\u007f]/g;
+const nondeterministicSpinnerFramePattern =
+  /^(?:◒|◐|◓|◑|•|o|O|0) {2}(?:Searching for package\.json files|Writing configuration files)\.\.\.\n?/gm;
+const promptGuidePrefixPattern = /^[│|] {2}/;
+const temporaryRootTypingSequencePattern = /(?:│  [^\n│]+?█)+/g;
+const temporaryRootTypingFramePattern = /│  ([^\n│]+?)█/g;
 
 /**
  * Captures stdout and optional stderr for complete terminal snapshots. It
@@ -107,27 +135,28 @@ function normalizeOutput(
     .map(([chunk]) => toText(chunk))
     .join("");
 
-  let normalized = stripNondeterministicSpinnerFrames(
-    stripTerminalControlSequences(output).replace(
-      /\r\n?|\u2028|\u2029/g,
-      "\n",
-    ),
+  let normalized = output.replace(newlinePattern, lineFeed);
+  normalized = stripTerminalControlSequences(normalized);
+  normalized = stripNondeterministicSpinnerFrames(normalized);
+  normalized = normalizeColorDrivenMultiselectRedraws(normalized);
+  normalized = joinSoftWrappedPromptLines(normalized.split(lineFeed)).join(
+    lineFeed,
   );
 
-  const temporaryRoots = [...(options.temporaryRoots ?? [])]
-    .map(root => root.replaceAll("\\", "/"))
+  const normalizedTemporaryRoots = [...(options.temporaryRoots ?? [])]
+    .map(normalizePathSeparators)
     .sort((left, right) => right.length - left.length);
 
-  normalized = normalized.replaceAll("\\", "/");
+  normalized = normalizePathSeparators(normalized);
   normalized = normalizeProgressivelyTypedTemporaryRoots(
     normalized,
-    temporaryRoots,
+    normalizedTemporaryRoots,
   );
-  for (const temporaryRoot of temporaryRoots) {
+  for (const temporaryRoot of normalizedTemporaryRoots) {
     normalized = replaceAllCaseInsensitive(
       normalized,
       temporaryRoot,
-      "<test-root>",
+      temporaryRootPlaceholder,
     );
   }
 
@@ -145,6 +174,14 @@ function normalizePackageVersion(output: string): string {
 }
 
 /**
+ * Converts Windows path separators to the separator used in cross-platform
+ * snapshots.
+ */
+function normalizePathSeparators(value: string): string {
+  return value.replaceAll(windowsPathSeparator, normalizedPathSeparator);
+}
+
+/**
  * Collapses the redraw frames produced while a complete known temporary root
  * is typed into one `<test-root>` frame. Requiring the complete root in the
  * same sequence prevents unrelated absolute input from matching a shared
@@ -154,35 +191,84 @@ function normalizeProgressivelyTypedTemporaryRoots(
   output: string,
   temporaryRoots: readonly string[],
 ): string {
-  return output.replace(
-    /(?:│  [^\n│]+?█)+/g,
-    typingSequence => {
-      const typedValues = [
-        ...typingSequence.matchAll(/│  ([^\n│]+?)█/g),
-      ].map(([, typedValue]) => typedValue);
-      const completedRoots = temporaryRoots.filter(root =>
-        typedValues.some(
-          typedValue => typedValue.toLowerCase() === root.toLowerCase(),
-        ),
-      );
-
-      if (completedRoots.length === 0) {
-        return typingSequence;
-      }
-
-      return typingSequence
-        .replace(
-          /│  ([^\n│]+?)█/g,
-          (match, typedValue: string) =>
-            completedRoots.some(root =>
-              root.toLowerCase().startsWith(typedValue.toLowerCase()),
-            )
-              ? "│  <test-root>█"
-              : match,
-        )
-        .replace(/(?:│  <test-root>█)+/g, "│  <test-root>█");
-    },
+  const normalizedTemporaryRootFrame = `│  ${temporaryRootPlaceholder}█`;
+  const repeatedNormalizedTemporaryRootFrames = new RegExp(
+    `(?:${escapeForRegExp(normalizedTemporaryRootFrame)})+`,
+    "g",
   );
+  return output.replace(
+    temporaryRootTypingSequencePattern,
+    typingSequence =>
+      normalizeTemporaryRootTypingSequence(
+        typingSequence,
+        temporaryRoots,
+        normalizedTemporaryRootFrame,
+        repeatedNormalizedTemporaryRootFrames,
+      ),
+  );
+}
+
+/**
+ * Normalizes one sequence of progressively typed frames when that sequence
+ * reaches a configured temporary root, leaving unrelated input unchanged.
+ */
+function normalizeTemporaryRootTypingSequence(
+  typingSequence: string,
+  temporaryRoots: readonly string[],
+  normalizedTemporaryRootFrame: string,
+  repeatedNormalizedTemporaryRootFrames: RegExp,
+): string {
+  const completedRoots = findCompletedTemporaryRoots(
+    typingSequence,
+    temporaryRoots,
+  );
+  if (completedRoots.length === 0) {
+    return typingSequence;
+  }
+
+  return typingSequence
+    .replace(
+      temporaryRootTypingFramePattern,
+      (originalFrame, typedValue: string) => {
+        const belongsToCompletedRoot = completedRoots.some(root =>
+          startsWithIgnoringCase(root, typedValue),
+        );
+        return belongsToCompletedRoot
+          ? normalizedTemporaryRootFrame
+          : originalFrame;
+      },
+    )
+    .replace(
+      repeatedNormalizedTemporaryRootFrames,
+      normalizedTemporaryRootFrame,
+    );
+}
+
+/**
+ * Returns the configured temporary roots that appear as complete values in a
+ * progressively typed frame sequence.
+ */
+function findCompletedTemporaryRoots(
+  typingSequence: string,
+  temporaryRoots: readonly string[],
+): string[] {
+  const typedValues = [
+    ...typingSequence.matchAll(temporaryRootTypingFramePattern),
+  ].map(([, typedValue]) => typedValue);
+
+  return temporaryRoots.filter(root =>
+    typedValues.some(typedValue => equalsIgnoringCase(typedValue, root)),
+  );
+}
+
+/** Compares two strings without regard to casing. */
+function equalsIgnoringCase(left: string, right: string): boolean {
+  return left.toLowerCase() === right.toLowerCase();
+}
+
+/** Tests whether a string starts with a prefix without regard to casing. */
+function startsWithIgnoringCase(value: string, prefix: string): boolean {
+  return value.toLowerCase().startsWith(prefix.toLowerCase());
 }
 
 /**
@@ -201,10 +287,10 @@ function toText(chunk: string | Uint8Array): string {
  */
 function stripTerminalControlSequences(value: string): string {
   return value
-    .replace(/\u001b\][^\u0007]*(?:\u0007|\u001b\\)/g, "")
-    .replace(/\u001b\[[0-?]*[ -/]*[@-~]/g, "")
-    .replace(/\u001b[()][0-2A-Z0-9]/g, "")
-    .replace(/[\u0000-\u0008\u000b-\u001a\u001c-\u001f\u007f]/g, "");
+    .replace(operatingSystemCommandPattern, "")
+    .replace(controlSequenceIntroducerPattern, "")
+    .replace(characterSetSelectionPattern, "")
+    .replace(remainingControlCharactersPattern, "");
 }
 
 /**
@@ -212,10 +298,108 @@ function stripTerminalControlSequences(value: string): string {
  * success or error line remains as the deterministic operation result.
  */
 function stripNondeterministicSpinnerFrames(value: string): string {
-  return value.replace(
-    /^(?:◒|◐|◓|◑|•|o|O|0) {2}(?:Searching for package\.json files|Writing configuration files)\.\.\.\n?/gm,
-    "",
+  return value.replace(nondeterministicSpinnerFramePattern, "");
+}
+
+/**
+ * Clack compares ANSI-styled frames when deciding how much of a multiselect to
+ * redraw. A color-enabled terminal therefore emits unchanged option blocks as
+ * focus moves, while a non-color terminal emits only lines whose visible text
+ * changed. Collapse the color-only blocks to those same visible updates so
+ * snapshots do not depend on the parent terminal's styling.
+ */
+function normalizeColorDrivenMultiselectRedraws(value: string): string {
+  const navigationHint =
+    `│  ↑/↓ to navigate • Space: select • Enter: confirm${lineFeed}` +
+    `└${lineFeed}`;
+  const allOption = String.raw`│  ◻ ALL`;
+  const selectedOptionPrefix = String.raw`│  ◼`;
+  const anyOptionLine = String.raw`│  [◻◼] [^│\n]+\n`;
+  const unselectedOptionExceptAllLine =
+    String.raw`│  ◻ (?!ALL)[^│\n]+\n`;
+  const selectedOptionLineWithoutNewline = String.raw`│  ◼ [^│\n]+`;
+  const completeOptionBlock =
+    `(?:${anyOptionLine})+${escapeForRegExp(navigationHint)}`;
+  const unselectedOptionBlock =
+    `(?:${unselectedOptionExceptAllLine})+${escapeForRegExp(navigationHint)}`;
+  const firstFocusMove = new RegExp(
+    `^${allOption}\\n${completeOptionBlock}`,
+    "gm",
   );
+  const laterFocusMoves = new RegExp(
+    `(?<=${allOption})(?:${unselectedOptionBlock})+(?=${selectedOptionPrefix})`,
+    "g",
+  );
+  const selectedFocusMoves = new RegExp(
+    `(${selectedOptionLineWithoutNewline})(?:${completeOptionBlock})+(?=${selectedOptionPrefix})`,
+    "g",
+  );
+
+  return value
+    .replace(firstFocusMove, allOption)
+    .replace(laterFocusMoves, "")
+    .replace(selectedFocusMoves, "$1");
+}
+
+/**
+ * Rejoins lines that Clack soft-wraps to the active terminal width. Depending
+ * on the wrapper path, a continuation is marked by either a trailing break
+ * space or one extra indentation column after the prompt guide.
+ */
+function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
+  const joinedLines: string[] = [];
+  for (const line of lines) {
+    const previousLineIndex = joinedLines.length - 1;
+    const previousLine = joinedLines[previousLineIndex];
+    const guidePrefix = line.match(promptGuidePrefixPattern)?.[0];
+    if (previousLine === undefined || guidePrefix === undefined) {
+      joinedLines.push(line);
+      continue;
+    }
+
+    const lineContinuesPreviousPrompt = isSoftWrappedPromptContinuation(
+      line,
+      previousLine,
+      guidePrefix,
+    );
+
+    if (lineContinuesPreviousPrompt) {
+      joinedLines[previousLineIndex] = previousLine + line.slice(guidePrefix.length);
+    } else {
+      joinedLines.push(line);
+    }
+  }
+  return joinedLines;
+}
+
+/**
+ * Determines whether two adjacent prompt lines represent a terminal-width
+ * soft wrap rather than two independent lines.
+ */
+function isSoftWrappedPromptContinuation(
+  line: string,
+  previousLine: string,
+  guidePrefix: string,
+): boolean {
+  const belongsToSamePrompt = previousLine.startsWith(guidePrefix);
+  if (!belongsToSamePrompt) {
+    return false;
+  }
+
+  const previousLineEndsAtBreakSpace = previousLine.endsWith(" ");
+  const textAfterGuide = line.slice(guidePrefix.length);
+  const firstCharacterAfterExtraIndent = textAfterGuide.at(1);
+  const continuationUsesExtraIndent =
+    textAfterGuide.startsWith(" ") &&
+    firstCharacterAfterExtraIndent !== undefined &&
+    /\S/.test(firstCharacterAfterExtraIndent);
+
+  return previousLineEndsAtBreakSpace || continuationUsesExtraIndent;
+}
+
+/** Escapes regular-expression syntax so a value can be matched literally. */
+function escapeForRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**

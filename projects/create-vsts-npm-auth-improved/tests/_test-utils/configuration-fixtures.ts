@@ -1,4 +1,5 @@
 import path from "node:path";
+import type { JsonObject } from "type-fest";
 
 /**
  * Supplies deterministic package.json and .npmrc content plus fixture path
@@ -11,11 +12,12 @@ export const DEFAULT_REGISTRY = "https://registry.example.test/";
 const EXPECTED_REQUIRED_SCRIPTS = {
   "registry-auth":
     "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --no-force",
-  "preinstall-packages": "npm run registry-auth",
-  "install-packages": "npm i",
+  preinstall: "npm run registry-auth",
 } as const;
 
 const EXPECTED_VSTS_NPM_AUTH_IMPROVED_SPEC = "alpha";
+
+type PackageJsonFixtureOverrides = Readonly<JsonObject>;
 
 export const EXPECTED_MANAGED_NPM_CONFIG = {
   "package-lock": "true",
@@ -24,7 +26,7 @@ export const EXPECTED_MANAGED_NPM_CONFIG = {
 } as const;
 
 export function packageJsonContent(
-  overrides: Readonly<Record<string, unknown>> = {},
+  overrides: PackageJsonFixtureOverrides = {},
 ): string {
   return JSON.stringify(
     {
@@ -37,7 +39,7 @@ export function packageJsonContent(
 }
 
 export function configuredPackageJsonContent(
-  overrides: Readonly<Record<string, unknown>> = {},
+  overrides: PackageJsonFixtureOverrides = {},
 ): string {
   return packageJsonContent({
     scripts: EXPECTED_REQUIRED_SCRIPTS,

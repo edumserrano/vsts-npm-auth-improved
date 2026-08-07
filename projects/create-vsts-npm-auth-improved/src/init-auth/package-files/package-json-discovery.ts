@@ -1,5 +1,5 @@
 import path from "node:path";
-import { DirectorySearchFailure } from "../init-auth-failure";
+import { DirectorySearchFailure } from "../init-auth-failure.js";
 
 const EXCLUDED_DIRECTORY_NAMES = ["node_modules"] as const;
 

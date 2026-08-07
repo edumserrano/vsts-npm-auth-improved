@@ -1,3 +1,5 @@
+import type { Key } from "node:readline";
+
 /**
  * Drives real terminal prompts with queued text and keypress events, waiting
  * for a prompt to accept input and for rendering to settle around each
@@ -6,6 +8,7 @@
 
 type PromptOperation = () => void | Promise<void>;
 type KeypressListener = (...args: any[]) => void;
+type KeypressModifiers = Pick<Key, "ctrl" | "meta" | "shift">;
 
 const initialKeypressListeners = new Set(currentKeypressListeners());
 // Node installs its terminal-data bridge before the prompt's input listener.
@@ -61,6 +64,10 @@ export class PromptsInteraction implements PromiseLike<void> {
     return this;
   }
 
+  public acceptSelectValue(): this {
+    return this.submitText();
+  }
+
   public cancel(): this {
     this.operations.push(() => {
       emitKeypress("\u001b", "escape");
@@ -113,12 +120,12 @@ export class PromptsInteraction implements PromiseLike<void> {
 function emitKeypress(
   sequence: string,
   name: string,
-  additionalProperties: Record<string, unknown> = {},
+  modifiers: KeypressModifiers = {},
 ): void {
   process.stdin.emit("keypress", sequence, {
     name,
     sequence,
-    ...additionalProperties,
+    ...modifiers,
   });
 }
 

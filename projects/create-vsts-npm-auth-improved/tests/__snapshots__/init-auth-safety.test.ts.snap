@@ -68,6 +68,14 @@ exports[`rejects a later invalid package before prompting or writing 1`] = `
 │  ◼ ALL (Configure every package)◇  Which packages should be configured?
 │  ALL
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ■  Could not configure beta/package.json: the file contains invalid JSON: Invalid package.json: JSONParseError: Expected property name or '}' in JSON at position 2 (line 1 column 3) while parsing "{ malformed".
 │
 └  No files were changed.
@@ -93,6 +101,14 @@ exports[`reports a boolean JSON root with zero writes 1`] = `
 └
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
+│
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
 │
 ■  Could not configure package.json: the top-level JSON value must be an object.
 │
@@ -137,6 +153,14 @@ exports[`reports a later write failure after preserving earlier completed writes
 │  ◼ ALL (Configure every package)◇  Which packages should be configured?
 │  ALL
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◆  Registry URL for alpha/package.json
 │  https://registry.example.com/
 └
@@ -175,6 +199,14 @@ exports[`reports a missing package.json after discovery with zero writes 1`] = `
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ■  Could not read package.json: Could not read package.json: Error: ENOENT: no such file or directory, open '<test-root>/package.json'.
 │
 └  No files were changed.
@@ -200,6 +232,14 @@ exports[`reports a null JSON root with zero writes 1`] = `
 └
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
+│
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
 │
 ■  Could not configure package.json: the top-level JSON value must be an object.
 │
@@ -227,6 +267,14 @@ exports[`reports a number JSON root with zero writes 1`] = `
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ■  Could not configure package.json: the top-level JSON value must be an object.
 │
 └  No files were changed.
@@ -252,6 +300,14 @@ exports[`reports a string JSON root with zero writes 1`] = `
 └
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
+│
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
 │
 ■  Could not configure package.json: the top-level JSON value must be an object.
 │
@@ -279,6 +335,14 @@ exports[`reports a unreadable package.json after discovery with zero writes 1`] 
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ■  Could not read package.json: Could not read package.json: Error: EISDIR: illegal operation on a directory, read.
 │
 └  No files were changed.
@@ -305,6 +369,14 @@ exports[`reports an .npmrc read failure with relative context and zero writes 1`
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ■  Could not read .npmrc: Expected a regular file at <test-root>/.npmrc.
 │
 └  No files were changed.
@@ -330,6 +402,14 @@ exports[`reports an .npmrc write failure after package.json is persisted 1`] = `
 └
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
+│
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
 │
 ◆  Registry URL for package.json
 │  https://registry.example.com/
@@ -363,6 +443,14 @@ exports[`reports an array JSON root with zero writes 1`] = `
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ■  Could not configure package.json: the top-level JSON value must be an object.
 │
 └  No files were changed.
@@ -389,6 +477,14 @@ exports[`reports malformed JSON with zero writes 1`] = `
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ■  Could not configure package.json: the file contains invalid JSON: Invalid package.json: JSONParseError: Expected property name or '}' in JSON at position 2 (line 1 column 3) while parsing "{ malformed".
 │
 └  No files were changed.
@@ -414,6 +510,14 @@ exports[`surfaces a targeted write failure through the persistence spinner 1`] =
 └
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
+│
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
 │
 ◆  Registry URL for package.json
 │  https://registry.example.com/

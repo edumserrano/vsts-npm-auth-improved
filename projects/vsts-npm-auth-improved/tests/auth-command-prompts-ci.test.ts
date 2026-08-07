@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeEach, expect, test, vi } from "vitest";
 import { vol } from "memfs";
 import { AuthCommand } from "@test-utils/auth-command";
-import { mockStdoutWrite } from "@test-utils/stdout";
+import { mockStdoutWrite } from "@test-utils/process-output";
 import { mockVstsNpmAuth } from "@test-utils/vsts-npm-auth";
 
 /**

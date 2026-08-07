@@ -1,0 +1,142 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`force token acquisition select prompt cancelled 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+◆  Where is the NPM configuration file?
+│  ./.npmrc█
+└
+│  ./.npmrc
+│  .█
+│  ./█
+│  ./t█
+│  ./th█
+│  ./thi█
+│  ./this█
+│  ./this-█
+│  ./this-d█
+│  ./this-di█
+│  ./this-dir█
+│  ./this-dir-█
+│  ./this-dir-e█
+│  ./this-dir-ex█
+│  ./this-dir-exi█
+│  ./this-dir-exis█
+│  ./this-dir-exist█
+│  ./this-dir-exists█
+│  ./this-dir-exists-█
+│  ./this-dir-exists-o█
+│  ./this-dir-exists-on█
+│  ./this-dir-exists-onl█
+│  ./this-dir-exists-only█
+│  ./this-dir-exists-only-█
+│  ./this-dir-exists-only-i█
+│  ./this-dir-exists-only-in█
+│  ./this-dir-exists-only-in-█
+│  ./this-dir-exists-only-in-m█
+│  ./this-dir-exists-only-in-me█
+│  ./this-dir-exists-only-in-mem█
+│  ./this-dir-exists-only-in-memf█
+│  ./this-dir-exists-only-in-memfs█
+│  ./this-dir-exists-only-in-memfs/█
+│  ./this-dir-exists-only-in-memfs/.█
+│  ./this-dir-exists-only-in-memfs/.n█
+│  ./this-dir-exists-only-in-memfs/.np█
+│  ./this-dir-exists-only-in-memfs/.npm█
+│  ./this-dir-exists-only-in-memfs/.npmr█
+│  ./this-dir-exists-only-in-memfs/.npmrc█
+◇  Where is the NPM configuration file?
+│  ./this-dir-exists-only-in-memfs/.npmrc
+│
+◆  What kind scope should be used for the auth token?
+│  ● Packaging (Read) (Read packages)
+│  ○ Packaging (Read & Write)
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  What kind scope should be used for the auth token?
+│  Packaging (Read)
+│
+◆  Force token acquisition?
+│  ● no
+│  ○ yes
+│  ↑/↓ to navigate • Enter: confirm
+└
+■  Force token acquisition?
+│  no
+│
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`npm configuration path prompt cancelled 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+◆  Where is the NPM configuration file?
+│  ./.npmrc█
+└
+■  Where is the NPM configuration file?
+│  ./.npmrc
+│
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`token scope select prompt cancelled 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+◆  Where is the NPM configuration file?
+│  ./.npmrc█
+└
+│  ./.npmrc
+│  .█
+│  ./█
+│  ./t█
+│  ./th█
+│  ./thi█
+│  ./this█
+│  ./this-█
+│  ./this-d█
+│  ./this-di█
+│  ./this-dir█
+│  ./this-dir-█
+│  ./this-dir-e█
+│  ./this-dir-ex█
+│  ./this-dir-exi█
+│  ./this-dir-exis█
+│  ./this-dir-exist█
+│  ./this-dir-exists█
+│  ./this-dir-exists-█
+│  ./this-dir-exists-o█
+│  ./this-dir-exists-on█
+│  ./this-dir-exists-onl█
+│  ./this-dir-exists-only█
+│  ./this-dir-exists-only-█
+│  ./this-dir-exists-only-i█
+│  ./this-dir-exists-only-in█
+│  ./this-dir-exists-only-in-█
+│  ./this-dir-exists-only-in-m█
+│  ./this-dir-exists-only-in-me█
+│  ./this-dir-exists-only-in-mem█
+│  ./this-dir-exists-only-in-memf█
+│  ./this-dir-exists-only-in-memfs█
+│  ./this-dir-exists-only-in-memfs/█
+│  ./this-dir-exists-only-in-memfs/.█
+│  ./this-dir-exists-only-in-memfs/.n█
+│  ./this-dir-exists-only-in-memfs/.np█
+│  ./this-dir-exists-only-in-memfs/.npm█
+│  ./this-dir-exists-only-in-memfs/.npmr█
+│  ./this-dir-exists-only-in-memfs/.npmrc█
+◇  Where is the NPM configuration file?
+│  ./this-dir-exists-only-in-memfs/.npmrc
+│
+◆  What kind scope should be used for the auth token?
+│  ● Packaging (Read) (Read packages)
+│  ○ Packaging (Read & Write)
+│  ↑/↓ to navigate • Enter: confirm
+└
+■  What kind scope should be used for the auth token?
+│  Packaging (Read)
+│
+└  Operation failed. Exiting - maybe another time? 👋"
+`;

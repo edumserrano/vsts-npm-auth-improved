@@ -1,237 +1,74 @@
 # create-vsts-npm-auth-improved
 
-`create-vsts-npm-auth-improved` is an interactive setup CLI for
-`vsts-npm-auth-improved`. It configures one or more projects so their npm
-registry settings and package scripts can use `vsts-npm-auth-improved`; it does
-not authenticate with a registry itself. As a post-write safeguard, it also
-checks whether `.npmrc` files changed during setup are excluded by applicable
-`.gitignore` rules and warns when they may not be shared through source control.
+`create-vsts-npm-auth-improved` is an interactive setup CLI for [`vsts-npm-auth-improved`](https://www.npmjs.com/package/vsts-npm-auth-improved).
 
-## Requirements
+- ✅ Configures one or more npm projects in a single interactive setup.
+- ✅ Updates/creates `.npmrc` files and package scripts to use `vsts-npm-auth-improved` for automatic npm registry authentication.
+- ✅ Warns when changed `.npmrc` files may not be shared through source control.
+- ✅ Keeps setup separate from authentication; it does not authenticate with a registry itself.
 
-- Node.js 24.18.1 or later
-- npm with `npx`/`npm exec`
+## How to run
 
-The setup CLI uses Node's cross-platform filesystem APIs and can be run on
-Windows, macOS, or Linux. Authentication performed later by
-`vsts-npm-auth-improved` has its own platform-specific behavior and requirements.
-
-## Install and run
-
-Install the CLI in a project:
+The intended way to run the interactive setup is with `npm init`:
 
 ```shell
-npm install --save-dev create-vsts-npm-auth-improved
-npx create-vsts-npm-auth-improved init-auth
+npm init vsts-npm-auth-improved
 ```
 
-The single `init-auth` command is also the default command, so this is
-equivalent:
+It can also be executed directly with `npx`:
 
 ```shell
 npx create-vsts-npm-auth-improved
-```
-
-It can also be run without first adding it to the project:
-
-```shell
-npx --yes create-vsts-npm-auth-improved init-auth
 ```
 
 Use `--help` or `-h` for help and `--version` or `-v` for the package version:
 
 ```shell
 npx create-vsts-npm-auth-improved --help
-npx create-vsts-npm-auth-improved init-auth --help
 npx create-vsts-npm-auth-improved --version
 ```
 
-## Prompt flow
+## What the setup asks
 
-`init-auth` completes the interactive setup in this order:
+Follow the prompts to:
 
-1. Enter the root directory to search. The default is `./`, relative to the
-   directory where the command was started. The directory must exist, be
-   readable, and be a directory.
-2. The CLI recursively discovers `package.json` files in deterministic order.
-   It respects `.gitignore` files from the selected root up to the repository
-   root as well as nested `.gitignore` files. It also skips hidden directories,
-   symbolic-link directories, and directories named `node_modules`. Global Git
-   ignore files are not applied, so discovery is consistent across machines.
-3. Select `ALL` to configure every discovered package, or select a subset. An
-   empty selection exits without changing files.
-4. For each selected package whose adjacent `.npmrc` has no non-empty global
-   `registry` setting, enter an absolute registry URL. Existing global registry
-   values are reused, so those packages do not prompt. A scoped registry alone
-   does not replace the required global registry.
-5. After every selected package has been read, parsed, and planned—and all
-   required registry prompts have completed—the CLI writes only changed files.
-   It groups the result by package directory and labels each managed file as
-   created, updated, or unchanged.
-6. If an `.npmrc` created or updated by the command is ignored by Git, the CLI
-   lists it in a warning. See [Git-ignore checking](#git-ignore-checking).
+1. Choose the directory containing your npm projects.
+2. Select the projects you want to configure.
+3. Choose the install command that matches the npm versions your projects support.
+4. Provide an Azure DevOps Artifacts registry URL when a selected project does not already have one.
 
-Cancelling any prompt during planning exits before any file is written. Invalid
-or unreadable input also stops planning before persistence begins.
+You can cancel before setup completes without changing any files.
 
-## Git-ignore checking
+## What the setup changes
 
-After configuration files are written successfully, the CLI checks every
-`.npmrc` file it created or updated against applicable `.gitignore` rules. This
-helps identify project-level npm settings that may otherwise remain local and
-unavailable to other contributors.
+For each selected project, the setup:
 
-The check:
+- creates or updates the project `.npmrc` with the selected registry, enables lockfiles, and disables automatic audit and funding messages;
+- removes obsolete `always-auth` settings;
+- adds the dependency and package scripts needed to run `vsts-npm-auth-improved` before installing packages;
+- preserves unrelated registry settings, dependencies, and package scripts;
+- warns when a changed `.npmrc` is ignored by Git and may not be shared with other contributors.
 
-- considers only `.npmrc` files created or updated during the current run;
-- does not report selected `.npmrc` files that remained unchanged;
-- respects `.gitignore` files from the selected root up to the repository root,
-  nested `.gitignore` files, and negated rules;
-- does not apply a user's global Git ignore file; and
-- is best-effort: if the check cannot be completed, setup still succeeds and no
-  Git-ignore warning is displayed.
+The setup does not authenticate with the registry or add credentials to the project `.npmrc`. Review any `.npmrc` before changing `.gitignore` rules or committing it.
 
-When ignored files are found, the warning lists their paths and recommends
-reviewing each file for credentials or other secrets before changing
-`.gitignore` rules or committing it. The CLI does not modify `.gitignore`, stage
-files, create commits, or push changes automatically.
+You can safely run the setup again when you need to update the configuration.
 
-## Resulting configuration
+## Install packages after setup
 
-### `.npmrc`
+Use the command selected during setup.
 
-For a new `.npmrc`, the CLI configures these managed settings:
+For npm 12 and later:
 
-```ini
-registry=<registry entered in the prompt>
-package-lock=true
-audit=false
-fund=false
+```shell
+npm i
 ```
 
-For an existing `.npmrc`, the CLI enforces those same four managed values. The
-effective non-empty project `registry` value is reused; the other three managed
-values are overwritten when they conflict. Credentials, unrelated settings,
-and scoped registry entries such as `@scope:registry=...` remain configured.
-`lockfile-version` and `legacy-peer-deps` are not added or changed.
-Both global `always-auth=...` and scoped `//registry/:always-auth=...` settings
-are removed.
+Authentication also runs automatically with `npm ci` on npm 12 and later.
 
-### `package.json`
-
-The CLI adds or replaces this exact development dependency:
-
-```json
-{
-  "devDependencies": {
-    "vsts-npm-auth-improved": "alpha"
-  }
-}
-```
-
-It places these exact managed scripts at the top of the `scripts` object, in
-this order:
-
-```json
-{
-  "scripts": {
-    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --no-force",
-    "preinstall-packages": "npm run registry-auth",
-    "install-packages": "npm i"
-  }
-}
-```
-
-`registry-auth` uses npm's package runner so authentication can run before
-the project's dependencies have been installed. The explicit package spec and
-command-line registry select the current `alpha` release from the public npm
-registry, overriding the project-level global registry for this bootstrap
-request. npm caches the fetched package and reuses its package data while the
-same alpha release remains current. All `npx` options precede the package spec,
-so the remaining options are passed to `vsts-npm-auth-improved`.
-
-Run the managed installation command immediately after configuration:
+For npm 11 and earlier:
 
 ```shell
 npm run install-packages
 ```
 
-Its `preinstall-packages` hook authenticates first, then `npm i` installs the
-project dependencies using the configured project registry.
-
-If authentication fails, retry from the project directory with forced token
-acquisition:
-
-```shell
-npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --force
-```
-
-Conflicting values for the managed dependency or scripts are overwritten.
-Unrelated fields, dependencies, and scripts are preserved, with unrelated
-scripts following the three managed entries. Repeating `init-auth` with the
-same answers is idempotent: already-configured files remain unchanged.
-
-### File serialization
-
-The CLI uses npm's own `@npmcli/config` and `@npmcli/package-json` libraries to
-parse and serialize `.npmrc` and `package.json` files. Managed semantic values
-and unrelated semantic configuration are retained, but the original text is not
-a preservation contract. Comments, formatting, duplicate entries, key ordering,
-byte-order marks (BOMs), and newline style or final-newline choices are not
-guaranteed after a semantic update. npm may also reorder dependency entries in
-`package.json`.
-
-Files whose managed configuration is already semantically correct are not
-rewritten, so their existing bytes remain unchanged.
-
-## Version policy
-
-During the prerelease phase, the CLI writes the npm `alpha` dist-tag for
-`vsts-npm-auth-improved` instead of a fixed version range. Generated projects
-therefore resolve the version that npm assigns to `alpha` when dependencies are
-installed. Publishing another core alpha does not require a corresponding source
-or documentation update in `create-vsts-npm-auth-improved`. When the stable
-release is ready, change this managed spec to `latest` and publish a new create
-package version.
-
-## Local development
-
-From `vsts-npm-auth-improved/projects/create-vsts-npm-auth-improved`:
-
-```shell
-npm ci
-npm run build
-npm test
-```
-
-Additional test workflows:
-
-```shell
-npm run test:watch
-npm run test:ui
-npm run test:update-snapshots
-```
-
-`build` cleans `dist` before compiling the library and test TypeScript. `test`
-cleans `test-reporters` before running Vitest with coverage. Generated build,
-test-report, and tarball output is ignored by Git.
-
-Build the release tarball with:
-
-```shell
-npm run pack
-```
-
-The package is written to:
-
-```text
-dist/create-vsts-npm-auth-improved-package/create-vsts-npm-auth-improved-<version>.tgz
-```
-
-Smoke-test that tarball with npm's package runner (PowerShell example):
-
-```powershell
-$tarball = (Resolve-Path .\dist\create-vsts-npm-auth-improved-package\create-vsts-npm-auth-improved-*.tgz).Path
-npx --yes --package="$tarball" create-vsts-npm-auth-improved --help
-npx --yes --package="$tarball" create-vsts-npm-auth-improved --version
-```
+On Windows, authentication runs before npm installs packages from the private registry. On macOS, Linux, and CI, automatic authentication is skipped so your environment must supply the required credentials.

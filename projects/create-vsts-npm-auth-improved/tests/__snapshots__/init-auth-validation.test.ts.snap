@@ -19,6 +19,14 @@ exports[`accepts a valid HTTPS registry through the real registry prompt 1`] = `
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -32,6 +40,16 @@ exports[`accepts a valid HTTPS registry through the real registry prompt 1`] = `
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -57,6 +75,14 @@ exports[`accepts a valid custom-scheme registry through the real registry prompt
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -70,6 +96,16 @@ exports[`accepts a valid custom-scheme registry through the real registry prompt
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -113,6 +149,14 @@ exports[`reuses an existing global registry without showing a registry prompt 1`
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◇  Configuration files are ready.
 │
 ◆  Changed 1 file in 1 package
@@ -120,6 +164,16 @@ exports[`reuses an existing global registry without showing a registry prompt 1`
 │  ./
 │    UPDATED    package.json
 │    UNCHANGED  .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -145,6 +199,14 @@ exports[`shows empty registry feedback before accepting a valid correction 1`] =
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -164,6 +226,16 @@ exports[`shows empty registry feedback before accepting a valid correction 1`] =
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -261,6 +333,14 @@ exports[`shows missing-scheme registry feedback before accepting a valid correct
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -280,6 +360,16 @@ exports[`shows missing-scheme registry feedback before accepting a valid correct
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -305,6 +395,14 @@ exports[`shows relative registry feedback before accepting a valid correction 1`
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -324,6 +422,16 @@ exports[`shows relative registry feedback before accepting a valid correction 1`
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -349,6 +457,14 @@ exports[`shows whitespace registry feedback before accepting a valid correction 
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -368,6 +484,16 @@ exports[`shows whitespace registry feedback before accepting a valid correction 
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 

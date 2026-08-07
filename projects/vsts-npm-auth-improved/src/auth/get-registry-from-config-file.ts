@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { parse } from "ini";
-import { PromptMessages } from "./prompts-utils";
+import { PromptMessages } from "./prompts-utils.js";
 
 type GetRegistryResult = RegistryFoundResult | GetRegistryErrorResult;
 
@@ -21,7 +21,7 @@ export function getRegistryFromConfigFile(configPath: string): GetRegistryResult
   try {
     const npmrcFileContents = readFileSync(configPath, { encoding: "utf-8" });
     const npmrc = parse(npmrcFileContents);
-    if (typeof npmrc.registry === "undefined" || npmrc.registry === "") {
+    if (typeof npmrc.registry !== "string" || npmrc.registry.trim() === "") {
       return { type: "registry-not-found" };
     }
 
@@ -43,4 +43,3 @@ export function getRegistryErrorMessage(result: GetRegistryErrorResult): string 
     }
   }
 }
-

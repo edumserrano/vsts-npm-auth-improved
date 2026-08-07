@@ -1,10 +1,15 @@
 import path from "node:path";
+import type { JsonObject, JsonValue } from "type-fest";
+import { commonJsRequire } from "../../commonjs-require.js";
+import { PackageInstallationStrategy } from "../package-installation-strategy.js";
 
 const VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC = "alpha";
 
-const REQUIRED_SCRIPTS = {
-  "registry-auth":
-    `npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@${VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC} -c ./.npmrc --read --no-force`,
+const REGISTRY_AUTH_SCRIPT =
+  `npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@${VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC} -c ./.npmrc --read --no-force`;
+const PREINSTALL_AUTH_SCRIPT = "npm run registry-auth";
+const PREINSTALL_AUTH_PREFIX = `${PREINSTALL_AUTH_SCRIPT} && `;
+const CUSTOM_INSTALL_SCRIPTS = {
   "preinstall-packages": "npm run registry-auth",
   "install-packages": "npm i",
 } as const;
@@ -16,13 +21,22 @@ const DEPENDENCY_TYPES = [
   "peerDependencies",
 ] as const;
 
-type JsonObject = Record<string, unknown>;
-type StringMap = Readonly<Record<string, string>>;
+type PackageJsonFieldValue = JsonValue | undefined;
+type PackageScripts = Readonly<Record<string, string>>;
+type PackageDependencies = Readonly<Record<string, string>>;
+
+type PackageJsonUpdate = {
+  scripts: PackageScripts;
+  devDependencies: PackageDependencies;
+  dependencies?: PackageDependencies;
+  optionalDependencies?: PackageDependencies;
+  peerDependencies?: PackageDependencies;
+};
 
 type NpmPackageJson = {
-  readonly content: unknown;
+  readonly content: JsonValue;
   save(): Promise<void>;
-  update(content: Readonly<Record<string, unknown>>): NpmPackageJson;
+  update(content: PackageJsonUpdate): NpmPackageJson;
 };
 
 type NpmPackageJsonConstructor = {
@@ -32,6 +46,10 @@ type NpmPackageJsonConstructor = {
 type NpmPackageJsonFileDependencies = {
   readonly PackageJson: NpmPackageJsonConstructor;
 };
+
+type JsonParseError =
+  | { readonly code: "EJSONPARSE" }
+  | { readonly name: "JSONParseError" };
 
 export type NpmPackageJsonFileDisposition = "updated" | "unchanged";
 
@@ -73,6 +91,7 @@ export type NpmPackageJsonFile = {
 
 export type LoadNpmPackageJsonFileOptions = {
   readonly packageDirectory: string;
+  readonly packageInstallationStrategy: PackageInstallationStrategy;
 };
 
 export async function loadNpmPackageJsonFileAsync(
@@ -115,9 +134,13 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
   }
 
   const content = packageJson.content;
-  const scripts = buildScripts(content["scripts"]);
-  const devDependencies = {
-    ...readStringMap(content["devDependencies"]),
+  const existingScripts = readPackageScripts(content["scripts"]);
+  const scripts = buildScripts(
+    existingScripts,
+    options.packageInstallationStrategy,
+  );
+  const devDependencies: PackageDependencies = {
+    ...readPackageDependencies(content["devDependencies"]),
     "vsts-npm-auth-improved": VSTS_NPM_AUTH_IMPROVED_PACKAGE_SPEC,
   };
   const disposition = hasRequiredSemanticState(
@@ -129,7 +152,7 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
     : "updated";
 
   if (disposition === "updated") {
-    const update: Record<string, unknown> = {
+    const update: PackageJsonUpdate = {
       scripts,
       devDependencies,
     };
@@ -137,7 +160,7 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
       if (dependencyType === "devDependencies") {
         continue;
       }
-      const dependenciesForType = readValidStringMap(content[dependencyType]);
+      const dependenciesForType = readValidPackageDependencies(content[dependencyType]);
       if (dependenciesForType !== undefined) {
         update[dependencyType] = dependenciesForType;
       }
@@ -167,27 +190,94 @@ async function loadNpmPackageJsonFileWithDependenciesAsync(
   };
 }
 
-function buildScripts(value: unknown): Readonly<Record<string, string>> {
-  const existingScripts = readStringMap(value);
+function buildScripts(
+  existingScripts: PackageScripts,
+  packageInstallationStrategy: PackageInstallationStrategy,
+): PackageScripts {
+  if (packageInstallationStrategy === "standard-npm-install") {
+    return buildStandardInstallScripts(existingScripts);
+  }
+  return buildCustomInstallScripts(existingScripts);
+}
+
+function buildStandardInstallScripts(existingScripts: PackageScripts): PackageScripts {
+  const existingPreinstall = existingScripts["preinstall"];
+  const preinstall =
+    existingPreinstall === undefined
+      ? PREINSTALL_AUTH_SCRIPT
+      : hasManagedAuthPrefix(existingPreinstall)
+        ? existingPreinstall
+        : `${PREINSTALL_AUTH_PREFIX}${existingPreinstall}`;
   const unrelatedScripts = Object.fromEntries(
-    Object.entries(existingScripts).filter(([name]) => !(name in REQUIRED_SCRIPTS)),
+    Object.entries(existingScripts).filter(([name, script]) => {
+      if (name === "registry-auth" || name === "preinstall") {
+        return false;
+      }
+      return !isGeneratedCustomInstallScript(name, script);
+    }),
   );
-  return { ...REQUIRED_SCRIPTS, ...unrelatedScripts };
+
+  return {
+    "registry-auth": REGISTRY_AUTH_SCRIPT,
+    preinstall,
+    ...unrelatedScripts,
+  };
+}
+
+function buildCustomInstallScripts(existingScripts: PackageScripts): PackageScripts {
+  const existingPreinstall = existingScripts["preinstall"];
+  const restoredPreinstall = restorePreinstallWithoutManagedAuth(existingPreinstall);
+  const unrelatedScripts = Object.fromEntries(
+    Object.entries(existingScripts).filter(
+      ([name]) =>
+        name !== "registry-auth" && name !== "preinstall" && !(name in CUSTOM_INSTALL_SCRIPTS),
+    ),
+  );
+
+  return {
+    "registry-auth": REGISTRY_AUTH_SCRIPT,
+    ...CUSTOM_INSTALL_SCRIPTS,
+    ...(restoredPreinstall === undefined ? {} : { preinstall: restoredPreinstall }),
+    ...unrelatedScripts,
+  };
+}
+
+function hasManagedAuthPrefix(script: string): boolean {
+  return script === PREINSTALL_AUTH_SCRIPT || script.startsWith(PREINSTALL_AUTH_PREFIX);
+}
+
+function restorePreinstallWithoutManagedAuth(script: string | undefined): string | undefined {
+  if (script === undefined || script === PREINSTALL_AUTH_SCRIPT) {
+    return undefined;
+  }
+  return script.startsWith(PREINSTALL_AUTH_PREFIX)
+    ? script.slice(PREINSTALL_AUTH_PREFIX.length)
+    : script;
+}
+
+function isGeneratedCustomInstallScript(name: string, script: string): boolean {
+  return (
+    name in CUSTOM_INSTALL_SCRIPTS &&
+    CUSTOM_INSTALL_SCRIPTS[name as keyof typeof CUSTOM_INSTALL_SCRIPTS] === script
+  );
 }
 
 function hasRequiredSemanticState(
   content: JsonObject,
-  scripts: StringMap,
-  devDependencies: StringMap,
+  scripts: PackageScripts,
+  devDependencies: PackageDependencies,
 ): boolean {
   return (
-    isOrderedStringMapEqual(content["scripts"], scripts) &&
-    isStringMapEqual(content["devDependencies"], devDependencies)
+    isOrderedPackageScriptsEqual(content["scripts"], scripts) &&
+    isPackageDependenciesEqual(content["devDependencies"], devDependencies)
   );
 }
 
-function isOrderedStringMapEqual(value: unknown, expected: StringMap): boolean {
-  const current = readValidStringMap(value);
+function isOrderedPackageScriptsEqual(
+  value: PackageJsonFieldValue,
+  expected: PackageScripts,
+): boolean {
+  const current = readValidPackageScripts(value);
   if (current === undefined) {
     return false;
   }
@@ -203,8 +293,11 @@ function isOrderedStringMapEqual(value: unknown, expected: StringMap): boolean {
   );
 }
 
-function isStringMapEqual(value: unknown, expected: StringMap): boolean {
-  const current = readValidStringMap(value);
+function isPackageDependenciesEqual(
+  value: PackageJsonFieldValue,
+  expected: PackageDependencies,
+): boolean {
+  const current = readValidPackageDependencies(value);
   if (current === undefined) {
     return false;
   }
@@ -216,7 +309,19 @@ function isStringMapEqual(value: unknown, expected: StringMap): boolean {
   );
 }
 
-function readStringMap(value: unknown): StringMap {
+function readPackageScripts(value: PackageJsonFieldValue): PackageScripts {
+  return readStringRecord(value);
+}
+
+function readPackageDependencies(
+  value: PackageJsonFieldValue,
+): PackageDependencies {
+  return readStringRecord(value);
+}
+
+function readStringRecord(
+  value: PackageJsonFieldValue,
+): Readonly<Record<string, string>> {
   if (!isJsonObject(value)) {
     return {};
   }
@@ -228,7 +333,21 @@ function readStringMap(value: unknown): StringMap {
   );
 }
 
-function readValidStringMap(value: unknown): StringMap | undefined {
+function readValidPackageScripts(
+  value: PackageJsonFieldValue,
+): PackageScripts | undefined {
+  return readValidStringRecord(value);
+}
+
+function readValidPackageDependencies(
+  value: PackageJsonFieldValue,
+): PackageDependencies | undefined {
+  return readValidStringRecord(value);
+}
+
+function readValidStringRecord(
+  value: PackageJsonFieldValue,
+): Readonly<Record<string, string>> | undefined {
   if (!isJsonObject(value)) {
     return undefined;
   }
@@ -239,23 +358,29 @@ function readValidStringMap(value: unknown): StringMap | undefined {
 }
 
 function loadPackageJsonConstructor(): NpmPackageJsonConstructor {
-  const loaded: unknown = require("@npmcli/package-json");
-  if (
-    (typeof loaded !== "function" && !isJsonObject(loaded)) ||
-    typeof Reflect.get(loaded, "load") !== "function"
-  ) {
+  const loaded: unknown = commonJsRequire("@npmcli/package-json");
+  if (!isNpmPackageJsonConstructor(loaded)) {
     throw new TypeError(
       "@npmcli/package-json did not expose its CommonJS load function.",
     );
   }
-  return loaded as NpmPackageJsonConstructor;
+  return loaded;
+}
+
+function isNpmPackageJsonConstructor(
+  value: unknown,
+): value is NpmPackageJsonConstructor {
+  return (
+    (typeof value === "function" || isJsonObject(value)) &&
+    typeof Reflect.get(value, "load") === "function"
+  );
 }
 
 function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isJsonParseError(error: unknown): boolean {
+function isJsonParseError(error: unknown): error is JsonParseError {
   return (
     isJsonObject(error) &&
     (error["code"] === "EJSONPARSE" || error["name"] === "JSONParseError")

@@ -19,6 +19,14 @@ exports[`displays the Git ignore warning when changed npmrc files are ignored 1`
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -38,6 +46,16 @@ exports[`displays the Git ignore warning when changed npmrc files are ignored 1`
 │  Review each file for credentials or other secrets, then remove the relevant .gitignore rules and commit and push any files that are safe to share:
 │
 │  - .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -63,6 +81,14 @@ exports[`does not display the Git ignore warning when no changed npmrc files are
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◆  Registry URL for package.json
 │  https://registry.example.com/
 └
@@ -76,6 +102,16 @@ exports[`does not display the Git ignore warning when no changed npmrc files are
 │  ./
 │    UPDATED    package.json
 │    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 

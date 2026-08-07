@@ -23,6 +23,10 @@ afterEach(async () => {
   await NpmProject.cleanupAllAsync();
 });
 
+/**
+ * Tests a changed .npmrc file that is ignored by Git.
+ * Verifies that the command displays the credential-safety warning.
+ */
 test("displays the Git ignore warning when changed npmrc files are ignored", async () => {
   const output = await invokeInitAuth("warning-shown", {
     gitignore: ".npmrc\n",
@@ -34,6 +38,10 @@ test("displays the Git ignore warning when changed npmrc files are ignored", asy
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests changed .npmrc files that are not ignored by Git.
+ * Verifies that the credential-safety warning is not displayed.
+ */
 test("does not display the Git ignore warning when no changed npmrc files are ignored", async () => {
   const output = await invokeInitAuth("warning-not-required");
 
@@ -64,6 +72,7 @@ async function invokeInitAuth(
     .down()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
+    .acceptSelectValue()
     .enterText("https://registry.example.test/")
     .submitText();
   await command;

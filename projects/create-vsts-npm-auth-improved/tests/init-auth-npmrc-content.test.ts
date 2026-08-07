@@ -133,6 +133,10 @@ const scenarios: readonly NpmrcWorkflowScenario[] = [
   },
 ];
 
+/**
+ * Tests managed .npmrc settings across existing configuration shapes.
+ * Verifies that required values are normalized while unrelated settings are preserved.
+ */
 test.each(scenarios)(
   "configures .npmrc content: $description",
   async ({ description, npmrc, expectedValues, absentKeys, promptForRegistry }) => {
@@ -157,6 +161,10 @@ test.each(scenarios)(
   },
 );
 
+/**
+ * Tests registry selection when npm provides an inherited registry.
+ * Verifies that a project registry is still requested and written without changing inherited files.
+ */
 test.each([
   {
     description: "global registry",
@@ -193,6 +201,7 @@ test.each([
       .down()
       .toggleMultiselectItem()
       .acceptMultiselectValues()
+      .acceptSelectValue()
       .enterText(promptedRegistry)
       .submitText();
     await command;
@@ -208,6 +217,10 @@ test.each([
   },
 );
 
+/**
+ * Tests .npmrc placement for standalone, nested, and workspace packages.
+ * Verifies that only the configuration adjacent to the selected package is updated.
+ */
 test.each([
   {
     description: "standalone package",
@@ -253,7 +266,7 @@ test.each([
     if (packageDirectory !== "") {
       interaction.down();
     }
-    await interaction.toggleMultiselectItem().acceptMultiselectValues();
+    await interaction.toggleMultiselectItem().acceptMultiselectValues().acceptSelectValue();
     await command;
 
     expect(process.exitCode ?? 0).toBe(0);

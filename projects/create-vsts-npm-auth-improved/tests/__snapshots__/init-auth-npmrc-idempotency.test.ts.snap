@@ -19,6 +19,14 @@ exports[`keeps .npmrc semantically idempotent after normalization 1`] = `
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◇  Configuration files are ready.
 │
 ◆  Changed 1 file in 1 package
@@ -26,6 +34,16 @@ exports[`keeps .npmrc semantically idempotent after normalization 1`] = `
 │  ./
 │    UNCHANGED  package.json
 │    UPDATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
@@ -51,6 +69,14 @@ exports[`keeps .npmrc semantically idempotent after normalization 2`] = `
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
+◆  How should users install packages with automatic authentication?
+│  ● Standard npm install (npm i — requires npm 12 or later)
+│  ○ Custom npm script
+│  ↑/↓ to navigate • Enter: confirm
+└
+◇  How should users install packages with automatic authentication?
+│  Standard npm install
+│
 ◇  Configuration files are ready.
 │
 ◆  No files changed
@@ -58,6 +84,16 @@ exports[`keeps .npmrc semantically idempotent after normalization 2`] = `
 │  ./
 │    UNCHANGED  package.json
 │    UNCHANGED  .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm install                                                  │
+│                                                               │
+│  This requires npm 12 or later.                               │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
 │
 └  Authentication configuration complete. 😊
 
