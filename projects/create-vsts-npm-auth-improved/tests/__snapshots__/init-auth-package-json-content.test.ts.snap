@@ -19,14 +19,6 @@ exports[`configures package.json content: creates managed scripts and the develo
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 1 file in 1 package
@@ -39,9 +31,9 @@ exports[`configures package.json content: creates managed scripts and the develo
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -69,14 +61,6 @@ exports[`configures package.json content: discards invalid managed entries while
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 1 file in 1 package
@@ -89,9 +73,9 @@ exports[`configures package.json content: discards invalid managed entries while
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -119,14 +103,6 @@ exports[`configures package.json content: overwrites conflicts while preserving 
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 1 file in 1 package
@@ -139,9 +115,9 @@ exports[`configures package.json content: overwrites conflicts while preserving 
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -169,14 +145,6 @@ exports[`configures package.json content: preserves and reconciles every depende
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 1 file in 1 package
@@ -189,9 +157,9 @@ exports[`configures package.json content: preserves and reconciles every depende
 │                                                               │
 │  Install packages with authentication handled automatically:  │
 │                                                               │
-│  npm install                                                  │
+│  npm run install-packages                                     │
 │                                                               │
-│  This requires npm 12 or later.                               │
+│  Use this command instead of npm install.                     │
 │                                                               │
 ├───────────────────────────────────────────────────────────────╯
 │
@@ -219,68 +187,6 @@ exports[`configures package.json content: replaces non-object script and depende
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
-◇  Configuration files are ready.
-│
-◆  Changed 1 file in 1 package
-│
-│  ./
-│    UPDATED    package.json
-│    UNCHANGED  .npmrc
-│
-◇  Next step ───────────────────────────────────────────────────╮
-│                                                               │
-│  Install packages with authentication handled automatically:  │
-│                                                               │
-│  npm install                                                  │
-│                                                               │
-│  This requires npm 12 or later.                               │
-│                                                               │
-├───────────────────────────────────────────────────────────────╯
-│
-└  Authentication configuration complete. 😊
-
-"
-`;
-
-exports[`creates the custom install-packages compatibility scripts when selected 1`] = `
-"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
-│
-◆  Where should package.json files be searched for?
-│  ./█
-└
-◇  Where should package.json files be searched for?
-│  ./
-│
-◇  Found 1 package.json file.
-│
-◆  Which packages should be configured?
-│  ◻ ALL (Configure every package)
-│  ◻ package.json
-│  ↑/↓ to navigate • Space: select • Enter: confirm
-└
-│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
-│  package.json
-│
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-│  ○ Standard npm install
-│  ● Custom npm script (npm run install-packages — supports npm 11 and earlier)
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Custom npm script
-│
 ◇  Configuration files are ready.
 │
 ◆  Changed 1 file in 1 package
@@ -304,7 +210,7 @@ exports[`creates the custom install-packages compatibility scripts when selected
 "
 `;
 
-exports[`switches from custom install scripts to standard npm install without stale hooks 1`] = `
+exports[`migrates to install-packages scripts and restores chained preinstall work 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
 ◆  Where should package.json files be searched for?
@@ -322,68 +228,6 @@ exports[`switches from custom install scripts to standard npm install without st
 └
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
-│
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Standard npm install
-│
-◇  Configuration files are ready.
-│
-◆  Changed 1 file in 1 package
-│
-│  ./
-│    UPDATED    package.json
-│    UNCHANGED  .npmrc
-│
-◇  Next step ───────────────────────────────────────────────────╮
-│                                                               │
-│  Install packages with authentication handled automatically:  │
-│                                                               │
-│  npm install                                                  │
-│                                                               │
-│  This requires npm 12 or later.                               │
-│                                                               │
-├───────────────────────────────────────────────────────────────╯
-│
-└  Authentication configuration complete. 😊
-
-"
-`;
-
-exports[`switches to custom install scripts and restores chained preinstall work 1`] = `
-"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
-│
-◆  Where should package.json files be searched for?
-│  ./█
-└
-◇  Where should package.json files be searched for?
-│  ./
-│
-◇  Found 1 package.json file.
-│
-◆  Which packages should be configured?
-│  ◻ ALL (Configure every package)
-│  ◻ package.json
-│  ↑/↓ to navigate • Space: select • Enter: confirm
-└
-│  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
-│  package.json
-│
-◆  How should users install packages with automatic authentication?
-│  ● Standard npm install (npm i — requires npm 12 or later)
-│  ○ Custom npm script
-│  ↑/↓ to navigate • Enter: confirm
-└
-│  ○ Standard npm install
-│  ● Custom npm script (npm run install-packages — supports npm 11 and earlier)
-│  ↑/↓ to navigate • Enter: confirm
-└
-◇  How should users install packages with automatic authentication?
-│  Custom npm script
 │
 ◇  Configuration files are ready.
 │

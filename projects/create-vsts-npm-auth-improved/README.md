@@ -34,8 +34,7 @@ Follow the prompts to:
 
 1. Choose the directory containing your npm projects.
 2. Select the projects you want to configure.
-3. Choose the install command that matches the npm versions your projects support.
-4. Provide an Azure DevOps Artifacts registry URL when a selected project does not already have one.
+3. Provide an Azure DevOps Artifacts registry URL when a selected project does not already have one.
 
 You can cancel before setup completes without changing any files.
 
@@ -55,20 +54,21 @@ You can safely run the setup again when you need to update the configuration.
 
 ## Install packages after setup
 
-Use the command selected during setup.
-
-For npm 12 and later:
-
-```shell
-npm i
-```
-
-Authentication also runs automatically with `npm ci` on npm 12 and later.
-
-For npm 11 and earlier:
+Use the generated installation command:
 
 ```shell
 npm run install-packages
 ```
 
 On Windows, authentication runs before npm installs packages from the private registry. On macOS, Linux, and CI, automatic authentication is skipped so your environment must supply the required credentials.
+
+## Why package installation uses a custom command
+
+A root `preinstall` hook cannot reliably authenticate npm before it accesses a private registry:
+
+1. In npm 7 through npm 11, the root `preinstall` hook ran after dependencies had already been installed, which was too late to provide registry credentials. npm 12 corrected that lifecycle ordering through [npm/cli#2660](https://github.com/npm/cli/issues/2660), but the correction is not available to projects that still use an earlier npm version.
+2. npm 12 runs root `preinstall` before fetching dependencies, but the active npm process loads `.npmrc` before invoking the hook. Credentials created or refreshed by `preinstall` are therefore not used by the dependency requests that follow it. This remaining behavior is tracked by [npm/cli#9853](https://github.com/npm/cli/issues/9853).
+
+The custom workflow provides the required process boundary. Running `npm run install-packages` first invokes its matching `preinstall-packages` hook to authenticate, then starts `npm install` as a new process. That new npm process loads the updated credentials before accessing the private registry.
+
+If [npm/cli#9853](https://github.com/npm/cli/issues/9853) is resolved and the fix is available, the standard `npm install` workflow can be enabled in future versions of this package without requiring the custom `install-packages` command.

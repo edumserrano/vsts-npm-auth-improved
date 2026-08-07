@@ -6,7 +6,6 @@ import { mockStdoutWrite, OutputChannelCapture } from "./process-output.js";
 export type SinglePackageScenarioOptions = {
   readonly name: string;
   readonly npmrc?: string;
-  readonly packageInstallationStrategy?: "standard-npm-install" | "custom-install-packages";
   readonly packageJson: string;
   readonly promptedRegistry?: string;
 };
@@ -14,7 +13,6 @@ export type SinglePackageScenarioOptions = {
 export async function runSinglePackageScenarioAsync({
   name,
   npmrc,
-  packageInstallationStrategy = "standard-npm-install",
   packageJson,
   promptedRegistry,
 }: SinglePackageScenarioOptions): Promise<{
@@ -33,10 +31,6 @@ export async function runSinglePackageScenarioAsync({
     .down()
     .toggleMultiselectItem()
     .acceptMultiselectValues();
-  if (packageInstallationStrategy === "custom-install-packages") {
-    interaction.down();
-  }
-  interaction.acceptSelectValue();
   if (promptedRegistry !== undefined) {
     interaction.enterText(promptedRegistry).submitText();
   }

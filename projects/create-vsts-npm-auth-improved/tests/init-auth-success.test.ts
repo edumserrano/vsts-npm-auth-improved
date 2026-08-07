@@ -66,7 +66,6 @@ test.each([
     const command = InitAuthCommand.invokeAsync();
     const interaction = new PromptsInteraction().submitText();
     selectChoices(interaction, choicePositions);
-    interaction.acceptSelectValue();
     await interaction;
     await command;
 
@@ -136,7 +135,6 @@ test("reports mixed created updated and unchanged outcomes in persistence order"
     .submitText()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
-    .acceptSelectValue()
     .enterText(promptedRegistry)
     .submitText();
   await command;
@@ -201,7 +199,6 @@ test("a second complete CLI run is idempotent for package.json and .npmrc", asyn
     .down()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
-    .acceptSelectValue()
     .enterText(promptedRegistry)
     .submitText();
   await firstCommand;
@@ -228,8 +225,7 @@ test("a second complete CLI run is idempotent for package.json and .npmrc", asyn
     .submitText()
     .down()
     .toggleMultiselectItem()
-    .acceptMultiselectValues()
-    .acceptSelectValue();
+    .acceptMultiselectValues();
   await secondCommand;
 
   expect(process.exitCode ?? 0).toBe(0);
