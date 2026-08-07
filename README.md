@@ -7,6 +7,7 @@
 
 `vsts-npm-auth-improved` wraps and invokes [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) to authenticate npm with private Azure DevOps Artifacts registries on Windows. It adds:
 
+- ✅ Configures one or more npm projects for automatic npm authentication in a single interactive setup.
 - ✅ A friendlier guided authentication experience.
 - ✅ Clearer success and error messages.
 - ✅ A one-time automatic retry that can recover from stale or expired tokens.

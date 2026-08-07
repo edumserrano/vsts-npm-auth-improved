@@ -43,17 +43,17 @@ See the [`create-vsts-npm-auth-improved` package documentation](https://www.npmj
 
 ## Options
 
-| Option | Default | Required | Description |
-| --- | --- | --- | --- |
-| `-c, --config-path <path>` | `./.npmrc` | No | Project `.npmrc` containing the registry. When omitted, the CLI prompts for the path. |
-| `--read` | Packaging (Read) | No | Requests a token with Packaging (Read) scope. |
-| `--no-read` | Packaging (Read) | No | Requests a token with Packaging (Read & Write) scope. |
-| `--force` | No forced acquisition | No | Forces token acquisition even when an existing token is still valid. |
-| `--no-force` | No forced acquisition | No | Allows reuse of an existing valid token. A failed request is retried once with forced acquisition. |
-| `-h, --help` | Not enabled | No | Displays wrapper command help without running authentication. |
-| `-v, --version` | Not enabled | No | Displays the `vsts-npm-auth-improved` package version. |
+| Option                     | Description and default                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `-c, --config-path <path>` | Project `.npmrc` containing the registry. When omitted, the CLI prompts with `./.npmrc` as the default. |
+| `--read`                   | Requests a token with Packaging (Read) scope.                                                           |
+| `--no-read`                | Requests a token with Packaging (Read & Write) scope.                                                   |
+| `--force`                  | Forces token acquisition even when an existing token is still valid.                                    |
+| `--no-force`               | Allows reuse of an existing valid token. A failed request is retried once with forced acquisition.      |
+| `-h, --help`               | Displays command help.                                                                                  |
+| `-v, --version`            | Displays the `vsts-npm-auth-improved` package version.                                                  |
 
-When config path, token scope, or force behavior is omitted on Windows, the CLI prompts for that value using the defaults shown above. Newly acquired tokens use the upstream 90-day expiration default.
+When config path, token scope, or force behavior is omitted on Windows, the CLI prompts for that value. Newly acquired tokens expire in 90 days.
 
 ## Examples
 
