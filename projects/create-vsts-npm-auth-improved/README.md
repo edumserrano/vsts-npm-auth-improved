@@ -60,10 +60,15 @@ Use the generated installation command:
 npm run install-packages
 ```
 
-This custom command is required even with npm 12. npm 12 runs a root `preinstall` before fetching
-dependencies, but npm loads `.npmrc` before that hook and does not use credentials created or
-refreshed by it during the active installation. This npm behavior is tracked by
-[npm/cli#9853](https://github.com/npm/cli/issues/9853). `npm run install-packages` authenticates
-first and then starts `npm install` as a new process, which loads the updated credentials.
-
 On Windows, authentication runs before npm installs packages from the private registry. On macOS, Linux, and CI, automatic authentication is skipped so your environment must supply the required credentials.
+
+## Why package installation uses a custom command
+
+A root `preinstall` hook cannot reliably authenticate npm before it accesses a private registry:
+
+1. In npm 7 through npm 11, the root `preinstall` hook ran after dependencies had already been installed, which was too late to provide registry credentials. npm 12 corrected that lifecycle ordering through [npm/cli#2660](https://github.com/npm/cli/issues/2660), but the correction is not available to projects that still use an earlier npm version.
+2. npm 12 runs root `preinstall` before fetching dependencies, but the active npm process loads `.npmrc` before invoking the hook. Credentials created or refreshed by `preinstall` are therefore not used by the dependency requests that follow it. This remaining behavior is tracked by [npm/cli#9853](https://github.com/npm/cli/issues/9853).
+
+The custom workflow provides the required process boundary. Running `npm run install-packages` first invokes its matching `preinstall-packages` hook to authenticate, then starts `npm install` as a new process. That new npm process loads the updated credentials before accessing the private registry.
+
+If [npm/cli#9853](https://github.com/npm/cli/issues/9853) is resolved and the fix is available, the standard `npm install` workflow can be enabled in future versions of this package without requiring the custom `install-packages` command.

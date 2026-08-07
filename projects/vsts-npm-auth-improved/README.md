@@ -26,6 +26,17 @@ npm run install-packages
 
 On Windows, authentication happens automatically before npm installs private packages. On macOS, Linux, and CI, the authentication step is skipped so your environment must supply the required credentials.
 
+## Why package installation uses a custom command
+
+A root `preinstall` hook cannot reliably authenticate npm before it accesses a private registry:
+
+1. In npm 7 through npm 11, the root `preinstall` hook ran after dependencies had already been installed, which was too late to provide registry credentials. npm 12 corrected that lifecycle ordering through [npm/cli#2660](https://github.com/npm/cli/issues/2660), but the correction is not available to projects that still use an earlier npm version.
+2. npm 12 runs root `preinstall` before fetching dependencies, but the active npm process loads `.npmrc` before invoking the hook. Credentials created or refreshed by `preinstall` are therefore not used by the dependency requests that follow it. This remaining behavior is tracked by [npm/cli#9853](https://github.com/npm/cli/issues/9853).
+
+The custom workflow provides the required process boundary. Running `npm run install-packages` first invokes its matching `preinstall-packages` hook to authenticate, then starts `npm install` as a new process. That new npm process loads the updated credentials before accessing the private registry.
+
+If [npm/cli#9853](https://github.com/npm/cli/issues/9853) is resolved and the fix is available, the standard `npm install` workflow can be enabled in future versions of this package without requiring the custom `install-packages` command.
+
 ## Configure a project for automatic npm authentication (manual setup)
 
 Add an npm script with the authentication choices explicitly set:
@@ -51,10 +62,6 @@ After adding the `registry-auth` command, connect it to a custom package-install
   }
 }
 ```
-
-Install packages with `npm run install-packages` instead of `npm install`. npm automatically runs `preinstall-packages` first; `install-packages` then starts a new npm process, which loads the credentials that authentication just wrote.
-
-A root `preinstall` hook is not sufficient for this workflow, even with npm 12. Although npm 12 runs the hook before dependency fetching, the parent npm process loaded `.npmrc` before the hook began, so a newly created or refreshed token is not used until a later npm invocation. This npm behavior is tracked by [npm/cli#9853](https://github.com/npm/cli/issues/9853). The custom `install-packages` command provides the required later invocation automatically.
 
 ## Use as a global module
 
