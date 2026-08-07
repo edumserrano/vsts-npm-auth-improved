@@ -108,7 +108,7 @@ async function getConfigPathsAsync(
 
 function parseConfigPaths(value: string): readonly string[] {
   const configPaths = value.split(",").map(configPath => configPath.trim());
-  if (configPaths.length === 0 || configPaths.some(configPath => configPath.length === 0)) {
+  if (configPaths.some(configPath => configPath.length === 0)) {
     throw new Error("Config paths must be a comma-separated list with no empty paths.");
   }
 
