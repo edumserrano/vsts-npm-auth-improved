@@ -2,12 +2,82 @@
 
 `vsts-npm-auth-improved` wraps and invokes [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) to authenticate npm with private Azure DevOps Artifacts registries on Windows. It adds:
 
+- ✅ An interactive setup to Configure one or more npm projects for automatic npm authentication.
 - ✅ A friendlier guided authentication experience.
 - ✅ Clearer success and error messages.
 - ✅ A one-time automatic retry that can recover from stale or expired tokens.
 - ✅ The same npm scripts remain safe to use on macOS, Linux, and CI.
 
-## Install and run
+## Configure a project for automatic npm authentication (interactive setup)
+
+From the directory containing one or more npm projects, run:
+
+```shell
+npm init vsts-npm-auth-improved
+```
+
+Follow the prompts to choose the projects and Azure DevOps Artifacts registry you want to use. The selected projects are updated so authentication runs automatically with either `npm install` (supported on npm 12 and later) or `npm run install-packages` (supported on npm 11 and earlier).
+
+After setup, install packages using the command selected during setup.
+
+For npm 12 and later:
+
+```shell
+npm install
+```
+
+For npm 11 and earlier:
+
+```shell
+npm run install-packages
+```
+
+On Windows, authentication happens automatically before npm installs private packages. On macOS, Linux, and CI, the authentication step is skipped so your environment must supply the required credentials.
+
+## Configure a project for automatic npm authentication (manual setup)
+
+Add an npm script with the authentication choices explicitly set:
+
+```json
+{
+  "scripts": {
+    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force"
+  }
+}
+```
+
+This command uses `npx` to resolve and run `vsts-npm-auth-improved` before the project's dependencies have been installed. The explicit `--registry=https://registry.npmjs.org/` option fetches the publicly available package from the public npm registry, which does not require authentication. This avoids the chicken-and-egg problem of needing working private-registry credentials before the tool that obtains those credentials can run.
+
+After adding the `registry-auth` command, connect it to package installation with one of the following pre-hook scripts.
+
+For npm 12 and later, use `preinstall` to authenticate automatically before `npm install` or `npm ci`:
+
+```json
+{
+  "scripts": {
+    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force",
+    "preinstall": "npm run registry-auth"
+  }
+}
+```
+
+This `preinstall` strategy requires npm 12 or later. In npm 7 through npm 11, the root `preinstall` script runs after dependencies have already been fetched and installed, which is too late to authenticate before npm accesses a private registry. npm 12 restores the hook so it runs before dependency installation. See [npm CLI issue #2660](https://github.com/npm/cli/issues/2660) for the history of this behavior.
+
+For npm 11 and earlier, use a custom package-installation command with its matching pre-hook script:
+
+```json
+{
+  "scripts": {
+    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force",
+    "preinstall-packages": "npm run registry-auth",
+    "install-packages": "npm install"
+  }
+}
+```
+
+Install packages with `npm run install-packages` instead of `npm install`. npm automatically runs `preinstall-packages` before `install-packages`, so authentication completes before npm accesses the private registry.
+
+## Use as a global module
 
 Install the CLI globally:
 
@@ -21,25 +91,11 @@ Run the interactive authentication flow:
 vsts-npm-auth-improved
 ```
 
-For an npm script, provide the project `.npmrc` and authentication choices explicitly:
-
-```json
-{
-  "scripts": {
-    "registry-auth": "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force"
-  }
-}
-```
-
-This command uses `npx` to resolve and run `vsts-npm-auth-improved` before the project's dependencies have been installed. The explicit `--registry=https://registry.npmjs.org/` option fetches the publicly available package from the public npm registry, which does not require authentication. This avoids the chicken-and-egg problem of needing working private-registry credentials before the tool that obtains those credentials can run.
-
-To configure your projects interactively, run:
+For a non-interactive authentication flow, provide all required options on the command line. The available options are described below. Example:
 
 ```shell
-npm init vsts-npm-auth-improved
+vsts-npm-auth-improved -c ./.npmrc --read --no-force
 ```
-
-See the [`create-vsts-npm-auth-improved` package documentation](https://www.npmjs.com/package/create-vsts-npm-auth-improved) for detailed setup options and guidance.
 
 ## Options
 
@@ -104,3 +160,15 @@ The command reads the global registry from every selected `.npmrc`, invokes [`vs
 ### macOS and Linux
 
 Automatic authentication is not available. The command warns that registry authentication must be configured manually, [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth) is not invoked, and exits successfully so a cross-platform npm script can continue.
+
+## Why this package was created
+
+`vsts-npm-auth-improved` was created to improve the developer experience while retaining the familiar `vsts-npm-auth` authentication flow on Windows. The interactive setup configures projects for automatic authentication, reducing the manual work required to get started. If token acquisition fails, the package retries once with forced acquisition unless `--force` was already supplied. This can recover automatically when a cached token is stale or expired.
+
+### Alternatives considered
+
+Each of the following alternatives has the advantage of supporting multiple platforms. However, none provided a sufficiently simple and reliable drop-in replacement for the way `vsts-npm-auth` was being used:
+
+- [`better-vsts-npm-auth`](https://github.com/zumwald/better-vsts-npm-auth) uses a two-part OAuth solution that requires an accompanying web service and an initial authorization flow in which a refresh token is copied back into the terminal. This setup was considered too involved for a drop-in replacement.
+- [`azdo-npm-auth`](https://github.com/johnnyreilly/azdo-npm-auth) can work, but automatic PAT acquisition requires the Azure CLI, an `az login`, and an Azure DevOps organization connected to Microsoft Entra ID. A PAT can instead be supplied manually, but either approach requires additional setup. See this [comparison from the evaluation](https://github.com/microsoft/ado-npm-auth/issues/69#issuecomment-3566949390).
+- [`ado-npm-auth`](https://github.com/microsoft/ado-npm-auth) is also cross-platform, but it could not authenticate against the organization used during the evaluation, even after trying `az login --allow-no-subscriptions`. The failure and the steps attempted are recorded in the same [issue comment](https://github.com/microsoft/ado-npm-auth/issues/69#issuecomment-3566949390).
