@@ -307,6 +307,10 @@ test("force token acquisition select prompt cancelled", async () => {
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests correcting an invalid configuration path at the prompt.
+ * Verifies that authentication proceeds only after a valid path is submitted.
+ */
 test("invalid configuration path can be corrected before successful completion", async () => {
   const invalidConfigPath = "./this-dir-does-not-exist-in-memfs/.npmrc";
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
@@ -339,6 +343,10 @@ test("invalid configuration path can be corrected before successful completion",
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests correcting a configuration file that does not define a registry.
+ * Verifies that the corrected file is validated and forwarded to authentication.
+ */
 test("configuration without a registry can be corrected before successful completion", async () => {
   const invalidConfigPath = "./config-without-registry/.npmrc";
   const validConfigPath = "./valid-config/.npmrc";
@@ -372,6 +380,10 @@ test("configuration without a registry can be corrected before successful comple
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests selecting Packaging (Read & Write) from the token scope prompt.
+ * Verifies that the read-only vsts-npm-auth flag is omitted.
+ */
 test("Packaging (Read & Write) can be selected from the prompt", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
@@ -398,6 +410,10 @@ test("Packaging (Read & Write) can be selected from the prompt", async () => {
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests selecting forced token acquisition from the prompt.
+ * Verifies that the force flag is forwarded to vsts-npm-auth.
+ */
 test("forced acquisition can be selected from the prompt", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
@@ -429,6 +445,10 @@ test("forced acquisition can be selected from the prompt", async () => {
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests completing every prompt with its non-default selection.
+ * Verifies that read-write scope and forced acquisition are forwarded together.
+ */
 test("complete non-default prompt flow selects read-write scope and forced acquisition", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();

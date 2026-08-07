@@ -1,5 +1,22 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`a failed registry takes precedence over existing credentials and is retried 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registries at https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/, https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the user's NPM configuration file (after retrying with forced token acquisition)
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
 exports[`a global registry amid unrelated npm settings is used 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
@@ -21,7 +38,7 @@ exports[`a scoped registry without a global registry is rejected 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
-▲  No registry entry found in the NPM configuration file
+▲  No registry entry found in the NPM configuration file Path: ./this-dir-exists-only-in-memfs/.npmrc
 │
 ■  Authentication with Azure DevOps NPM registry failed. 😞
 └  Operation failed. Exiting - maybe another time? 👋"
@@ -80,12 +97,21 @@ exports[`auth command help text (useOptionAlias: false) 1`] = `
 Usage: vsts-npm-auth-improved auth [options]
 Authenticate on Windows using vsts-npm-auth NPM package
 Options:
-  -c, --config-path <path>  Path to the .npmrc config file
-  --read                    Request a token with Packaging (Read) scope
-  --no-read                 Request a token with Packaging (Read & Write)
-  --force                   Force authentication token acquisition
-  --no-force                Do not force authentication token acquisition
-  -h, --help                display help for command"
+  -c, --config-path <paths>           Comma-separated paths to .npmrc config
+                                      files
+  -t, --target-config <path>          Path to the .npmrc that receives
+                                      credentials (default: ~/.npmrc)
+  -e, --expiration-minutes <minutes>  Token lifetime in whole minutes, up to
+                                      525600 (365 days); defaults to 129600 (90
+                                      days)
+  --read                              Request a token with Packaging (Read)
+                                      scope
+  --no-read                           Request a token with Packaging (Read &
+                                      Write)
+  --force                             Force authentication token acquisition
+  --no-force                          Do not force authentication token
+                                      acquisition
+  -h, --help                          display help for command"
 `;
 
 exports[`auth command help text (useOptionAlias: true) 1`] = `
@@ -93,12 +119,21 @@ exports[`auth command help text (useOptionAlias: true) 1`] = `
 Usage: vsts-npm-auth-improved auth [options]
 Authenticate on Windows using vsts-npm-auth NPM package
 Options:
-  -c, --config-path <path>  Path to the .npmrc config file
-  --read                    Request a token with Packaging (Read) scope
-  --no-read                 Request a token with Packaging (Read & Write)
-  --force                   Force authentication token acquisition
-  --no-force                Do not force authentication token acquisition
-  -h, --help                display help for command"
+  -c, --config-path <paths>           Comma-separated paths to .npmrc config
+                                      files
+  -t, --target-config <path>          Path to the .npmrc that receives
+                                      credentials (default: ~/.npmrc)
+  -e, --expiration-minutes <minutes>  Token lifetime in whole minutes, up to
+                                      525600 (365 days); defaults to 129600 (90
+                                      days)
+  --read                              Request a token with Packaging (Read)
+                                      scope
+  --no-read                           Request a token with Packaging (Read &
+                                      Write)
+  --force                             Force authentication token acquisition
+  --no-force                          Do not force authentication token
+                                      acquisition
+  -h, --help                          display help for command"
 `;
 
 exports[`auth command version (useOptionAlias: false) 1`] = `
@@ -226,6 +261,87 @@ exports[`combined read and force options are passed to vsts-npm-auth 1`] = `
 └  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
 `;
 
+exports[`comma-separated configuration paths are trimmed and forwarded in order 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registries at https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/, https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the user's NPM configuration file
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`empty configuration path entries are rejected: ''   '' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must be a comma-separated list with no empty paths.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`empty configuration path entries are rejected: '''' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must be a comma-separated list with no empty paths.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`empty configuration path entries are rejected: '',./client/.npmrc'' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must be a comma-separated list with no empty paths.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`empty configuration path entries are rejected: ''./client/.npmrc,'' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must be a comma-separated list with no empty paths.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`empty configuration path entries are rejected: ''./client/.npmrc,,./server/.npmrc'' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must be a comma-separated list with no empty paths.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`every configuration file is validated before authentication starts 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+▲  No registry entry found in the NPM configuration file Path: ./server/.npmrc
+│
+■  Authentication with Azure DevOps NPM registry failed. 😞
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`invalid expiration minutes are rejected: -1 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument '-1' is invalid. Expiration minutes must be a positive integer."`;
+
+exports[`invalid expiration minutes are rejected: 0 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument '0' is invalid. Expiration minutes must be a positive integer."`;
+
+exports[`invalid expiration minutes are rejected: 1.5 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument '1.5' is invalid. Expiration minutes must be a positive integer."`;
+
+exports[`invalid expiration minutes are rejected: 525601 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument '525601' is invalid. Expiration minutes must be between 1 and 525600."`;
+
+exports[`invalid expiration minutes are rejected: 9007199254740992 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument '9007199254740992' is invalid. Expiration minutes must be between 1 and 525600."`;
+
+exports[`invalid expiration minutes are rejected: Infinity 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument 'Infinity' is invalid. Expiration minutes must be a positive integer."`;
+
+exports[`invalid expiration minutes are rejected: abc 1`] = `"error: option '-e, --expiration-minutes <minutes>' argument 'abc' is invalid. Expiration minutes must be a positive integer."`;
+
 exports[`multiple unknown vsts-npm-auth output lines are displayed in order 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
@@ -250,7 +366,7 @@ exports[`npm configuration file not found 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
-▲  NPM configuration file not found. Is the filepath correct?
+▲  NPM configuration file not found. Is the filepath correct? Path: ./this-dir-does-not-exist-in-memfs/.npmrc
 │
 ■  Authentication with Azure DevOps NPM registry failed. 😞
 └  Operation failed. Exiting - maybe another time? 👋"
@@ -260,7 +376,7 @@ exports[`npm configuration file without a registry defined 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
-▲  No registry entry found in the NPM configuration file
+▲  No registry entry found in the NPM configuration file Path: ./this-dir-exists-only-in-memfs/.npmrc
 │
 ■  Authentication with Azure DevOps NPM registry failed. 😞
 └  Operation failed. Exiting - maybe another time? 👋"
@@ -337,13 +453,47 @@ exports[`retry with force token acquisition keeps arguments 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
-●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read), force: no)
+●  Attempting to authenticate with the Azure DevOps NPM registries at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/, https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read), force: no)
 │
-●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+●  Credentials will be saved to the NPM configuration file at ./credentials/.npmrc
 │
 ◇  Authentication attempt finished
 │
-●  New credentials were successfully obtained and written to the user's NPM configuration file (after retrying with forced token acquisition)
+●  New credentials were successfully obtained and written to the NPM configuration file at ./credentials/.npmrc (after retrying with forced token acquisition)
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`target and expiration auth options (useOptionAlias: false) 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the NPM configuration file at ./credentials/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the NPM configuration file at ./credentials/.npmrc
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`target and expiration auth options (useOptionAlias: true) 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the NPM configuration file at ./credentials/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the NPM configuration file at ./credentials/.npmrc
 │
 ◆  Authentication with Azure DevOps NPM registry completed successfully 😊
 │

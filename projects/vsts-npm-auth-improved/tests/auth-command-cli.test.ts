@@ -123,6 +123,157 @@ test.each([{ useConfigPathAlias: true }, { useConfigPathAlias: false }])(
 );
 
 /**
+ * Tests authentication with multiple comma-separated configuration paths.
+ * Verifies that surrounding whitespace is removed and path order is preserved.
+ */
+test("comma-separated configuration paths are trimmed and forwarded in order", async () => {
+  const firstConfigPath = "./client/.npmrc";
+  const secondConfigPath = "./server/.npmrc";
+  createInMemoryNpmrcFile({
+    vol,
+    path: firstConfigPath,
+    contents: "registry=https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/",
+  });
+  createInMemoryNpmrcFile({
+    vol,
+    path: secondConfigPath,
+    contents: "registry=https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/",
+  });
+  const stdoutWriteFunctionMock = mockStdoutWrite();
+  const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: {
+      from: "cli",
+      value: `  ${firstConfigPath} , ${secondConfigPath}  `,
+    },
+    read: { from: "cli", value: false },
+    force: { from: "cli", value: false },
+  });
+
+  expect(vstsNpmAuthMock.callCount).toBe(1);
+  expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
+    "-C",
+    `${firstConfigPath},${secondConfigPath}`,
+  ]);
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+  expect(process.exitCode).toBe(0);
+});
+
+/**
+ * Tests invalid empty entries in the comma-separated configuration path option.
+ * Verifies that validation fails before vsts-npm-auth is invoked.
+ */
+test.each([
+  { configPaths: "" },
+  { configPaths: ",./client/.npmrc" },
+  { configPaths: "./client/.npmrc," },
+  { configPaths: "./client/.npmrc,,./server/.npmrc" },
+  { configPaths: "   " },
+])("empty configuration path entries are rejected: '$configPaths'", async ({ configPaths }) => {
+  const stdoutWriteFunctionMock = mockStdoutWrite();
+  const execaFunctionMock = vi.mocked(execa);
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: { from: "cli", value: configPaths },
+    read: { from: "cli", value: false },
+    force: { from: "cli", value: false },
+  });
+
+  expect(execaFunctionMock).not.toHaveBeenCalled();
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+  expect(process.exitCode).toBe(1);
+});
+
+/**
+ * Tests the target configuration and expiration options through their long and short forms.
+ * Verifies that both forms map to the corresponding vsts-npm-auth arguments.
+ */
+test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
+  "target and expiration auth options (useOptionAlias: $useOptionAlias)",
+  async ({ useOptionAlias }) => {
+    const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+    const targetConfig = "./credentials/.npmrc";
+    const stdoutWriteFunctionMock = mockStdoutWrite();
+    const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
+
+    await AuthCommand.invokeAsync({
+      type: "auth",
+      configPath: { from: "cli", value: inMemoryNpmrcFile.path },
+      targetConfig: { from: "cli", value: targetConfig, useOptionAlias },
+      expirationMinutes: { from: "cli", value: 60, useOptionAlias },
+      read: { from: "cli", value: false },
+      force: { from: "cli", value: false },
+    });
+
+    expect(vstsNpmAuthMock.callCount).toBe(1);
+    expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
+      "-C",
+      inMemoryNpmrcFile.path,
+      "-T",
+      targetConfig,
+      "-E",
+      "60",
+    ]);
+    expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+    expect(process.exitCode).toBe(0);
+  },
+);
+
+/**
+ * Tests the maximum supported token expiration lifetime.
+ * Verifies that the boundary value is forwarded to vsts-npm-auth.
+ */
+test("the maximum expiration lifetime is forwarded", async () => {
+  const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+  const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: { from: "cli", value: inMemoryNpmrcFile.path },
+    expirationMinutes: { from: "cli", value: 525_600 },
+    read: { from: "cli", value: false },
+    force: { from: "cli", value: false },
+  });
+
+  expect(vstsNpmAuthMock.callCount).toBe(1);
+  expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
+    "-C",
+    inMemoryNpmrcFile.path,
+    "-E",
+    "525600",
+  ]);
+  expect(process.exitCode).toBe(0);
+});
+
+/**
+ * Tests invalid token expiration values.
+ * Verifies that malformed and out-of-range values fail before authentication starts.
+ */
+test.each(["0", "-1", "1.5", "abc", "Infinity", "525601", "9007199254740992"])(
+  "invalid expiration minutes are rejected: %s",
+  async expirationMinutes => {
+    const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+    const stderrWriteFunctionMock = mockStderrWrite();
+    const execaFunctionMock = vi.mocked(execa);
+
+    await AuthCommand.invokeAsync({
+      type: "auth",
+      configPath: { from: "cli", value: inMemoryNpmrcFile.path },
+      expirationMinutes: { from: "cli", value: expirationMinutes },
+      read: { from: "cli", value: false },
+      force: { from: "cli", value: false },
+    });
+
+    expect(execaFunctionMock).not.toHaveBeenCalled();
+    expect(stderrWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+    expect(process.exitCode).toBe(1);
+  },
+);
+
+/**
  * Tests the --read and --no-read options of the auth command.
  * Verifies that:
  * - vsts-npm-auth is called with the correct arguments
@@ -229,10 +380,7 @@ test.each<{ vstsNpmAuthResult: MockVstsNpmAuthOptions }>([
     });
 
     expect(vstsNpmAuthMock.callCount).toBe(1);
-    expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
-      "-C",
-      inMemoryNpmrcFile.path,
-    ]);
+    expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs(["-C", inMemoryNpmrcFile.path]);
     expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
     expect(process.exitCode).toBe(0);
   },
@@ -270,10 +418,7 @@ test.each<{ vstsNpmAuthResult: MockVstsNpmAuthOptions }>([
     });
 
     expect(vstsNpmAuthMock.callCount).toBe(1);
-    expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
-      "-C",
-      inMemoryNpmrcFile.path,
-    ]);
+    expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs(["-C", inMemoryNpmrcFile.path]);
     expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
     expect(process.exitCode).toBe(1);
   },
@@ -343,6 +488,74 @@ test("retries once with force token acquisition when vsts-npm-auth returns could
 });
 
 /**
+ * Tests mixed output containing both existing credentials and a registry authentication failure.
+ * Verifies that the failure takes precedence and triggers one forced retry.
+ */
+test("a failed registry takes precedence over existing credentials and is retried", async () => {
+  const firstConfigPath = "./client/.npmrc";
+  const secondConfigPath = "./server/.npmrc";
+  createInMemoryNpmrcFile({
+    vol,
+    path: firstConfigPath,
+    contents: "registry=https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/",
+  });
+  createInMemoryNpmrcFile({
+    vol,
+    path: secondConfigPath,
+    contents: "registry=https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/",
+  });
+  const stdoutWriteFunctionMock = mockStdoutWrite();
+  const vstsNpmAuthMock = mockVstsNpmAuth([
+    "mixed-existing-credentials-and-auth-failure",
+    "credentials-obtained",
+  ]);
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: { from: "cli", value: `${firstConfigPath},${secondConfigPath}` },
+    read: { from: "cli", value: false },
+    force: { from: "cli", value: false },
+  });
+
+  expect(vstsNpmAuthMock.callCount).toBe(2);
+  expect(vstsNpmAuthMock).toHaveBeenNthCalledWith(
+    1,
+    "npx",
+    [
+      "--yes",
+      "--registry=https://registry.npmjs.org/",
+      "vsts-npm-auth@latest",
+      "-C",
+      `${firstConfigPath},${secondConfigPath}`,
+    ],
+    {
+      lines: true,
+      all: true,
+      reject: false,
+    },
+  );
+  expect(vstsNpmAuthMock).toHaveBeenNthCalledWith(
+    2,
+    "npx",
+    [
+      "--yes",
+      "--registry=https://registry.npmjs.org/",
+      "vsts-npm-auth@latest",
+      "-C",
+      `${firstConfigPath},${secondConfigPath}`,
+      "-F",
+    ],
+    {
+      lines: true,
+      all: true,
+      reject: false,
+    },
+  );
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+  expect(process.exitCode).toBe(0);
+});
+
+/**
  * Tests that the automatic retry with force token acquisition preserves the original CLI arguments.
  * Verifies that:
  * - The retry includes the -F flag while keeping other arguments like -R (read-only scope)
@@ -351,7 +564,11 @@ test("retries once with force token acquisition when vsts-npm-auth returns could
  * - vsts-npm-auth-improved auth --config-path <path> --read --no-force
  */
 test("retry with force token acquisition keeps arguments", async () => {
-  const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+  const firstConfigPath = "./client/.npmrc";
+  const secondConfigPath = "./server/.npmrc";
+  createInMemoryNpmrcFile({ vol, path: firstConfigPath });
+  createInMemoryNpmrcFile({ vol, path: secondConfigPath });
+  const targetConfig = "./credentials/.npmrc";
   const stdoutWriteFunctionMock = mockStdoutWrite();
   const vstsNpmAuthMock = mockVstsNpmAuth(["could-not-get-auth-token", "credentials-obtained"]);
 
@@ -359,8 +576,10 @@ test("retry with force token acquisition keeps arguments", async () => {
     type: "auth",
     configPath: {
       from: "cli",
-      value: inMemoryNpmrcFile.path,
+      value: `${firstConfigPath},${secondConfigPath}`,
     },
+    targetConfig: { from: "cli", value: targetConfig },
+    expirationMinutes: { from: "cli", value: 120 },
     read: { from: "cli", value: true },
     force: { from: "cli", value: false },
   });
@@ -374,7 +593,11 @@ test("retry with force token acquisition keeps arguments", async () => {
       "--registry=https://registry.npmjs.org/",
       "vsts-npm-auth@latest",
       "-C",
-      inMemoryNpmrcFile.path,
+      `${firstConfigPath},${secondConfigPath}`,
+      "-T",
+      targetConfig,
+      "-E",
+      "120",
       "-R",
     ],
     {
@@ -391,7 +614,11 @@ test("retry with force token acquisition keeps arguments", async () => {
       "--registry=https://registry.npmjs.org/",
       "vsts-npm-auth@latest",
       "-C",
-      inMemoryNpmrcFile.path,
+      `${firstConfigPath},${secondConfigPath}`,
+      "-T",
+      targetConfig,
+      "-E",
+      "120",
       "-R",
       "-F",
     ],
@@ -532,6 +759,30 @@ test("npm configuration file without a registry defined", async () => {
 });
 
 /**
+ * Tests validation of every supplied configuration file.
+ * Verifies that one invalid file prevents authentication for the complete ordered set.
+ */
+test("every configuration file is validated before authentication starts", async () => {
+  const validConfigPath = "./client/.npmrc";
+  const invalidConfigPath = "./server/.npmrc";
+  createInMemoryNpmrcFile({ vol, path: validConfigPath });
+  createInMemoryNpmrcFile({ vol, path: invalidConfigPath, contents: "registry=   " });
+  const stdoutWriteFunctionMock = mockStdoutWrite();
+  const execaFunctionMock = vi.mocked(execa);
+
+  await AuthCommand.invokeAsync({
+    type: "auth",
+    configPath: { from: "cli", value: `${validConfigPath},${invalidConfigPath}` },
+    read: { from: "cli", value: false },
+    force: { from: "cli", value: false },
+  });
+
+  expect(execaFunctionMock).not.toHaveBeenCalled();
+  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+  expect(process.exitCode).toBe(1);
+});
+
+/**
  * Tests the error handling when executing the auth command.
  * Verifies that:
  * - When an unexpected error is thrown during the auth command execution,
@@ -577,6 +828,10 @@ test("unexpected errors are handled", async () => {
   expect(process.exitCode).toBe(1);
 });
 
+/**
+ * Tests a failed authentication request that was already forced.
+ * Verifies that the command does not repeat an explicitly forced request.
+ */
 test("an initial forced authentication failure does not retry", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
@@ -594,15 +849,15 @@ test("an initial forced authentication failure does not retry", async () => {
 
   expect(vstsNpmAuthMock.callCount).toBe(1);
   expect(vstsNpmAuthMock.mock.calls.slice(1)).toHaveLength(0);
-  expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs([
-    "-C",
-    inMemoryNpmrcFile.path,
-    "-F",
-  ]);
+  expect(vstsNpmAuthMock).toHaveBeenCalledWithVstsNpmAuthArgs(["-C", inMemoryNpmrcFile.path, "-F"]);
   expect(process.exitCode).toBe(1);
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests using read-only scope and forced acquisition together.
+ * Verifies that both flags are forwarded to vsts-npm-auth.
+ */
 test("combined read and force options are passed to vsts-npm-auth", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
@@ -630,6 +885,10 @@ test("combined read and force options are passed to vsts-npm-auth", async () => 
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests multiple unrecognized lines returned by vsts-npm-auth.
+ * Verifies that the command preserves their original display order.
+ */
 test("multiple unknown vsts-npm-auth output lines are displayed in order", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
@@ -676,6 +935,10 @@ test("multiple unknown vsts-npm-auth output lines are displayed in order", async
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests an unexpected Error with a nested Error cause.
+ * Verifies that the actionable cause is included in the reported failure.
+ */
 test("an unexpected Error reports its Error cause", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
@@ -717,6 +980,10 @@ test("an unexpected Error reports its Error cause", async () => {
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests an unexpected rejection whose value is not an Error instance.
+ * Verifies that the rejection is normalized into a terminal command failure.
+ */
 test("an unexpected non-Error rejection is handled", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
   const stdoutWriteFunctionMock = mockStdoutWrite();
@@ -754,11 +1021,14 @@ test("an unexpected non-Error rejection is handled", async () => {
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests an npm configuration containing only a scoped registry.
+ * Verifies that the missing global registry is rejected before authentication starts.
+ */
 test("a scoped registry without a global registry is rejected", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({
     vol,
-    contents:
-      "@example:registry=https://pkgs.dev.azure.com/org/_packaging/scoped/npm/registry/",
+    contents: "@example:registry=https://pkgs.dev.azure.com/org/_packaging/scoped/npm/registry/",
   });
   const stdoutWriteFunctionMock = mockStdoutWrite();
   const execaFunctionMock = vi.mocked(execa);
@@ -779,6 +1049,10 @@ test("a scoped registry without a global registry is rejected", async () => {
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests finding a global registry among unrelated npm settings.
+ * Verifies that the registry is accepted and authentication proceeds successfully.
+ */
 test("a global registry amid unrelated npm settings is used", async () => {
   const registry = "https://pkgs.dev.azure.com/org/_packaging/global/npm/registry/";
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({
@@ -811,6 +1085,10 @@ test("a global registry amid unrelated npm settings is used", async () => {
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests Commander handling for an unknown command.
+ * Verifies that cliAsync captures the usage error without invoking authentication.
+ */
 test("an unknown Commander command is captured through cliAsync", async () => {
   const stdoutWriteFunctionMock = mockStdoutWrite();
   const stderrWriteFunctionMock = mockStderrWrite();
@@ -825,6 +1103,10 @@ test("an unknown Commander command is captured through cliAsync", async () => {
   expect(stderrWriteFunctionMock.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests a failure while presenting the final command result.
+ * Verifies that the top-level CLI boundary converts the thrown value into a failed exit code.
+ */
 test("a top-level terminal failure is handled", async () => {
   const execaFunctionMock = vi.mocked(execa);
   const unexpectedValue = "Unexpected top-level terminal failure";
@@ -838,11 +1120,7 @@ test("a top-level terminal failure is handled", async () => {
   expect(execaFunctionMock.mock.calls.length).toBe(0);
   expect(process.exitCode).toBe(1);
   expect(consoleLog).toHaveBeenNthCalledWith(1);
-  expect(consoleLog).toHaveBeenNthCalledWith(
-    2,
-    "🚨 Unexpected error:",
-    unexpectedValue,
-  );
+  expect(consoleLog).toHaveBeenNthCalledWith(2, "🚨 Unexpected error:", unexpectedValue);
 });
 
 afterAll(() => {

@@ -31,10 +31,9 @@ function createProgram(): Command {
       `
 Examples:
   $ vsts-npm-auth-improved
-  $ vsts-npm-auth-improved init
   $ vsts-npm-auth-improved auth
-  $ vsts-npm-auth-improved auth --config-path ~/.npmrc --force-refresh
-  $ vsts-npm-auth-improved auth --config-path ~/.npmrc --write-token
+  $ vsts-npm-auth-improved auth --config-path ./.npmrc --read --no-force
+  $ vsts-npm-auth-improved auth --config-path ./client/.npmrc,./server/.npmrc --read --no-force
 `,
     );
   addAuthCommand(program);

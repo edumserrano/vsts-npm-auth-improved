@@ -43,17 +43,19 @@ See the [`create-vsts-npm-auth-improved` package documentation](https://www.npmj
 
 ## Options
 
-| Option                     | Description and default                                                                                 |
-| -------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `-c, --config-path <path>` | Project `.npmrc` containing the registry. When omitted, the CLI prompts with `./.npmrc` as the default. |
-| `--read`                   | Requests a token with Packaging (Read) scope.                                                           |
-| `--no-read`                | Requests a token with Packaging (Read & Write) scope.                                                   |
-| `--force`                  | Forces token acquisition even when an existing token is still valid.                                    |
-| `--no-force`               | Allows reuse of an existing valid token. A failed request is retried once with forced acquisition.      |
-| `-h, --help`               | Displays command help.                                                                                  |
-| `-v, --version`            | Displays the `vsts-npm-auth-improved` package version.                                                  |
+| Option                               | Description and default                                                                                                                                            |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `-c, --config-path <paths>`          | One project `.npmrc`, or a comma-separated list. Each file must contain a global `registry`. When omitted, the CLI prompts for one path, defaulting to `./.npmrc`. |
+| `-t, --target-config <path>`         | `.npmrc` that receives generated credentials. Defaults to the user npm configuration, normally `~/.npmrc`.                                                         |
+| `-e, --expiration-minutes <minutes>` | Positive integer lifetime for a newly acquired token, up to 525,600 minutes (365 days). Defaults to 129,600 minutes (90 days).                                     |
+| `--read`                             | Requests a token with Packaging (Read) scope.                                                                                                                      |
+| `--no-read`                          | Requests a token with Packaging (Read & Write) scope.                                                                                                              |
+| `--force`                            | Forces token acquisition even when an existing token is still valid.                                                                                               |
+| `--no-force`                         | Allows reuse of an existing valid token. A failed request is retried once with forced acquisition.                                                                 |
+| `-h, --help`                         | Displays command help.                                                                                                                                             |
+| `-v, --version`                      | Displays the `vsts-npm-auth-improved` package version.                                                                                                             |
 
-When config path, token scope, or force behavior is omitted on Windows, the CLI prompts for that value. Newly acquired tokens expire in 90 days.
+When config path, token scope, or force behavior is omitted on Windows, the CLI prompts for that value.
 
 ## Examples
 
@@ -69,6 +71,24 @@ Force a new read-only token:
 vsts-npm-auth-improved -c ./.npmrc --read --force
 ```
 
+Authenticate the registries from multiple project configurations, in order:
+
+```shell
+vsts-npm-auth-improved -c ./client/.npmrc,./server/.npmrc --read --no-force
+```
+
+Write credentials to a custom npm configuration file:
+
+```shell
+vsts-npm-auth-improved -c ./.npmrc --read --no-force --target-config ./credentials/.npmrc
+```
+
+Request a new token with a 60-minute lifetime:
+
+```shell
+vsts-npm-auth-improved -c ./.npmrc --read --force --expiration-minutes 60
+```
+
 ## Platform behavior
 
 ### CI environments
@@ -79,7 +99,7 @@ CI environment detection is done by the [ci-info](https://www.npmjs.com/package/
 
 ### Windows
 
-The command reads the global registry from the selected `.npmrc`, invokes [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth), and writes credentials to the user npm configuration at `~/.npmrc`. Failed token acquisition is retried once with forced acquisition unless `--force` was supplied.
+The command reads the global registry from every selected `.npmrc`, invokes [`vsts-npm-auth`](https://www.npmjs.com/package/vsts-npm-auth), and writes credentials to the target npm configuration. The target defaults to the user npm configuration at `~/.npmrc` and can be changed with `--target-config`. Failed token acquisition is retried once with forced acquisition unless `--force` was supplied.
 
 ### macOS and Linux
 

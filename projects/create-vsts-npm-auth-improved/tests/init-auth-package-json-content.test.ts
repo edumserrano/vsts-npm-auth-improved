@@ -155,6 +155,10 @@ test.each([
   },
 );
 
+/**
+ * Tests selecting the custom install-packages compatibility strategy.
+ * Verifies that its managed scripts are created while unrelated scripts are preserved.
+ */
 test("creates the custom install-packages compatibility scripts when selected", async () => {
   const scenario = await runSinglePackageScenarioAsync({
     name: "package-json-custom-install-packages",
@@ -172,6 +176,10 @@ test("creates the custom install-packages compatibility scripts when selected", 
   expect(scenario.output.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests changing from custom install-packages scripts to the standard npm install strategy.
+ * Verifies that stale hooks are replaced while existing preinstall work remains chained.
+ */
 test("switches from custom install scripts to standard npm install without stale hooks", async () => {
   const scenario = await runSinglePackageScenarioAsync({
     name: "package-json-custom-to-standard",
@@ -196,6 +204,10 @@ test("switches from custom install scripts to standard npm install without stale
   expect(scenario.output.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests changing from standard npm install scripts to the custom compatibility strategy.
+ * Verifies that managed hooks are replaced and existing preinstall work is restored.
+ */
 test("switches to custom install scripts and restores chained preinstall work", async () => {
   const scenario = await runSinglePackageScenarioAsync({
     name: "package-json-standard-to-custom",
