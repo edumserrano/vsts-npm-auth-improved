@@ -34,7 +34,7 @@ type GetAuthOptionsResult = GetAuthOptionsSuccess | GetAuthOptionsCancelled;
 
 type GetAuthOptionsSuccess = {
   readonly promptCancelled: false;
-  readonly configPath: string;
+  readonly configPaths: readonly string[];
   readonly tokenScope: AuthOption<TokenScope>;
   readonly forceOption: AuthOption<ForceAcquisitionOption>;
 };
@@ -52,8 +52,8 @@ type AuthCommandOptionsFromCli = {
 export async function getAuthOptionsAsync(
   options: AuthCommandOptionsFromCli,
 ): Promise<GetAuthOptionsResult> {
-  const configPath = await getConfigPathAsync(options);
-  if (prompts.isCancel(configPath)) {
+  const configPaths = await getConfigPathsAsync(options);
+  if (prompts.isCancel(configPaths)) {
     return { promptCancelled: true };
   }
 
@@ -69,15 +69,17 @@ export async function getAuthOptionsAsync(
 
   return {
     promptCancelled: false,
-    configPath,
+    configPaths,
     tokenScope,
     forceOption,
   };
 }
 
-async function getConfigPathAsync(options: AuthCommandOptionsFromCli): Promise<string | symbol> {
+async function getConfigPathsAsync(
+  options: AuthCommandOptionsFromCli,
+): Promise<readonly string[] | symbol> {
   if (typeof options.configPath !== "undefined") {
-    return options.configPath;
+    return parseConfigPaths(options.configPath);
   }
 
   const configPathPromptResult = await prompts.text({
@@ -97,7 +99,20 @@ async function getConfigPathAsync(options: AuthCommandOptionsFromCli): Promise<s
       return getRegistryErrorMessage(getRegistryResult);
     },
   });
-  return configPathPromptResult;
+  if (prompts.isCancel(configPathPromptResult)) {
+    return configPathPromptResult;
+  }
+
+  return [configPathPromptResult];
+}
+
+function parseConfigPaths(value: string): readonly string[] {
+  const configPaths = value.split(",").map(configPath => configPath.trim());
+  if (configPaths.length === 0 || configPaths.some(configPath => configPath.length === 0)) {
+    throw new Error("Config paths must be a comma-separated list with no empty paths.");
+  }
+
+  return configPaths;
 }
 
 const TOKEN_SCOPE_OPTIONS: PromptOption<TokenScope>[] = [

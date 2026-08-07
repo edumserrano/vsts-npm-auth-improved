@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, InvalidArgumentError } from "commander";
 import { isCI } from "ci-info";
 import {
   isVstsNpmAuthSuccessful,
@@ -18,7 +18,17 @@ export function addAuthCommand(program: Command): Command {
   return program
     .command("auth", { isDefault: true })
     .description("Authenticate on Windows using vsts-npm-auth NPM package")
-    .option("-c, --config-path <path>", "Path to the .npmrc config file")
+    .option("-c, --config-path <paths>", "Comma-separated paths to .npmrc config files")
+    .option("-N, --non-interactive", "Prevent vsts-npm-auth credential prompts")
+    .option(
+      "-T, --target-config <path>",
+      "Path to the .npmrc that receives credentials (default: ~/.npmrc)",
+    )
+    .option(
+      "-E, --expiration-minutes <minutes>",
+      "Positive integer token lifetime (default: 129600 minutes)",
+      parseExpirationMinutes,
+    )
     .option("--read", "Request a token with Packaging (Read) scope")
     .option("--no-read", "Request a token with Packaging (Read & Write)")
     .option("--force", "Force authentication token acquisition")
@@ -28,6 +38,9 @@ export function addAuthCommand(program: Command): Command {
 
 type AuthCommandOptions = {
   readonly configPath?: string;
+  readonly nonInteractive?: boolean;
+  readonly targetConfig?: string;
+  readonly expirationMinutes?: number;
   readonly read?: boolean;
   readonly force?: boolean;
 };
@@ -63,30 +76,47 @@ async function handleAuthCommandAsync(options: AuthCommandOptions, _: Command): 
     }
 
     const {
-      configPath: configPathResult,
+      configPaths,
       tokenScope: tokenScopeResult,
       forceOption: forceOptionResult,
     } = authOptionsResult;
-    const getRegistryResult = getRegistryFromConfigFile(configPathResult);
-    if (getRegistryResult.type !== "registry-found") {
-      const errorMessage = getRegistryErrorMessage(getRegistryResult);
-      prompts.log.warn(errorMessage);
-      prompts.log.error(PromptMessages.AuthFailed);
-      prompts.cancel(PromptMessages.Cancel);
-      process.exitCode = 1;
-      return;
+    const registries: string[] = [];
+    for (const configPath of configPaths) {
+      const getRegistryResult = getRegistryFromConfigFile(configPath);
+      if (getRegistryResult.type !== "registry-found") {
+        const errorMessage = getRegistryErrorMessage(getRegistryResult);
+        prompts.log.warn(`${errorMessage} Path: ${configPath}`);
+        prompts.log.error(PromptMessages.AuthFailed);
+        prompts.cancel(PromptMessages.Cancel);
+        process.exitCode = 1;
+        return;
+      }
+
+      registries.push(getRegistryResult.registry);
     }
 
+    const registrySummary =
+      registries.length === 1
+        ? `registry at ${registries[0]}`
+        : `registries at ${registries.join(", ")}`;
     prompts.log.info(
-      `Attempting to authenticate with the Azure DevOps NPM registry at ${getRegistryResult.registry} (scope: ${tokenScopeResult.asFriendlyText}, force: ${forceOptionResult.asFriendlyText})`,
+      `Attempting to authenticate with the Azure DevOps NPM ${registrySummary} (scope: ${tokenScopeResult.asFriendlyText}, force: ${forceOptionResult.asFriendlyText})`,
     );
-    prompts.log.info(`Credentials will be saved to the user's NPM configuration file at ~/.npmrc`);
+    const credentialsDestination = getCredentialsDestination(options.targetConfig);
+    const credentialsDestinationForSave =
+      typeof options.targetConfig === "undefined"
+        ? `${credentialsDestination} at ~/.npmrc`
+        : credentialsDestination;
+    prompts.log.info(`Credentials will be saved to ${credentialsDestinationForSave}`);
     spinnerPrompt = prompts.spinner();
     spinnerPrompt.start(`Authenticating`);
     const { vstsNpmAuthResult, retriedWithForce } = await runVstsNpmAuthWithRetryAsync(
-      configPathResult,
+      configPaths,
       tokenScopeResult.value,
       forceOptionResult.value,
+      options.nonInteractive,
+      options.targetConfig,
+      options.expirationMinutes,
       spinnerPrompt,
     );
     switch (vstsNpmAuthResult.type) {
@@ -97,13 +127,12 @@ async function handleAuthCommandAsync(options: AuthCommandOptions, _: Command): 
       }
       case "already-have-credentials": {
         spinnerPrompt.stop(PromptMessages.AuthAttemptFinished);
-        prompts.log.info("Valid credentials already exist in the user's NPM configuration file");
+        prompts.log.info(`Valid credentials already exist in ${credentialsDestination}`);
         break;
       }
       case "credentials-obtained": {
         spinnerPrompt.stop(PromptMessages.AuthAttemptFinished);
-        const credentialsObtainedMessage =
-          "New credentials were successfully obtained and written to the user's NPM configuration file";
+        const credentialsObtainedMessage = `New credentials were successfully obtained and written to ${credentialsDestination}`;
         const message = retriedWithForce
           ? `${credentialsObtainedMessage} (after retrying with forced token acquisition)`
           : credentialsObtainedMessage;
@@ -172,19 +201,44 @@ function getErrorMessage(error: unknown): string {
   return "";
 }
 
+function parseExpirationMinutes(value: string): number {
+  if (!/^[1-9]\d*$/.test(value)) {
+    throw new InvalidArgumentError("Expiration minutes must be a positive integer.");
+  }
+
+  const expirationMinutes = Number(value);
+  if (!Number.isSafeInteger(expirationMinutes)) {
+    throw new InvalidArgumentError("Expiration minutes must be a safe positive integer.");
+  }
+
+  return expirationMinutes;
+}
+
+function getCredentialsDestination(targetConfig: string | undefined): string {
+  return typeof targetConfig === "undefined"
+    ? "the user's NPM configuration file"
+    : `the NPM configuration file at ${targetConfig}`;
+}
+
 type VstsNpmAuthWithRetryResult = {
   readonly vstsNpmAuthResult: VstsNpmAuthResult;
   readonly retriedWithForce: boolean;
 };
 
 async function runVstsNpmAuthWithRetryAsync(
-  configPath: string,
+  configPaths: readonly string[],
   tokenScope: TokenScope,
   forceOption: ForceAcquisitionOption,
+  nonInteractive: boolean | undefined,
+  targetConfig: string | undefined,
+  expirationMinutes: number | undefined,
   spinnerPrompt: ReturnType<typeof prompts.spinner>,
 ): Promise<VstsNpmAuthWithRetryResult> {
   const vstsNpmAuthOptions: VstsNpmAuthOptions = {
-    config: [configPath],
+    config: configPaths,
+    nonInteractive,
+    targetConfig,
+    expirationMinutes,
     readOnly: tokenScope === "read",
     force: forceOption === "force-acquisition",
   };
