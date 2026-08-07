@@ -11,11 +11,9 @@ export const DEFAULT_REGISTRY = "https://registry.example.test/";
 
 const EXPECTED_REQUIRED_SCRIPTS = {
   "registry-auth":
-    "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved@alpha -c ./.npmrc --read --no-force",
+    "npx --yes --registry=https://registry.npmjs.org/ vsts-npm-auth-improved -c ./.npmrc --read --no-force",
   preinstall: "npm run registry-auth",
 } as const;
-
-const EXPECTED_VSTS_NPM_AUTH_IMPROVED_SPEC = "alpha";
 
 type PackageJsonFixtureOverrides = Readonly<JsonObject>;
 
@@ -44,7 +42,7 @@ export function configuredPackageJsonContent(
   return packageJsonContent({
     scripts: EXPECTED_REQUIRED_SCRIPTS,
     devDependencies: {
-      "vsts-npm-auth-improved": EXPECTED_VSTS_NPM_AUTH_IMPROVED_SPEC,
+      "vsts-npm-auth-improved": "latest",
     },
     ...overrides,
   });
