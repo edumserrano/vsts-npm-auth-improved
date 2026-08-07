@@ -74,6 +74,8 @@ test.each([{ useOptionAlias: true }, { useOptionAlias: false }])(
  */
 test("the maximum expiration lifetime is forwarded", async () => {
   const inMemoryNpmrcFile = createInMemoryNpmrcFile({ vol });
+  // This is not needed to assert or control mock behavior; it only suppresses CLI output in the test runner.
+  mockStdoutWrite();
   const vstsNpmAuthMock = mockVstsNpmAuth("credentials-obtained");
 
   await AuthCommand.invokeAsync({
