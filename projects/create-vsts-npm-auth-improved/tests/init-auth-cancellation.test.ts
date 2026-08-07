@@ -76,6 +76,10 @@ test("cancels at package selection without changing the filesystem", async () =>
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests cancellation at the package installation strategy prompt.
+ * Verifies that cancellation leaves all project files unchanged.
+ */
 test("cancels at installation strategy selection without changing the filesystem", async () => {
   const project = await NpmProject.createAsync("installation-strategy-cancelled");
   const originalPackageJson = packageJsonContent();

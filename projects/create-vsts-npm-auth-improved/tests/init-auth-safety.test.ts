@@ -284,6 +284,10 @@ test("surfaces a targeted write failure through the persistence spinner", async 
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests an .npmrc write failure after its package.json update succeeds.
+ * Verifies that the completed package.json write is preserved and the failure is reported.
+ */
 test("reports an .npmrc write failure after package.json is persisted", async () => {
   const project = await NpmProject.createAsync("npmrc-write-failure");
   await project.createPackageAsync({ packageJson: originalPackageJson });
@@ -312,6 +316,10 @@ test("reports an .npmrc write failure after package.json is persisted", async ()
   expect(output.normalizedOutput).toMatchSnapshot();
 });
 
+/**
+ * Tests a write failure in a later selected package.
+ * Verifies that earlier package writes remain complete while the failed package stays unmodified.
+ */
 test("reports a later write failure after preserving earlier completed writes", async () => {
   const project = await NpmProject.createAsync("later-write-failure");
   await project.createPackageAsync({
