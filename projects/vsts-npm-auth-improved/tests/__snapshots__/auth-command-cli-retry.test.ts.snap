@@ -1,0 +1,84 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`a failed registry takes precedence over existing credentials and is retried 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registries at https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/, https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the user's NPM configuration file (after retrying with forced token acquisition)
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`an initial forced authentication failure does not retry 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: yes)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+▲  Failed to get an authentication token.
+│
+■  Authentication with Azure DevOps NPM registry failed. 😞
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`retries once but still fails 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+▲  Failed to get an authentication token.
+│
+■  Authentication with Azure DevOps NPM registry failed. 😞
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`retries once with force token acquisition when vsts-npm-auth returns could-not-get-auth-token 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the user's NPM configuration file (after retrying with forced token acquisition)
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`retry with force token acquisition keeps arguments 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registries at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/, https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read), force: no)
+│
+●  Credentials will be saved to the NPM configuration file at ./credentials/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the NPM configuration file at ./credentials/.npmrc (after retrying with forced token acquisition)
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;

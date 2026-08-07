@@ -1,0 +1,161 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`an unexpected Error reports its Error cause 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+■  Inner test cause
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`an unexpected non-Error rejection is handled 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+■
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`auth failures cases (vsts-npm-auth returns 'config-file-not-found') 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+▲  NPM configuration file not found. Is the filepath correct?
+│
+■  Authentication with Azure DevOps NPM registry failed. 😞
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`auth failures cases (vsts-npm-auth returns 'credentials-not-required') 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+▲  The registry in the NPM configuration file doesn't require authentication
+│
+■  Authentication with Azure DevOps NPM registry failed. 😞
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`auth failures cases (vsts-npm-auth returns 'no-registry-entry-found') 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+▲  No registry entry found in the NPM configuration file.
+│
+■  Authentication with Azure DevOps NPM registry failed. 😞
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`auth failures cases (vsts-npm-auth returns 'unknown') 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  Some unexpected output
+│
+■  Authentication with Azure DevOps NPM registry failed. 😞
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`auth success cases (vsts-npm-auth returns 'already-have-credentials') 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  Valid credentials already exist in the user's NPM configuration file
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`auth success cases (vsts-npm-auth returns 'credentials-obtained') 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the user's NPM configuration file
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`multiple unknown vsts-npm-auth output lines are displayed in order 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  First unknown output line
+│
+●  Second unknown output line
+│
+●  Third unknown output line
+│
+■  Authentication with Azure DevOps NPM registry failed. 😞
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`unexpected errors are handled 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+■  Unexpected test error
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
