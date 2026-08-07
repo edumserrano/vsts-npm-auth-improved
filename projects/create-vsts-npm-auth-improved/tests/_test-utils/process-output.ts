@@ -13,6 +13,14 @@ const packageVersionAfterName = new RegExp(
   "g",
 );
 const standalonePackageVersion = new RegExp(`^${semanticVersionPattern}$`, "gm");
+const carriageReturn = "\r";
+const lineFeed = "\n";
+const unicodeLineSeparator = "\u2028";
+const unicodeParagraphSeparator = "\u2029";
+const newlinePattern = new RegExp(
+  `${carriageReturn}${lineFeed}?|${unicodeLineSeparator}|${unicodeParagraphSeparator}`,
+  "g",
+);
 
 /**
  * Captures stdout and optional stderr for complete terminal snapshots. It
@@ -107,7 +115,7 @@ function normalizeOutput(
     .map(([chunk]) => toText(chunk))
     .join("");
 
-  let normalized = output.replace(/\r\n?|\u2028|\u2029/g, "\n");
+  let normalized = output.replace(newlinePattern, lineFeed);
   normalized = stripTerminalControlSequences(normalized);
   normalized = stripNondeterministicSpinnerFrames(normalized);
   normalized = normalizeColorDrivenMultiselectRedraws(normalized);
