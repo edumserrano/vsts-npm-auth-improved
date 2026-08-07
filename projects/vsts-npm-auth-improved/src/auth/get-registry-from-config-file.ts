@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { parse } from "ini";
-import { PromptMessages } from "./prompts-utils";
+import { PromptMessages } from "./prompts-utils.js";
 
 type GetRegistryResult = RegistryFoundResult | GetRegistryErrorResult;
 

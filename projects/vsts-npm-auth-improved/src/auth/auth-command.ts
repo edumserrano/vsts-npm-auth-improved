@@ -5,14 +5,14 @@ import {
   runVstsNpmAuthAsync,
   VstsNpmAuthOptions,
   VstsNpmAuthResult,
-} from "./vsts-npm-auth";
-import { PromptMessages, prompts } from "./prompts-utils";
-import { packageName, packageVersion } from "../package-json-utils";
-import { ForceAcquisitionOption, getAuthOptionsAsync, TokenScope } from "./get-auth-options";
+} from "./vsts-npm-auth.js";
+import { PromptMessages, prompts } from "./prompts-utils.js";
+import { packageName, packageVersion } from "../package-json-utils.js";
+import { ForceAcquisitionOption, getAuthOptionsAsync, TokenScope } from "./get-auth-options.js";
 import {
   getRegistryErrorMessage,
   getRegistryFromConfigFile,
-} from "./get-registry-from-config-file";
+} from "./get-registry-from-config-file.js";
 
 export function addAuthCommand(program: Command): Command {
   return program

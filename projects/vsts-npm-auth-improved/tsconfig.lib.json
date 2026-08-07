@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist/vsts-npm-auth-improved/cjs",
+    "outDir": "./dist/vsts-npm-auth-improved/esm",
     "rootDir": "./src"
   },
   "include": ["src/**/*.ts"]
