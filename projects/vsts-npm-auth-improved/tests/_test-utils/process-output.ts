@@ -117,7 +117,7 @@ function joinSoftWrappedPromptLines(lines: readonly string[]): string[] {
       previousLine !== undefined &&
       guidePrefix !== undefined &&
       previousLine.startsWith(guidePrefix) &&
-      (previousLine.endsWith(" ") || /^[│|] {3}\S/.test(line))
+      previousLine.endsWith(" ")
     ) {
       joinedLines[previousLineIndex] = previousLine + line.slice(guidePrefix.length);
     } else {
