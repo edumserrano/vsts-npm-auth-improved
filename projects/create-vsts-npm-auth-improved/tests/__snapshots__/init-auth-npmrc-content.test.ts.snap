@@ -61,10 +61,10 @@ exports[`configures .npmrc content: 'creates a missing project configurati…' 1
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  Registry URL for package.json
+◆  Registry URL for packages without one
 │  https://registry.example.com/
 └
-│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages without one
 │  https://prompted.test/
 │
 ◇  Configuration files are ready.
@@ -109,10 +109,10 @@ exports[`configures .npmrc content: 'replaces a whitespace-only project re…' 1
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  Registry URL for package.json
+◆  Registry URL for packages without one
 │  https://registry.example.com/
 └
-│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages without one
 │  https://prompted.test/
 │
 ◇  Configuration files are ready.
@@ -157,10 +157,10 @@ exports[`configures .npmrc content: 'treats a scoped registry as distinct …' 1
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  Registry URL for package.json
+◆  Registry URL for packages without one
 │  https://registry.example.com/
 └
-│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages without one
 │  https://prompted.test/
 │
 ◇  Configuration files are ready.
@@ -205,10 +205,10 @@ exports[`configures .npmrc content: 'updates an empty project configuration' 1`]
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  Registry URL for package.json
+◆  Registry URL for packages without one
 │  https://registry.example.com/
 └
-│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages without one
 │  https://prompted.test/
 │
 ◇  Configuration files are ready.
@@ -295,10 +295,10 @@ exports[`prompts for a project registry despite an inherited 'environment regist
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  Registry URL for package.json
+◆  Registry URL for packages without one
 │  https://registry.example.com/
 └
-│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages without one
 │  https://prompted.test/
 │
 ◇  Configuration files are ready.
@@ -343,10 +343,10 @@ exports[`prompts for a project registry despite an inherited 'global registry' 1
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  Registry URL for package.json
+◆  Registry URL for packages without one
 │  https://registry.example.com/
 └
-│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages without one
 │  https://prompted.test/
 │
 ◇  Configuration files are ready.
@@ -391,10 +391,10 @@ exports[`prompts for a project registry despite an inherited 'user registry' 1`]
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  Registry URL for package.json
+◆  Registry URL for packages without one
 │  https://registry.example.com/
 └
-│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages without one
 │  https://prompted.test/
 │
 ◇  Configuration files are ready.

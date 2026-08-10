@@ -20,8 +20,6 @@ afterEach(async () => {
   await NpmProject.cleanupAllAsync();
 });
 
-const promptedRegistry = "https://registry.prompted.test/";
-
 /**
  * Tests cancellation at the initial project-root prompt.
  * Verifies that:
@@ -109,14 +107,14 @@ test("cancels at the registry prompt without changing the filesystem", async () 
 });
 
 /**
- * Tests cancellation while collecting registries for several selected packages.
+ * Tests cancellation at the shared registry prompt for several selected packages.
  * Verifies that:
- * - Supplying an earlier registry does not persist partial work
- * - Cancelling a later registry prompt exits with a failure status and zero writes
+ * - Only one registry prompt is shown for all packages that need a registry
+ * - Cancelling the shared prompt exits with a failure status and zero writes
  * - All selected packages retain their original files
  */
-test("cancels at a later registry prompt after planning with zero writes", async () => {
-  const project = await NpmProject.createAsync("later-registry-cancelled");
+test("cancels the shared registry prompt after planning with zero writes", async () => {
+  const project = await NpmProject.createAsync("shared-registry-cancelled");
   const originalPackageJson = packageJsonContent();
   await project.createPackageAsync({
     directory: "alpha",
@@ -135,8 +133,6 @@ test("cancels at a later registry prompt after planning with zero writes", async
     .submitText()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
-    .enterText(promptedRegistry)
-    .submitText()
     .cancel();
   await command;
 

@@ -84,9 +84,7 @@ type RegistryRequestCancelled = {
 
 type RegistryResolutionResult = RegistryProvided | RegistryRequestCancelled;
 
-export type RequestRegistryAsync = (
-  packageDisplayPath: string,
-) => Promise<RegistryResolutionResult>;
+export type RequestRegistryAsync = () => Promise<RegistryResolutionResult>;
 
 type LoadedPackageFiles = {
   readonly displayPath: string;
@@ -148,12 +146,16 @@ export async function buildAuthSetupPlanAsync(
 
   // Registry prompts depend only on the project layer. Inherited user, global,
   // environment, and CLI values must not suppress creation of a project value.
-  for (const loadedPackage of loadedPackages) {
-    if (loadedPackage.npmrc.projectRegistry === undefined) {
-      const registryResult = await requestRegistryAsync(loadedPackage.displayPath);
-      if (registryResult.status === "cancelled") {
-        return { status: "cancelled" };
-      }
+  // A single prompted value is shared by every selected package that needs one.
+  const packagesNeedingRegistry = loadedPackages.filter(
+    loadedPackage => loadedPackage.npmrc.projectRegistry === undefined,
+  );
+  if (packagesNeedingRegistry.length > 0) {
+    const registryResult = await requestRegistryAsync();
+    if (registryResult.status === "cancelled") {
+      return { status: "cancelled" };
+    }
+    for (const loadedPackage of packagesNeedingRegistry) {
       loadedPackage.npmrc.setPromptedRegistry(registryResult.registry);
     }
   }

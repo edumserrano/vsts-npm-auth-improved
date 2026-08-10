@@ -127,9 +127,9 @@ async function handleInitAuthCommandAsync(): Promise<void> {
       rootDirectory,
       selectedPackagePaths,
       packageInstallationStrategy,
-      async packageDisplayPath => {
+      async () => {
         const registry = await prompts.text({
-          message: `Registry URL for ${packageDisplayPath}`,
+          message: "Registry URL for packages without one",
           placeholder: "https://registry.example.com/",
           validate: validateRegistryUrl,
         });

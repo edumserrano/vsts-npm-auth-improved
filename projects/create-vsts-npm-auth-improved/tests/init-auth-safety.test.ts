@@ -332,13 +332,11 @@ test("reports a later write failure after preserving earlier completed writes", 
     .submitText()
     .toggleMultiselectItem()
     .acceptMultiselectValues()
-    .enterText("https://alpha.example.test/")
-    .submitText()
     .performAsync(async () => {
       await rename(project.path("beta/package.json"), project.path("beta/package.json.original"));
       await mkdir(project.path("beta/package.json"));
     })
-    .enterText("https://beta.example.test/")
+    .enterText("https://alpha.example.test/")
     .submitText();
   await command;
 

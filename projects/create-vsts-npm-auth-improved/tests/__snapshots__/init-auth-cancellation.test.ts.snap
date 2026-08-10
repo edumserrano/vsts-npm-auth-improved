@@ -1,41 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`cancels at a later registry prompt after planning with zero writes 1`] = `
-"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
-│
-◆  Where should package.json files be searched for?
-│  ./█
-└
-◇  Where should package.json files be searched for?
-│  ./
-│
-◇  Found 2 package.json files.
-│
-◆  Which packages should be configured?
-│  ◻ ALL (Configure every package)
-│  ◻ alpha/package.json
-│  ◻ beta/package.json
-│  ↑/↓ to navigate • Space: select • Enter: confirm
-└
-│  ◼ ALL (Configure every package)◇  Which packages should be configured?
-│  ALL
-│
-◆  Registry URL for alpha/package.json
-│  https://registry.example.com/
-└
-│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://r█│  https://re█│  https://reg█│  https://regi█│  https://regis█│  https://regist█│  https://registr█│  https://registry█│  https://registry.█│  https://registry.p█│  https://registry.pr█│  https://registry.pro█│  https://registry.prom█│  https://registry.promp█│  https://registry.prompt█│  https://registry.prompte█│  https://registry.prompted█│  https://registry.prompted.█│  https://registry.prompted.t█│  https://registry.prompted.te█│  https://registry.prompted.tes█│  https://registry.prompted.test█│  https://registry.prompted.test/█◇  Registry URL for alpha/package.json
-│  https://registry.prompted.test/
-│
-◆  Registry URL for beta/package.json
-│  https://registry.example.com/
-└
-■  Registry URL for beta/package.json
-│
-└  Operation failed. No files were changed. Exiting - maybe another time? 👋
-
-"
-`;
-
 exports[`cancels at package selection without changing the filesystem 1`] = `
 "┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
 │
@@ -78,10 +42,10 @@ exports[`cancels at the registry prompt without changing the filesystem 1`] = `
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  Registry URL for package.json
+◆  Registry URL for packages without one
 │  https://registry.example.com/
 └
-■  Registry URL for package.json
+■  Registry URL for packages without one
 │
 └  Operation failed. No files were changed. Exiting - maybe another time? 👋
 
@@ -96,6 +60,36 @@ exports[`cancels at the root prompt without changing the filesystem 1`] = `
 └
 ■  Where should package.json files be searched for?
 │  ./
+│
+└  Operation failed. No files were changed. Exiting - maybe another time? 👋
+
+"
+`;
+
+exports[`cancels the shared registry prompt after planning with zero writes 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 2 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ alpha/package.json
+│  ◻ beta/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◼ ALL (Configure every package)◇  Which packages should be configured?
+│  ALL
+│
+◆  Registry URL for packages without one
+│  https://registry.example.com/
+└
+■  Registry URL for packages without one
 │
 └  Operation failed. No files were changed. Exiting - maybe another time? 👋
 
