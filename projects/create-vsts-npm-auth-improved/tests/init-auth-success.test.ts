@@ -103,6 +103,61 @@ test.each([
 );
 
 /**
+ * Tests registry collection when several selected packages lack a project registry.
+ * Verifies that:
+ * - The registry is requested only once
+ * - The prompted registry is shared by every package that needs one
+ * - A package with an existing project registry keeps its own value
+ */
+test("shares one prompted registry across all packages that need one", async () => {
+  const project = await NpmProject.createAsync("shared-prompted-registry");
+  await project.createPackageAsync({
+    directory: "alpha",
+    packageJson: originalPackageJson,
+  });
+  await project.createPackageAsync({
+    directory: "beta",
+    packageJson: originalPackageJson,
+    npmrc: canonicalNpmrc(existingRegistry),
+  });
+  await project.createPackageAsync({
+    directory: "gamma",
+    packageJson: originalPackageJson,
+  });
+  const output = mockStdoutWrite({
+    temporaryRoots: [project.root],
+  });
+  process.chdir(project.root);
+  const command = InitAuthCommand.invokeAsync();
+  await new PromptsInteraction()
+    .submitText()
+    .toggleMultiselectItem()
+    .acceptMultiselectValues()
+    .enterText(promptedRegistry)
+    .submitText();
+  await command;
+
+  expect(process.exitCode ?? 0).toBe(0);
+  for (const packageName of ["alpha", "beta", "gamma"]) {
+    expect(
+      JSON.parse(await project.readFileAsync(`${packageName}/package.json`)),
+    ).toEqual(JSON.parse(configuredPackageJson));
+  }
+  expect(parseNpmrcContent(await project.readFileAsync("alpha/.npmrc"))).toMatchObject({
+    registry: promptedRegistry,
+    ...EXPECTED_MANAGED_NPM_CONFIG,
+  });
+  expect(await project.readFileAsync("beta/.npmrc")).toBe(
+    canonicalNpmrc(existingRegistry),
+  );
+  expect(parseNpmrcContent(await project.readFileAsync("gamma/.npmrc"))).toMatchObject({
+    registry: promptedRegistry,
+    ...EXPECTED_MANAGED_NPM_CONFIG,
+  });
+  expect(output.normalizedOutput).toMatchSnapshot();
+});
+
+/**
  * Tests one run containing packages whose files are unchanged, updated, and created.
  * Verifies that:
  * - Each package receives the required final package.json and .npmrc content

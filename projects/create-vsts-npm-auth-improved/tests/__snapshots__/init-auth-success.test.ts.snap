@@ -19,10 +19,10 @@ exports[`a second complete CLI run is idempotent for package.json and .npmrc 1`]
 │  ◻ ALL│  ◼ package.json◇  Which packages should be configured?
 │  package.json
 │
-◆  Registry URL for package.json
+◆  Registry URL for packages without one
 │  https://registry.example.com/
 └
-│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for package.json
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages without one
 │  https://prompted.test/
 │
 ◇  Configuration files are ready.
@@ -359,10 +359,10 @@ exports[`reports mixed created updated and unchanged outcomes in persistence ord
 │  ◼ ALL (Configure every package)◇  Which packages should be configured?
 │  ALL
 │
-◆  Registry URL for gamma/package.json
+◆  Registry URL for packages without one
 │  https://registry.example.com/
 └
-│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for gamma/package.json
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages without one
 │  https://prompted.test/
 │
 ◇  Configuration files are ready.
@@ -379,6 +379,64 @@ exports[`reports mixed created updated and unchanged outcomes in persistence ord
 │
 │  gamma/
 │    UNCHANGED  package.json
+│    CREATED    .npmrc
+│
+◇  Next step ───────────────────────────────────────────────────╮
+│                                                               │
+│  Install packages with authentication handled automatically:  │
+│                                                               │
+│  npm run install-packages                                     │
+│                                                               │
+│  Use this command instead of npm install.                     │
+│                                                               │
+├───────────────────────────────────────────────────────────────╯
+│
+└  Authentication configuration complete. 😊
+
+"
+`;
+
+exports[`shares one prompted registry across all packages that need one 1`] = `
+"┌  📦🔑 Configure vsts-npm-auth-improved 📦🔑
+│
+◆  Where should package.json files be searched for?
+│  ./█
+└
+◇  Where should package.json files be searched for?
+│  ./
+│
+◇  Found 3 package.json files.
+│
+◆  Which packages should be configured?
+│  ◻ ALL (Configure every package)
+│  ◻ alpha/package.json
+│  ◻ beta/package.json
+│  ◻ gamma/package.json
+│  ↑/↓ to navigate • Space: select • Enter: confirm
+└
+│  ◼ ALL (Configure every package)◇  Which packages should be configured?
+│  ALL
+│
+◆  Registry URL for packages without one
+│  https://registry.example.com/
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://p█│  https://pr█│  https://pro█│  https://prom█│  https://promp█│  https://prompt█│  https://prompte█│  https://prompted█│  https://prompted.█│  https://prompted.t█│  https://prompted.te█│  https://prompted.tes█│  https://prompted.test█│  https://prompted.test/█◇  Registry URL for packages without one
+│  https://prompted.test/
+│
+◇  Configuration files are ready.
+│
+◆  Changed 5 files across 3 packages
+│
+│  alpha/
+│    UPDATED    package.json
+│    CREATED    .npmrc
+│
+│  beta/
+│    UPDATED    package.json
+│    UNCHANGED  .npmrc
+│
+│  gamma/
+│    UPDATED    package.json
 │    CREATED    .npmrc
 │
 ◇  Next step ───────────────────────────────────────────────────╮
