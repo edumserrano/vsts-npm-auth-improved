@@ -15,8 +15,6 @@ The intended way to run the interactive setup is with `npm init`:
 npm init vsts-npm-auth-improved@latest
 ```
 
-Specify `@latest` so npm resolves the current release instead of potentially reusing an older version from its `npx` cache.
-
 It can also be executed directly with `npx`:
 
 ```shell
