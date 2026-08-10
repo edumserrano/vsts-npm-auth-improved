@@ -12,20 +12,20 @@
 The intended way to run the interactive setup is with `npm init`:
 
 ```shell
-npm init vsts-npm-auth-improved
+npm init vsts-npm-auth-improved@latest
 ```
 
 It can also be executed directly with `npx`:
 
 ```shell
-npx create-vsts-npm-auth-improved
+npx create-vsts-npm-auth-improved@latest
 ```
 
 Use `--help` or `-h` for help and `--version` or `-v` for the package version:
 
 ```shell
-npx create-vsts-npm-auth-improved --help
-npx create-vsts-npm-auth-improved --version
+npx create-vsts-npm-auth-improved@latest --help
+npx create-vsts-npm-auth-improved@latest --version
 ```
 
 ## What the setup asks

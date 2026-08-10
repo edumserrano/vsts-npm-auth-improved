@@ -13,7 +13,7 @@
 From the directory containing one or more npm projects, run:
 
 ```shell
-npm init vsts-npm-auth-improved
+npm init vsts-npm-auth-improved@latest
 ```
 
 Follow the prompts to choose the projects and Azure DevOps Artifacts registry you want to use. The selected projects are updated so authentication runs automatically before installing npm dependencies.
