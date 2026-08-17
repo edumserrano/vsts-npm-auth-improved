@@ -1,6 +1,6 @@
 {
   "name": "vsts-npm-auth-improved",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "packageManager": "npm@12.0.2",
   "author": "Eduardo Serrano",
