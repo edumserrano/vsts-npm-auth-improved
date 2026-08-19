@@ -9,7 +9,8 @@ exports[`auth command help text (useOptionAlias: false) 1`] = `
 Usage: vsts-npm-auth-improved auth [options]
 Authenticate on Windows using vsts-npm-auth NPM package
 Options:
-  -c, --config-path <paths...>        Paths to .npmrc config files
+  -c, --config-path <paths...>        Paths to .npmrc config files; repeat this
+                                      option to specify multiple paths
   -t, --target-config <path>          Path to the .npmrc that receives
                                       credentials (default: ~/.npmrc)
   -e, --expiration-minutes <minutes>  Token lifetime in whole minutes, up to
@@ -30,7 +31,8 @@ exports[`auth command help text (useOptionAlias: true) 1`] = `
 Usage: vsts-npm-auth-improved auth [options]
 Authenticate on Windows using vsts-npm-auth NPM package
 Options:
-  -c, --config-path <paths...>        Paths to .npmrc config files
+  -c, --config-path <paths...>        Paths to .npmrc config files; repeat this
+                                      option to specify multiple paths
   -t, --target-config <path>          Path to the .npmrc that receives
                                       credentials (default: ~/.npmrc)
   -e, --expiration-minutes <minutes>  Token lifetime in whole minutes, up to
