@@ -18,7 +18,7 @@ export function addAuthCommand(program: Command): Command {
   return program
     .command("auth", { isDefault: true })
     .description("Authenticate on Windows using vsts-npm-auth NPM package")
-    .option("-c, --config-path <paths>", "Comma-separated paths to .npmrc config files")
+    .option("-c, --config-path <paths...>", "Paths to .npmrc config files")
     .option(
       "-t, --target-config <path>",
       "Path to the .npmrc that receives credentials (default: ~/.npmrc)",
@@ -36,7 +36,7 @@ export function addAuthCommand(program: Command): Command {
 }
 
 type AuthCommandOptions = {
-  readonly configPath?: string;
+  readonly configPath?: readonly string[];
   readonly targetConfig?: string;
   readonly expirationMinutes?: number;
   readonly read?: boolean;

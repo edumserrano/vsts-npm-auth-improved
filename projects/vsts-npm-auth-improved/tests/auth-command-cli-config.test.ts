@@ -69,10 +69,10 @@ test.each([{ useConfigPathAlias: true }, { useConfigPathAlias: false }])(
 );
 
 /**
- * Tests authentication with multiple comma-separated configuration paths.
- * Verifies that surrounding whitespace is removed and path order is preserved.
+ * Tests authentication with multiple repeated configuration path options.
+ * Verifies that path order is preserved.
  */
-test("comma-separated configuration paths are trimmed and forwarded in order", async () => {
+test("repeated configuration path options are forwarded in order", async () => {
   const firstConfigPath = "./client/.npmrc";
   const secondConfigPath = "./server/.npmrc";
   createInMemoryNpmrcFile({
@@ -92,7 +92,7 @@ test("comma-separated configuration paths are trimmed and forwarded in order", a
     type: "auth",
     configPath: {
       from: "cli",
-      value: `  ${firstConfigPath} , ${secondConfigPath}  `,
+      value: [firstConfigPath, secondConfigPath],
     },
     read: { from: "cli", value: false },
     force: { from: "cli", value: false },
@@ -105,32 +105,6 @@ test("comma-separated configuration paths are trimmed and forwarded in order", a
   ]);
   expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
   expect(process.exitCode).toBe(0);
-});
-
-/**
- * Tests invalid empty entries in the comma-separated configuration path option.
- * Verifies that validation fails before vsts-npm-auth is invoked.
- */
-test.each([
-  { configPaths: "" },
-  { configPaths: ",./client/.npmrc" },
-  { configPaths: "./client/.npmrc," },
-  { configPaths: "./client/.npmrc,,./server/.npmrc" },
-  { configPaths: "   " },
-])("empty configuration path entries are rejected: '$configPaths'", async ({ configPaths }) => {
-  const stdoutWriteFunctionMock = mockStdoutWrite();
-  const execaFunctionMock = vi.mocked(execa);
-
-  await AuthCommand.invokeAsync({
-    type: "auth",
-    configPath: { from: "cli", value: configPaths },
-    read: { from: "cli", value: false },
-    force: { from: "cli", value: false },
-  });
-
-  expect(execaFunctionMock).not.toHaveBeenCalled();
-  expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
-  expect(process.exitCode).toBe(1);
 });
 
 /**
@@ -206,7 +180,7 @@ test("every configuration file is validated before authentication starts", async
 
   await AuthCommand.invokeAsync({
     type: "auth",
-    configPath: { from: "cli", value: `${validConfigPath},${invalidConfigPath}` },
+    configPath: { from: "cli", value: [validConfigPath, invalidConfigPath] },
     read: { from: "cli", value: false },
     force: { from: "cli", value: false },
   });

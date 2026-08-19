@@ -44,7 +44,7 @@ type GetAuthOptionsCancelled = {
 };
 
 type AuthCommandOptionsFromCli = {
-  readonly configPath?: string;
+  readonly configPath?: readonly string[];
   readonly read?: boolean;
   readonly force?: boolean;
 };
@@ -79,7 +79,7 @@ async function getConfigPathsAsync(
   options: AuthCommandOptionsFromCli,
 ): Promise<readonly string[] | symbol> {
   if (typeof options.configPath !== "undefined") {
-    return parseConfigPaths(options.configPath);
+    return options.configPath;
   }
 
   const configPathPromptResult = await prompts.text({
@@ -104,15 +104,6 @@ async function getConfigPathsAsync(
   }
 
   return [configPathPromptResult];
-}
-
-function parseConfigPaths(value: string): readonly string[] {
-  const configPaths = value.split(",").map(configPath => configPath.trim());
-  if (configPaths.some(configPath => configPath.length === 0)) {
-    throw new Error("Config paths must be a comma-separated list with no empty paths.");
-  }
-
-  return configPaths;
 }
 
 const TOKEN_SCOPE_OPTIONS: PromptOption<TokenScope>[] = [

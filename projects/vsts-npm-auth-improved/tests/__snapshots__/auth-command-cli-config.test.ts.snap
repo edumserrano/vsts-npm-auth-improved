@@ -27,63 +27,6 @@ exports[`a scoped registry without a global registry is rejected 1`] = `
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`comma-separated configuration paths are trimmed and forwarded in order 1`] = `
-"
-┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
-│
-●  Attempting to authenticate with the Azure DevOps NPM registries at https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/, https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/ (scope: Packaging (Read & Write), force: no)
-│
-●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
-│
-◇  Authentication attempt finished
-│
-●  New credentials were successfully obtained and written to the user's NPM configuration file
-│
-◆  Authentication with Azure DevOps NPM registry completed successfully 😊
-│
-└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
-`;
-
-exports[`empty configuration path entries are rejected: ''   '' 1`] = `
-"
-┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
-│
-■  Config paths must be a comma-separated list with no empty paths.
-└  Operation failed. Exiting - maybe another time? 👋"
-`;
-
-exports[`empty configuration path entries are rejected: '''' 1`] = `
-"
-┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
-│
-■  Config paths must be a comma-separated list with no empty paths.
-└  Operation failed. Exiting - maybe another time? 👋"
-`;
-
-exports[`empty configuration path entries are rejected: '',./client/.npmrc'' 1`] = `
-"
-┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
-│
-■  Config paths must be a comma-separated list with no empty paths.
-└  Operation failed. Exiting - maybe another time? 👋"
-`;
-
-exports[`empty configuration path entries are rejected: ''./client/.npmrc,'' 1`] = `
-"
-┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
-│
-■  Config paths must be a comma-separated list with no empty paths.
-└  Operation failed. Exiting - maybe another time? 👋"
-`;
-
-exports[`empty configuration path entries are rejected: ''./client/.npmrc,,./server/.npmrc'' 1`] = `
-"
-┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
-│
-■  Config paths must be a comma-separated list with no empty paths.
-└  Operation failed. Exiting - maybe another time? 👋"
-`;
-
 exports[`every configuration file is validated before authentication starts 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
@@ -136,6 +79,23 @@ exports[`npm configuration path (useConfigPathAlias: true) 1`] = `
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
 ●  Attempting to authenticate with the Azure DevOps NPM registry at https://pkgs.dev.azure.com/org/_packaging/feed/npm/registry/ (scope: Packaging (Read & Write), force: no)
+│
+●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
+│
+◇  Authentication attempt finished
+│
+●  New credentials were successfully obtained and written to the user's NPM configuration file
+│
+◆  Authentication with Azure DevOps NPM registry completed successfully 😊
+│
+└  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
+`;
+
+exports[`repeated configuration path options are forwarded in order 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+●  Attempting to authenticate with the Azure DevOps NPM registries at https://pkgs.dev.azure.com/org/_packaging/client/npm/registry/, https://pkgs.dev.azure.com/org/_packaging/server/npm/registry/ (scope: Packaging (Read & Write), force: no)
 │
 ●  Credentials will be saved to the user's NPM configuration file at ~/.npmrc
 │

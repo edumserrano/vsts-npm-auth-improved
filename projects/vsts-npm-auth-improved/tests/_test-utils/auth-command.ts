@@ -26,7 +26,7 @@ type FromPrompt = { readonly from: "prompt" };
 
 type AuthOptions = {
   readonly type: "auth";
-  readonly configPath: FromCli<string> | FromPrompt;
+  readonly configPath: FromCli<string | readonly string[]> | FromPrompt;
   readonly targetConfig?: FromCli<string>;
   readonly expirationMinutes?: FromCli<string | number>;
   readonly read: FromCli<boolean> | FromPrompt;
@@ -50,10 +50,16 @@ export class AuthCommand {
     switch (options.type) {
       case "auth": {
         if (options.configPath.from === "cli") {
-          args.push(
-            options.configPath.useOptionAlias ? "-c" : "--config-path",
-            options.configPath.value,
-          );
+          const configPaths =
+            typeof options.configPath.value === "string"
+              ? [options.configPath.value]
+              : options.configPath.value;
+          for (const configPath of configPaths) {
+            args.push(
+              options.configPath.useOptionAlias ? "-c" : "--config-path",
+              configPath,
+            );
+          }
         }
 
         if (options.targetConfig?.from === "cli") {
