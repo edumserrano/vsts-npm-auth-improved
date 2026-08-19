@@ -79,6 +79,10 @@ async function getConfigPathsAsync(
   options: AuthCommandOptionsFromCli,
 ): Promise<readonly string[] | symbol> {
   if (typeof options.configPath !== "undefined") {
+    if (options.configPath.some(configPath => configPath.trim().length === 0)) {
+      throw new Error("Config paths must not be empty.");
+    }
+
     return options.configPath;
   }
 

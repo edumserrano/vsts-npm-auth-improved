@@ -108,6 +108,29 @@ test("repeated configuration path options are forwarded in order", async () => {
 });
 
 /**
+ * Tests empty and whitespace-only values supplied to --config-path.
+ * Verifies that validation fails before vsts-npm-auth is invoked.
+ */
+test.each([{ configPath: "" }, { configPath: "   " }])(
+  "empty configuration path is rejected: '$configPath'",
+  async ({ configPath }) => {
+    const stdoutWriteFunctionMock = mockStdoutWrite();
+    const execaFunctionMock = vi.mocked(execa);
+
+    await AuthCommand.invokeAsync({
+      type: "auth",
+      configPath: { from: "cli", value: configPath },
+      read: { from: "cli", value: false },
+      force: { from: "cli", value: false },
+    });
+
+    expect(execaFunctionMock).not.toHaveBeenCalled();
+    expect(stdoutWriteFunctionMock.normalizedOutput).toMatchSnapshot();
+    expect(process.exitCode).toBe(1);
+  },
+);
+
+/**
  * Tests the early failure scenario when the NPM configuration file does not exist.
  * Verifies that:
  * - The auth command fails before calling vsts-npm-auth

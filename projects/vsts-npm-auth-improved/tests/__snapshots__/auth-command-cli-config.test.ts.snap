@@ -27,6 +27,22 @@ exports[`a scoped registry without a global registry is rejected 1`] = `
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
+exports[`empty configuration path is rejected: ''   '' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must not be empty.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
+exports[`empty configuration path is rejected: '''' 1`] = `
+"
+┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
+│
+■  Config paths must not be empty.
+└  Operation failed. Exiting - maybe another time? 👋"
+`;
+
 exports[`every configuration file is validated before authentication starts 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
