@@ -87,7 +87,7 @@ vsts-npm-auth-improved -c ./.npmrc --read --no-force
 
 | Option                               | Description and default                                                                                                                                            |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `-c, --config-path <paths>`          | One project `.npmrc`, or a comma-separated list. Each file must contain a global `registry`. When omitted, the CLI prompts for one path, defaulting to `./.npmrc`. |
+| `-c, --config-path <paths...>`       | One or more project `.npmrc` paths. Repeat the option for multiple files. Each file must contain a global `registry`. When omitted, the CLI prompts for one path, defaulting to `./.npmrc`. |
 | `-t, --target-config <path>`         | `.npmrc` that receives generated credentials. Defaults to the user npm configuration, normally `~/.npmrc`.                                                         |
 | `-e, --expiration-minutes <minutes>` | Positive integer lifetime for a newly acquired token, up to 525,600 minutes (365 days). Defaults to 129,600 minutes (90 days).                                     |
 | `--read`                             | Requests a token with Packaging (Read) scope.                                                                                                                      |
@@ -116,7 +116,7 @@ vsts-npm-auth-improved -c ./.npmrc --read --force
 Authenticate the registries from multiple project configurations, in order:
 
 ```shell
-vsts-npm-auth-improved -c ./client/.npmrc,./server/.npmrc --read --no-force
+vsts-npm-auth-improved -c ./client/.npmrc -c ./server/.npmrc --read --no-force
 ```
 
 Write credentials to a custom npm configuration file:

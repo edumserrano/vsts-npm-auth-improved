@@ -109,7 +109,7 @@ test("a failed registry takes precedence over existing credentials and is retrie
 
   await AuthCommand.invokeAsync({
     type: "auth",
-    configPath: { from: "cli", value: `${firstConfigPath},${secondConfigPath}` },
+    configPath: { from: "cli", value: [firstConfigPath, secondConfigPath] },
     read: { from: "cli", value: false },
     force: { from: "cli", value: false },
   });
@@ -163,7 +163,7 @@ test("retry with force token acquisition keeps arguments", async () => {
 
   await AuthCommand.invokeAsync({
     type: "auth",
-    configPath: { from: "cli", value: `${firstConfigPath},${secondConfigPath}` },
+    configPath: { from: "cli", value: [firstConfigPath, secondConfigPath] },
     targetConfig: { from: "cli", value: targetConfig },
     expirationMinutes: { from: "cli", value: 120 },
     read: { from: "cli", value: true },
