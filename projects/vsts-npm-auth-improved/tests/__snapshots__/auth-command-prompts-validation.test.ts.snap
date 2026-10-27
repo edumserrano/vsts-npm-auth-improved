@@ -282,7 +282,7 @@ exports[`npm configuration path - prompt validation - file does not exist 1`] = 
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`npm configuration path - prompt validation - no registry found ('empty registry value') 1`] = `
+exports[`npm configuration path - prompt validation - no registry found (empty registry value) 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
@@ -337,7 +337,7 @@ exports[`npm configuration path - prompt validation - no registry found ('empty 
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`npm configuration path - prompt validation - no registry found ('no registry key') 1`] = `
+exports[`npm configuration path - prompt validation - no registry found (no registry key) 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │

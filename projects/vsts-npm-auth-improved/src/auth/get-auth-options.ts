@@ -77,7 +77,7 @@ export async function getAuthOptionsAsync(
 
 async function getConfigPathsAsync(
   options: AuthCommandOptionsFromCli,
-): Promise<readonly string[] | symbol> {
+): Promise<readonly string[] | typeof prompts.CANCEL_SYMBOL> {
   if (typeof options.configPath !== "undefined") {
     if (options.configPath.some(configPath => configPath.trim().length === 0)) {
       throw new Error("Config paths must not be empty.");
@@ -125,7 +125,7 @@ const TOKEN_SCOPE_OPTIONS: PromptOption<TokenScope>[] = [
 
 async function getTokenScopeAsync(
   optionsFromCli: AuthCommandOptionsFromCli,
-): Promise<AuthOption<TokenScope> | symbol> {
+): Promise<AuthOption<TokenScope> | typeof prompts.CANCEL_SYMBOL> {
   if (typeof optionsFromCli.read !== "undefined") {
     const tokenScopeValueFromCli: TokenScope = optionsFromCli.read
       ? TOKEN_SCOPE.READ
@@ -166,7 +166,7 @@ const FORCE_OPTION_OPTIONS: PromptOption<ForceAcquisitionOption>[] = [
 
 async function getForceOptionAsync(
   optionsFromCli: AuthCommandOptionsFromCli,
-): Promise<AuthOption<ForceAcquisitionOption> | symbol> {
+): Promise<AuthOption<ForceAcquisitionOption> | typeof prompts.CANCEL_SYMBOL> {
   if (typeof optionsFromCli.force !== "undefined") {
     const forceOptionValueFromCli: ForceAcquisitionOption = optionsFromCli.force
       ? FORCE_ACQUISITION_OPTION.FORCE

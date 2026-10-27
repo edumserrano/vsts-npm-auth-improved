@@ -27,7 +27,7 @@ exports[`a scoped registry without a global registry is rejected 1`] = `
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`empty configuration path is rejected: ''   '' 1`] = `
+exports[`empty configuration path is rejected: '   ' 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
@@ -35,7 +35,7 @@ exports[`empty configuration path is rejected: ''   '' 1`] = `
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`empty configuration path is rejected: '''' 1`] = `
+exports[`empty configuration path is rejected: '' 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
