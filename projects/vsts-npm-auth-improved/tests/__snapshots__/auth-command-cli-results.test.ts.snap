@@ -28,7 +28,7 @@ exports[`an unexpected non-Error rejection is handled 1`] = `
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`auth failures cases (vsts-npm-auth returns 'config-file-not-found') 1`] = `
+exports[`auth failures cases (vsts-npm-auth returns config-file-not-found) 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
@@ -44,7 +44,7 @@ exports[`auth failures cases (vsts-npm-auth returns 'config-file-not-found') 1`]
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`auth failures cases (vsts-npm-auth returns 'credentials-not-required') 1`] = `
+exports[`auth failures cases (vsts-npm-auth returns credentials-not-required) 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
@@ -60,7 +60,7 @@ exports[`auth failures cases (vsts-npm-auth returns 'credentials-not-required') 
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`auth failures cases (vsts-npm-auth returns 'no-registry-entry-found') 1`] = `
+exports[`auth failures cases (vsts-npm-auth returns no-registry-entry-found) 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
@@ -76,7 +76,7 @@ exports[`auth failures cases (vsts-npm-auth returns 'no-registry-entry-found') 1
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`auth failures cases (vsts-npm-auth returns 'unknown') 1`] = `
+exports[`auth failures cases (vsts-npm-auth returns unknown) 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
@@ -92,7 +92,7 @@ exports[`auth failures cases (vsts-npm-auth returns 'unknown') 1`] = `
 └  Operation failed. Exiting - maybe another time? 👋"
 `;
 
-exports[`auth success cases (vsts-npm-auth returns 'already-have-credentials') 1`] = `
+exports[`auth success cases (vsts-npm-auth returns already-have-credentials) 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
@@ -109,7 +109,7 @@ exports[`auth success cases (vsts-npm-auth returns 'already-have-credentials') 1
 └  📦🔑 Thanks for using vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑"
 `;
 
-exports[`auth success cases (vsts-npm-auth returns 'credentials-obtained') 1`] = `
+exports[`auth success cases (vsts-npm-auth returns credentials-obtained) 1`] = `
 "
 ┌  📦🔑 Welcome to vsts-npm-auth-improved <PACKAGE_VERSION> 📦🔑
 │
